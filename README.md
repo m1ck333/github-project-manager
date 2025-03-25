@@ -34,7 +34,15 @@ cd <repository-name>
 npm install
 ```
 
-3. Create a `.env` file in the root directory and add your GitHub token:
+3. Set up GitHub Personal Access Token:
+   - Go to [GitHub Settings > Developer Settings > Personal Access Tokens](https://github.com/settings/tokens)
+   - Click "Generate new token (classic)"
+   - Give it a descriptive name
+   - Select the following permissions:
+     - `repo` (Full control of private repositories)
+     - `project` (Full control of organization projects)
+   - Copy the generated token
+   - Create a `.env` file in the root directory and add your token:
 
 ```env
 VITE_GITHUB_TOKEN=your_github_token_here

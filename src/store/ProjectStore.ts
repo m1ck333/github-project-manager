@@ -24,6 +24,28 @@ export class ProjectStore {
     makeAutoObservable(this);
   }
 
+  async fetchProjects() {
+    try {
+      this.loading = true;
+      this.error = null;
+
+      const projects = await GitHubService.getProjects();
+
+      runInAction(() => {
+        this.projects = projects || [];
+      });
+      return projects;
+    } catch (error) {
+      runInAction(() => {
+        this.error = error instanceof Error ? error.message : "Failed to fetch projects";
+      });
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
+
   async createProject(input: ProjectSchema) {
     try {
       this.loading = true;

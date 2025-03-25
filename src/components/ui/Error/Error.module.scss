@@ -1,0 +1,35 @@
+@use "src/styles/variables.scss" as *;
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  background-color: rgba($danger-color, 0.05);
+  text-align: center;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: $spacing-md;
+  border-radius: 50%;
+  background-color: $danger-color;
+  color: $background-primary;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.message {
+  margin-bottom: $spacing-md;
+  color: $text-primary;
+}
+
+.retryButton {
+  margin-top: $spacing-sm;
+}

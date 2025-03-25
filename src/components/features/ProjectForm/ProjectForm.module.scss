@@ -1,31 +1,32 @@
+@use "src/styles/variables.scss" as *;
+
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-md;
   max-width: 400px;
   width: 100%;
-  padding: 24px;
-  background-color: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: $spacing-lg;
+  background-color: $background-primary;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
 }
 
 .title {
   font-size: 20px;
   font-weight: 600;
-  color: #24292e;
-  margin-bottom: 8px;
+  color: $text-primary;
+  margin-bottom: $spacing-xs;
 }
 
 .description {
-  font-size: 14px;
-  color: #6e7681;
-  margin-bottom: 16px;
+  color: $text-secondary;
+  margin-bottom: $spacing-md;
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 8px;
+  gap: $spacing-xs;
+  margin-top: $spacing-xs;
 }

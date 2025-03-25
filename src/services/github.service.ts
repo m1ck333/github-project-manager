@@ -146,4 +146,73 @@ export class GitHubService {
     const result = await client.mutation(mutation, { projectId, userId, role });
     return result.data?.addProjectV2Collaborator.projectV2;
   }
+
+  static async getProjects() {
+    const query = gql`
+      query GetProjects {
+        viewer {
+          projects(first: 10) {
+            nodes {
+              id
+              name
+              description
+              boards: projectV2Boards(first: 10) {
+                nodes {
+                  id
+                  name
+                  columns {
+                    nodes {
+                      id
+                      name
+                      issues: cards(first: 10) {
+                        nodes {
+                          id
+                          title
+                          description
+                          state
+                          labels {
+                            nodes {
+                              id
+                              name
+                              color
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  labels: labels(first: 10) {
+                    nodes {
+                      id
+                      name
+                      color
+                      description
+                    }
+                  }
+                }
+              }
+              collaborators: projectCollaborators(first: 10) {
+                nodes {
+                  user {
+                    id
+                    login
+                    avatarUrl
+                  }
+                  role
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const result = await client.query(query, {}).toPromise();
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data?.viewer?.projects?.nodes || [];
+  }
 }
