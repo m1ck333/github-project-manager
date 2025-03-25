@@ -1,0 +1,16 @@
+@use "sass:math";
+
+// Function to handle division safely
+@function divide($dividend, $divisor) {
+  @return math.div($dividend, $divisor);
+}
+
+// Function to handle percentage calculations
+@function percentage($value, $total) {
+  @return math.div($value, $total) * 100%;
+}
+
+// Function to handle rem calculations
+@function rem($pixels, $context: 16) {
+  @return math.div($pixels, $context) * 1rem;
+}

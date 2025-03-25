@@ -8,18 +8,10 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        quietDeps: true,
         additionalData: `@use "@/styles/variables.scss" as *;`,
-        sassOptions: {
-          api: "modern",
-          quietDeps: true,
-          sourceMap: true,
-          style: "compressed",
-          loadPaths: ["src"],
-          configFile: path.resolve(__dirname, "./.sassrc.js"),
-        },
       },
     },
+    devSourcemap: true,
   },
   resolve: {
     alias: {

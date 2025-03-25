@@ -1,10 +1,5 @@
-module.exports = {
-  quietDeps: true,
+export default {
   api: "modern",
+  outputStyle: "compressed",
   sourceMap: true,
-  style: "compressed",
-  loadPaths: ["src"],
-  logger: {
-    warn: () => {}, // Suppress all warnings
-  },
 };

@@ -1,10 +1,5 @@
 @use "src/styles/variables.scss" as *;
 
-.app {
-  min-height: 100vh;
-  background-color: $background-secondary;
-}
-
 .header {
   display: flex;
   justify-content: space-between;
@@ -19,19 +14,4 @@
     font-weight: 600;
     color: $text-primary;
   }
-}
-
-.main {
-  max-width: $breakpoint-xl;
-  margin: 0 auto;
-  padding: $spacing-lg;
-}
-
-.content {
-  background-color: $background-primary;
-  border-radius: $border-radius-md;
-  padding: $spacing-lg;
-  box-shadow: $shadow-sm;
-  text-align: center;
-  color: $text-secondary;
 }
