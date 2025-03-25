@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
-import { projectStore } from "../../../store/ProjectStore";
+import { projectStore } from "../../../store";
 import styles from "./ProjectForm.module.scss";
+import { useToast } from "../../../components/ui/Toast";
 
 interface ProjectFormProps {
   onSuccess?: () => void;
@@ -17,18 +18,25 @@ const ProjectForm: React.FC<ProjectFormProps> = observer(({ onSuccess, onCancel 
     name?: string;
     description?: string;
   }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
 
     try {
-      await projectStore.createProject({ name, description });
+      setIsSubmitting(true);
+      await projectStore.createProject(name, description);
+      showToast(`Project "${name}" created successfully`, "success");
       onSuccess?.();
     } catch (error) {
+      showToast("Failed to create project", "error");
       if (error instanceof Error) {
         setErrors({ name: error.message });
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

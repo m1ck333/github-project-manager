@@ -1,318 +1,196 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { Project } from "../types";
 import { GitHubService } from "../services/github.service";
-import {
-  projectSchema,
-  boardSchema,
-  labelSchema,
-  issueSchema,
-  collaboratorSchema,
-  ProjectSchema,
-  BoardSchema,
-  LabelSchema,
-  IssueSchema,
-  CollaboratorSchema,
-} from "../utils/validation";
-import { IssueState } from "../types";
+import { Board, BoardFormData, Collaborator, CollaboratorFormData, Project } from "../types";
 
 export class ProjectStore {
   projects: Project[] = [];
-  loading: boolean = false;
+  loading = false;
   error: string | null = null;
+  selectedProject: Project | null = null;
 
-  constructor() {
+  constructor(private gitHubService: GitHubService) {
     makeAutoObservable(this);
   }
 
   async fetchProjects() {
-    try {
-      this.loading = true;
-      this.error = null;
+    this.loading = true;
+    this.error = null;
 
-      const projects = await GitHubService.getProjects();
+    try {
+      const projects = await this.gitHubService.getProjects();
 
       runInAction(() => {
-        this.projects = projects || [];
+        this.projects = projects.map((project) => ({
+          ...project,
+          boards: [],
+          collaborators: [],
+        }));
+        this.loading = false;
       });
-      return projects;
     } catch (error) {
       runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to fetch projects";
-      });
-    } finally {
-      runInAction(() => {
+        this.error = (error as Error).message;
         this.loading = false;
       });
     }
   }
 
-  async createProject(input: ProjectSchema) {
+  async createProject(name: string, description: string) {
+    this.loading = true;
+    this.error = null;
+
     try {
-      this.loading = true;
-      this.error = null;
+      const project = await this.gitHubService.createProject(name, description);
 
-      const validatedData = projectSchema.parse(input);
-      const project = await GitHubService.createProject(validatedData.name);
-
-      if (project) {
-        runInAction(() => {
-          this.projects.push(project);
+      runInAction(() => {
+        this.projects.push({
+          ...project,
+          boards: [],
+          collaborators: [],
         });
-        return project;
-      }
+        this.loading = false;
+      });
     } catch (error) {
       runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to create project";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
+        this.error = (error as Error).message;
         this.loading = false;
       });
     }
   }
 
-  async createBoard(projectId: string, input: BoardSchema) {
+  async updateProject(projectId: number, name: string, description: string) {
+    this.loading = true;
+    this.error = null;
+
     try {
-      this.loading = true;
-      this.error = null;
+      const updatedProject = await this.gitHubService.updateProject(projectId, name, description);
 
-      const validatedData = boardSchema.parse(input);
-      const board = await GitHubService.createBoard(projectId, validatedData.name);
+      runInAction(() => {
+        const index = this.projects.findIndex((p) => p.id === projectId);
+        if (index !== -1) {
+          // Preserve boards and collaborators
+          const existingBoards = this.projects[index].boards || [];
+          const existingCollaborators = this.projects[index].collaborators || [];
 
-      if (board) {
-        runInAction(() => {
-          const project = this.projects.find((p) => p.id === projectId);
-          if (project) {
-            project.boards.push(board);
-          }
-        });
-        return board;
-      }
+          this.projects[index] = {
+            ...updatedProject,
+            boards: existingBoards,
+            collaborators: existingCollaborators,
+          };
+        }
+        this.loading = false;
+      });
     } catch (error) {
       runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to create board";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
+        this.error = (error as Error).message;
         this.loading = false;
       });
     }
   }
 
-  async createLabel(projectId: string, input: LabelSchema) {
+  async deleteProject(projectId: number) {
+    this.loading = true;
+    this.error = null;
+
     try {
-      this.loading = true;
-      this.error = null;
+      await this.gitHubService.deleteProject(projectId);
 
-      const validatedData = labelSchema.parse(input);
-      const label = await GitHubService.createLabel(
-        projectId,
-        validatedData.name,
-        validatedData.color,
-        validatedData.description
-      );
-
-      if (label) {
-        runInAction(() => {
-          const project = this.projects.find((p) => p.id === projectId);
-          if (project) {
-            project.boards.forEach((board) => {
-              board.labels.push(label);
-            });
-          }
-        });
-        return label;
-      }
+      runInAction(() => {
+        this.projects = this.projects.filter((project) => project.id !== projectId);
+        this.loading = false;
+      });
     } catch (error) {
       runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to create label";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
+        this.error = (error as Error).message;
         this.loading = false;
       });
     }
   }
 
-  async createIssue(projectId: string, input: Omit<IssueSchema, "state"> & { state?: IssueState }) {
-    try {
-      this.loading = true;
-      this.error = null;
+  // Boards management
+  addBoard(projectId: number, boardData: BoardFormData) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (!project) {
+      this.error = "Project not found";
+      return;
+    }
 
-      // Default to 'open' state if not provided
-      const issueData = {
-        ...input,
-        state: input.state || IssueState._OPEN,
-        labels: input.labels || [],
-        assignees: input.assignees || [],
-      };
+    const newBoard: Board = {
+      id: Date.now(), // Generate a temporary ID
+      name: boardData.name,
+      type: boardData.type,
+    };
 
-      const validatedData = issueSchema.parse(issueData);
-      const issue = await GitHubService.createIssue(
-        projectId,
-        validatedData.title,
-        validatedData.description,
-        validatedData.labels
-      );
+    // Ensure boards array exists
+    if (!project.boards) {
+      project.boards = [];
+    }
 
-      if (issue) {
-        runInAction(() => {
-          const project = this.projects.find((p) => p.id === projectId);
-          if (project) {
-            project.boards.forEach((board) => {
-              board.columns.forEach((column) => {
-                if (column.name === "To Do") {
-                  column.issues.push(issue);
-                }
-              });
-            });
-          }
-        });
-        return issue;
-      }
-    } catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to create issue";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
+    project.boards.push(newBoard);
+  }
+
+  deleteBoard(projectId: number, boardId: number) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (!project || !project.boards) {
+      this.error = "Project or boards not found";
+      return;
+    }
+
+    project.boards = project.boards.filter((board) => board.id !== boardId);
+  }
+
+  // Collaborators management
+  addCollaborator(projectId: number, collaboratorData: CollaboratorFormData) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (!project) {
+      this.error = "Project not found";
+      return;
+    }
+
+    const newCollaborator: Collaborator = {
+      id: Date.now(), // Generate a temporary ID
+      username: collaboratorData.username,
+      avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
+      role: collaboratorData.role,
+    };
+
+    // Ensure collaborators array exists
+    if (!project.collaborators) {
+      project.collaborators = [];
+    }
+
+    // Check if collaborator already exists
+    const existingIndex = project.collaborators.findIndex(
+      (c) => c.username === collaboratorData.username
+    );
+    if (existingIndex !== -1) {
+      // Update existing collaborator
+      project.collaborators[existingIndex] = newCollaborator;
+    } else {
+      // Add new collaborator
+      project.collaborators.push(newCollaborator);
     }
   }
 
-  async updateIssueState(issueId: string, state: IssueState) {
-    try {
-      this.loading = true;
-      this.error = null;
-
-      const updatedIssue = await GitHubService.updateIssueState(issueId, state);
-
-      if (updatedIssue) {
-        runInAction(() => {
-          this.projects.forEach((project) => {
-            project.boards.forEach((board) => {
-              board.columns.forEach((column) => {
-                const issueIndex = column.issues.findIndex((i) => i.id === issueId);
-                if (issueIndex !== -1) {
-                  column.issues[issueIndex].state = state;
-                }
-              });
-            });
-          });
-        });
-        return updatedIssue;
-      }
-    } catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to update issue state";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
+  removeCollaborator(projectId: number, collaboratorId: number) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (!project || !project.collaborators) {
+      this.error = "Project or collaborators not found";
+      return;
     }
+
+    project.collaborators = project.collaborators.filter((collab) => collab.id !== collaboratorId);
   }
 
-  async addCollaborator(projectId: string, input: CollaboratorSchema) {
-    try {
-      this.loading = true;
-      this.error = null;
-
-      const validatedData = collaboratorSchema.parse(input);
-      const updatedProject = await GitHubService.addCollaborator(
-        projectId,
-        validatedData.userId,
-        validatedData.role
-      );
-
-      if (updatedProject) {
-        runInAction(() => {
-          const projectIndex = this.projects.findIndex((p) => p.id === projectId);
-          if (projectIndex !== -1) {
-            this.projects[projectIndex] = updatedProject;
-          }
-        });
-        return updatedProject;
-      }
-    } catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to add collaborator";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
+  selectProject(projectId: number) {
+    this.selectedProject = this.projects.find((p) => p.id === projectId) || null;
   }
 
-  async deleteProject(projectId: string) {
-    try {
-      this.loading = true;
-      this.error = null;
-
-      const success = await GitHubService.deleteProject(projectId);
-
-      if (success) {
-        runInAction(() => {
-          this.projects = this.projects.filter((p) => p.id !== projectId);
-        });
-        return true;
-      }
-      return false;
-    } catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to delete project";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
+  clearSelectedProject() {
+    this.selectedProject = null;
   }
 
-  async updateProject(projectId: string, input: ProjectSchema) {
-    try {
-      this.loading = true;
-      this.error = null;
-
-      const validatedData = projectSchema.parse(input);
-      const updatedProject = await GitHubService.updateProject(projectId, validatedData.name);
-
-      if (updatedProject) {
-        runInAction(() => {
-          const projectIndex = this.projects.findIndex((p) => p.id === projectId);
-          if (projectIndex !== -1) {
-            // Maintain existing boards and collaborators
-            const existingProject = this.projects[projectIndex];
-            this.projects[projectIndex] = {
-              ...updatedProject,
-              boards: existingProject.boards,
-              collaborators: existingProject.collaborators,
-            };
-          }
-        });
-        return updatedProject;
-      }
-      return null;
-    } catch (error) {
-      runInAction(() => {
-        this.error = error instanceof Error ? error.message : "Failed to update project";
-      });
-      throw error;
-    } finally {
-      runInAction(() => {
-        this.loading = false;
-      });
-    }
+  clearError() {
+    this.error = null;
   }
 }
-
-export const projectStore = new ProjectStore();

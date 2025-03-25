@@ -4,7 +4,7 @@ import ProjectList from "./components/features/ProjectList";
 import Loading from "./components/ui/Loading";
 import Error from "./components/ui/Error";
 import Layout from "./components/layout/Layout";
-import { projectStore } from "./store/ProjectStore";
+import { projectStore } from "./store";
 
 const App: React.FC = observer(() => {
   const { projects, loading, error } = projectStore;
@@ -18,7 +18,7 @@ const App: React.FC = observer(() => {
   };
 
   return (
-    <Layout title="GitHub Project Manager" onCreateClick={() => {}}>
+    <Layout>
       <div className="content-container">
         {loading ? (
           <Loading text="Loading projects..." />

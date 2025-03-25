@@ -6,11 +6,6 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/variables.scss" as *;`,
-      },
-    },
     devSourcemap: true,
   },
   resolve: {

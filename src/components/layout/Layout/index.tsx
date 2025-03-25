@@ -3,14 +3,12 @@ import Header from "../Header";
 
 interface LayoutProps {
   children: ReactNode;
-  title: string;
-  onCreateClick: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, title, onCreateClick }) => {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="app-container">
-      <Header title={title} onCreateClick={onCreateClick} />
+      <Header />
       <main className="main-container">{children}</main>
     </div>
   );

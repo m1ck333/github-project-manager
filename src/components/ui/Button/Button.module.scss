@@ -1,51 +1,109 @@
 @use "src/styles/variables.scss" as *;
 
 .button {
-  padding: $spacing-sm $spacing-md;
-  border-radius: $border-radius-sm;
-  border: none;
-  cursor: pointer;
-  font-size: $font-size-base;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-weight: 500;
-  transition: $transition-base;
-
-  &:hover {
-    opacity: 0.9;
-  }
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+  border-radius: $border-radius-md;
+  padding: 0 $spacing-md;
+  line-height: 1;
+  border: 1px solid transparent;
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
   }
 
+  // Size variants
+  &.large {
+    height: 48px;
+    font-size: 16px;
+  }
+
+  &.medium {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  &.small {
+    height: 32px;
+    font-size: 13px;
+    padding: 0 $spacing-sm;
+  }
+
+  // Icon-only button styles
+  &.iconOnly {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+
+    &.small {
+      width: 32px;
+      height: 32px;
+    }
+
+    &.medium {
+      width: 40px;
+      height: 40px;
+    }
+
+    &.large {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  // Color variants
   &.primary {
     background-color: $primary-color;
     color: $background-primary;
+
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    &:active:not(:disabled) {
+      opacity: 0.8;
+    }
   }
 
   &.secondary {
-    background-color: $secondary-color;
-    color: $background-primary;
+    background-color: transparent;
+    border-color: $border-color;
+    color: $text-primary;
+
+    &:hover:not(:disabled) {
+      background-color: rgba($background-secondary, 0.7);
+    }
+
+    &:active:not(:disabled) {
+      background-color: rgba($background-secondary, 0.5);
+    }
   }
 
   &.danger {
     background-color: $danger-color;
     color: $background-primary;
+
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    &:active:not(:disabled) {
+      opacity: 0.8;
+    }
   }
 
-  // Size variations
-  &.small {
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-small;
-  }
-
-  &.medium {
-    padding: $spacing-sm $spacing-md;
-    font-size: $font-size-base;
-  }
-
-  &.large {
-    padding: $spacing-md $spacing-lg;
-    font-size: $font-size-medium;
+  // Icon styles
+  svg {
+    font-size: 1.2em;
   }
 }

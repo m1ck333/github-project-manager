@@ -1,14 +1,107 @@
 import { client } from "../api/client";
 import { gql } from "urql";
+import { Project } from "../types";
 
 export class GitHubService {
-  static async createProject(name: string) {
+  async getProjects(): Promise<Project[]> {
+    // Define the query for fetching projects
+    const query = gql`
+      query GetProjectsV2 {
+        viewer {
+          projectsV2(first: 10) {
+            nodes {
+              id
+              title
+              shortDescription
+              url
+              owner {
+                ... on User {
+                  login
+                  avatarUrl
+                }
+                ... on Organization {
+                  login
+                  avatarUrl
+                }
+              }
+              items(first: 10) {
+                nodes {
+                  id
+                  content {
+                    ... on Issue {
+                      id
+                      title
+                      body
+                      state
+                      labels(first: 10) {
+                        nodes {
+                          id
+                          name
+                          color
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const result = await client.query(query, {}).toPromise();
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    // Map the V2 projects to maintain compatibility with existing code
+    const projectsV2 = result.data?.viewer?.projectsV2?.nodes || [];
+
+    interface ProjectV2Node {
+      id: string;
+      title: string;
+      shortDescription?: string;
+      url: string;
+      owner: {
+        login: string;
+        avatarUrl: string;
+      };
+    }
+
+    return (
+      projectsV2.map((projectV2: ProjectV2Node) => ({
+        id: parseInt(projectV2.id.split("_").pop() || "0"),
+        name: projectV2.title,
+        description: projectV2.shortDescription || "",
+        html_url: projectV2.url,
+        owner: {
+          login: projectV2.owner.login,
+          avatar_url: projectV2.owner.avatarUrl,
+        },
+      })) || []
+    );
+  }
+
+  async createProject(name: string, description: string): Promise<Project> {
     const mutation = gql`
       mutation CreateProjectV2($name: String!, $ownerId: ID!) {
         createProjectV2(input: { ownerId: $ownerId, title: $name }) {
           projectV2 {
             id
             title
+            url
+            owner {
+              ... on User {
+                login
+                avatarUrl
+              }
+              ... on Organization {
+                login
+                avatarUrl
+              }
+            }
           }
         }
       }
@@ -31,17 +124,117 @@ export class GitHubService {
     const ownerId = viewerResult.data?.viewer?.id;
     const result = await client.mutation(mutation, { name, ownerId });
 
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
     // Map the response to maintain compatibility with existing code
     if (result.data?.createProjectV2?.projectV2) {
+      const projectData = result.data.createProjectV2.projectV2;
       return {
-        id: result.data.createProjectV2.projectV2.id,
-        name: result.data.createProjectV2.projectV2.title,
-        boards: [],
-        collaborators: [],
+        id: parseInt(projectData.id.split("_").pop() || "0"),
+        name: projectData.title,
+        description: description || "",
+        html_url: projectData.url,
+        owner: {
+          login: projectData.owner.login,
+          avatar_url: projectData.owner.avatarUrl,
+        },
       };
     }
 
-    return null;
+    throw new Error("Failed to create project");
+  }
+
+  async updateProject(projectId: number, name: string, description: string): Promise<Project> {
+    const mutation = gql`
+      mutation UpdateProjectV2($projectId: ID!, $title: String!) {
+        updateProjectV2(input: { projectId: $projectId, title: $title }) {
+          projectV2 {
+            id
+            title
+            url
+            owner {
+              ... on User {
+                login
+                avatarUrl
+              }
+              ... on Organization {
+                login
+                avatarUrl
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const stringId = `ProjectV2_${projectId}`;
+    const result = await client.mutation(mutation, { projectId: stringId, title: name });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    // Map the response to maintain compatibility with existing code
+    if (result.data?.updateProjectV2?.projectV2) {
+      const projectData = result.data.updateProjectV2.projectV2;
+      return {
+        id: parseInt(projectData.id.split("_").pop() || "0"),
+        name: projectData.title,
+        description: description || "",
+        html_url: projectData.url,
+        owner: {
+          login: projectData.owner.login,
+          avatar_url: projectData.owner.avatarUrl,
+        },
+      };
+    }
+
+    throw new Error("Failed to update project");
+  }
+
+  async deleteProject(projectId: number): Promise<void> {
+    const mutation = gql`
+      mutation DeleteProjectV2($projectId: ID!) {
+        deleteProjectV2(input: { projectId: $projectId }) {
+          clientMutationId
+        }
+      }
+    `;
+
+    const stringId = `ProjectV2_${projectId}`;
+    const result = await client.mutation(mutation, { projectId: stringId });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+  }
+
+  // Static methods maintained for backward compatibility
+  static async getProjects() {
+    const service = new GitHubService();
+    return service.getProjects();
+  }
+
+  static async createProject(name: string, description: string = "") {
+    const service = new GitHubService();
+    return service.createProject(name, description);
+  }
+
+  static async updateProject(projectId: string | number, title: string, description: string = "") {
+    const service = new GitHubService();
+    const numericId =
+      typeof projectId === "string" ? parseInt(projectId.split("_").pop() || "0") : projectId;
+    return service.updateProject(numericId, title, description);
+  }
+
+  static async deleteProject(projectId: string | number) {
+    const service = new GitHubService();
+    const numericId =
+      typeof projectId === "string" ? parseInt(projectId.split("_").pop() || "0") : projectId;
+    await service.deleteProject(numericId);
+    return true;
   }
 
   static async createBoard(projectId: string, name: string) {
@@ -170,117 +363,5 @@ export class GitHubService {
 
     const result = await client.mutation(mutation, { projectId, userId, role });
     return result.data?.addProjectV2Collaborator.projectV2;
-  }
-
-  static async getProjects() {
-    // Define the query for fetching projects
-    const query = gql`
-      query GetProjectsV2 {
-        viewer {
-          projectsV2(first: 10) {
-            nodes {
-              id
-              title
-              shortDescription
-              items(first: 10) {
-                nodes {
-                  id
-                  content {
-                    ... on Issue {
-                      id
-                      title
-                      body
-                      state
-                      labels(first: 10) {
-                        nodes {
-                          id
-                          name
-                          color
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    const result = await client.query(query, {}).toPromise();
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-
-    // Map the V2 projects to maintain compatibility with existing code
-    const projectsV2 = result.data?.viewer?.projectsV2?.nodes || [];
-
-    interface ProjectV2Node {
-      id: string;
-      title: string;
-      shortDescription?: string;
-      items?: { nodes: Array<{ id: string }> };
-    }
-
-    return (
-      projectsV2.map((projectV2: ProjectV2Node) => ({
-        id: projectV2.id,
-        name: projectV2.title,
-        description: projectV2.shortDescription,
-        boards: [], // ProjectV2 doesn't have direct boards - would need different modeling
-        collaborators: [], // Collaborators not directly accessible in this endpoint
-      })) || []
-    );
-  }
-
-  static async deleteProject(projectId: string) {
-    const mutation = gql`
-      mutation DeleteProjectV2($projectId: ID!) {
-        deleteProjectV2(input: { projectId: $projectId }) {
-          clientMutationId
-        }
-      }
-    `;
-
-    const result = await client.mutation(mutation, { projectId });
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-
-    return true; // Return success indicator
-  }
-
-  static async updateProject(projectId: string, title: string) {
-    const mutation = gql`
-      mutation UpdateProjectV2($projectId: ID!, $title: String!) {
-        updateProjectV2(input: { projectId: $projectId, title: $title }) {
-          projectV2 {
-            id
-            title
-          }
-        }
-      }
-    `;
-
-    const result = await client.mutation(mutation, { projectId, title });
-
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-
-    // Map the response to maintain compatibility with existing code
-    if (result.data?.updateProjectV2?.projectV2) {
-      return {
-        id: result.data.updateProjectV2.projectV2.id,
-        name: result.data.updateProjectV2.projectV2.title,
-        boards: [],
-        collaborators: [],
-      };
-    }
-
-    return null;
   }
 }
