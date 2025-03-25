@@ -30,3 +30,10 @@ export const collaboratorSchema = z.object({
   userId: z.string(),
   role: z.nativeEnum(CollaboratorRole),
 });
+
+// Export inferred types from Zod schemas
+export type ProjectSchema = z.infer<typeof projectSchema>;
+export type BoardSchema = z.infer<typeof boardSchema>;
+export type LabelSchema = z.infer<typeof labelSchema>;
+export type IssueSchema = z.infer<typeof issueSchema>;
+export type CollaboratorSchema = z.infer<typeof collaboratorSchema>;

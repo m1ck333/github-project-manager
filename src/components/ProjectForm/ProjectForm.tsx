@@ -24,7 +24,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = observer(
       setErrors({});
 
       try {
-        await projectStore.createProject(name, description);
+        await projectStore.createProject({ name, description });
         onSuccess?.();
       } catch (error) {
         if (error instanceof Error) {

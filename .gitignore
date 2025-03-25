@@ -25,5 +25,4 @@ dist-ssr
 
 # Environment files
 config/environment/.env
-config/environment/.env.local
-config/environment/.env.*.local
+config/environment/.env.*

@@ -7,6 +7,11 @@ import {
   labelSchema,
   issueSchema,
   collaboratorSchema,
+  ProjectSchema,
+  BoardSchema,
+  LabelSchema,
+  IssueSchema,
+  CollaboratorSchema,
 } from "../utils/validation";
 import { IssueState } from "../types";
 
@@ -19,12 +24,12 @@ export class ProjectStore {
     makeAutoObservable(this);
   }
 
-  async createProject(name: string, description?: string) {
+  async createProject(input: ProjectSchema) {
     try {
       this.loading = true;
       this.error = null;
 
-      const validatedData = projectSchema.parse({ name, description });
+      const validatedData = projectSchema.parse(input);
       const project = await GitHubService.createProject(
         validatedData.name,
         validatedData.description
@@ -49,12 +54,12 @@ export class ProjectStore {
     }
   }
 
-  async createBoard(projectId: string, name: string) {
+  async createBoard(projectId: string, input: BoardSchema) {
     try {
       this.loading = true;
       this.error = null;
 
-      const validatedData = boardSchema.parse({ name });
+      const validatedData = boardSchema.parse(input);
       const board = await GitHubService.createBoard(
         projectId,
         validatedData.name
@@ -82,17 +87,12 @@ export class ProjectStore {
     }
   }
 
-  async createLabel(
-    projectId: string,
-    name: string,
-    color: string,
-    description?: string
-  ) {
+  async createLabel(projectId: string, input: LabelSchema) {
     try {
       this.loading = true;
       this.error = null;
 
-      const validatedData = labelSchema.parse({ name, color, description });
+      const validatedData = labelSchema.parse(input);
       const label = await GitHubService.createLabel(
         projectId,
         validatedData.name,
@@ -126,15 +126,21 @@ export class ProjectStore {
 
   async createIssue(
     projectId: string,
-    title: string,
-    description?: string,
-    labels: string[] = []
+    input: Omit<IssueSchema, "state"> & { state?: IssueState }
   ) {
     try {
       this.loading = true;
       this.error = null;
 
-      const validatedData = issueSchema.parse({ title, description, labels });
+      // Default to 'open' state if not provided
+      const issueData = {
+        ...input,
+        state: input.state || IssueState.OPEN,
+        labels: input.labels || [],
+        assignees: input.assignees || [],
+      };
+
+      const validatedData = issueSchema.parse(issueData);
       const issue = await GitHubService.createIssue(
         projectId,
         validatedData.title,
@@ -209,12 +215,12 @@ export class ProjectStore {
     }
   }
 
-  async addCollaborator(projectId: string, userId: string, role: string) {
+  async addCollaborator(projectId: string, input: CollaboratorSchema) {
     try {
       this.loading = true;
       this.error = null;
 
-      const validatedData = collaboratorSchema.parse({ userId, role });
+      const validatedData = collaboratorSchema.parse(input);
       const updatedProject = await GitHubService.addCollaborator(
         projectId,
         validatedData.userId,
