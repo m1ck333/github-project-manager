@@ -32,4 +32,20 @@
     background-color: $danger-color;
     color: $background-primary;
   }
+
+  // Size variations
+  &.small {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-small;
+  }
+
+  &.medium {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
+  }
+
+  &.large {
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-size-medium;
+  }
 }

@@ -1,8 +1,8 @@
 @use "src/styles/variables.scss" as *;
 
-.projectList {
-  display: flex;
-  flex-direction: column;
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: $spacing-lg;
   width: 100%;
 }
@@ -13,17 +13,71 @@
   padding: $spacing-lg;
   background-color: $background-primary;
   box-shadow: $shadow-sm;
+  transition: $transition-base;
+  display: flex;
+  flex-direction: column;
+  height: 250px;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
+
+.createProjectCard {
+  border: 2px dashed $border-color;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  background-color: $background-primary;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: $transition-base;
+  height: 250px;
+
+  &:hover {
+    border-color: $primary-color;
+    background-color: rgba($primary-color, 0.05);
+  }
+
+  p {
+    color: $text-secondary;
+    margin-top: $spacing-sm;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.createProjectIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: rgba($primary-color, 0.1);
+  color: $primary-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-light;
+  margin-bottom: $spacing-md;
 }
 
 .projectHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: $spacing-md;
 
   h3 {
     cursor: pointer;
     margin: 0;
+    font-size: $font-size-large;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &:hover {
       color: $primary-color;
@@ -33,7 +87,36 @@
 
 .actions {
   display: flex;
+  white-space: nowrap;
+  margin-left: $spacing-sm;
   gap: $spacing-xs;
+}
+
+.actionButton {
+  min-width: 70px;
+}
+
+.description {
+  margin-bottom: $spacing-sm;
+  color: $text-secondary;
+  font-size: $font-size-base;
+  flex-grow: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.boardsCount {
+  color: $text-secondary;
+  font-size: $font-size-small;
+  margin-top: auto;
+  padding-top: $spacing-md;
+
+  span {
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+  }
 }
 
 .projectDetails {
@@ -42,18 +125,17 @@
   border-top: 1px solid $border-color;
 }
 
-.description {
-  margin-bottom: $spacing-lg;
-  color: $text-secondary;
-}
-
 .boardsSection {
-  margin-top: $spacing-md;
+  margin-top: $spacing-sm;
+
+  h4 {
+    margin-bottom: $spacing-sm;
+  }
 }
 
 .boardsList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: $spacing-md;
 }
 
@@ -64,6 +146,42 @@
   background-color: $background-secondary;
 
   h5 {
-    margin: 0 0 $spacing-xs 0;
+    margin: 0;
+    font-size: $font-size-base;
   }
+}
+
+// Delete confirmation styles
+.deleteConfirmation {
+  text-align: center;
+  padding: $spacing-md;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+
+  p {
+    margin-bottom: $spacing-md;
+    font-size: $font-size-medium;
+  }
+}
+
+.deleteWarning {
+  color: $danger-color;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-lg !important;
+}
+
+.deleteActions {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+// Form styles for edit
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }

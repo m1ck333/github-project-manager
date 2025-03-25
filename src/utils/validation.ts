@@ -3,6 +3,7 @@ import { CollaboratorRole, IssueState } from "../types";
 
 export const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
+  description: z.string().optional(),
 });
 
 export const boardSchema = z.object({

@@ -34,7 +34,6 @@ const ProjectForm: React.FC<ProjectFormProps> = observer(({ onSuccess, onCancel 
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <h2 className={styles.title}>Create New Project</h2>
       <p className={styles.description}>
         Create a new project to organize your work and collaborate with your team.
       </p>

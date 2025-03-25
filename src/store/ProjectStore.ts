@@ -251,6 +251,68 @@ export class ProjectStore {
       });
     }
   }
+
+  async deleteProject(projectId: string) {
+    try {
+      this.loading = true;
+      this.error = null;
+
+      const success = await GitHubService.deleteProject(projectId);
+
+      if (success) {
+        runInAction(() => {
+          this.projects = this.projects.filter((p) => p.id !== projectId);
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      runInAction(() => {
+        this.error = error instanceof Error ? error.message : "Failed to delete project";
+      });
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
+
+  async updateProject(projectId: string, input: ProjectSchema) {
+    try {
+      this.loading = true;
+      this.error = null;
+
+      const validatedData = projectSchema.parse(input);
+      const updatedProject = await GitHubService.updateProject(projectId, validatedData.name);
+
+      if (updatedProject) {
+        runInAction(() => {
+          const projectIndex = this.projects.findIndex((p) => p.id === projectId);
+          if (projectIndex !== -1) {
+            // Maintain existing boards and collaborators
+            const existingProject = this.projects[projectIndex];
+            this.projects[projectIndex] = {
+              ...updatedProject,
+              boards: existingProject.boards,
+              collaborators: existingProject.collaborators,
+            };
+          }
+        });
+        return updatedProject;
+      }
+      return null;
+    } catch (error) {
+      runInAction(() => {
+        this.error = error instanceof Error ? error.message : "Failed to update project";
+      });
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.loading = false;
+      });
+    }
+  }
 }
 
 export const projectStore = new ProjectStore();

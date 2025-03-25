@@ -173,6 +173,7 @@ export class GitHubService {
   }
 
   static async getProjects() {
+    // Define the query for fetching projects
     const query = gql`
       query GetProjectsV2 {
         viewer {
@@ -201,16 +202,6 @@ export class GitHubService {
                   }
                 }
               }
-              collaborators: collaborators(first: 10) {
-                nodes {
-                  user {
-                    id
-                    login
-                    avatarUrl
-                  }
-                  role
-                }
-              }
             }
           }
         }
@@ -231,9 +222,6 @@ export class GitHubService {
       title: string;
       shortDescription?: string;
       items?: { nodes: Array<{ id: string }> };
-      collaborators?: {
-        nodes: Array<{ user: { id: string; login: string; avatarUrl: string }; role: string }>;
-      };
     }
 
     return (
@@ -242,8 +230,57 @@ export class GitHubService {
         name: projectV2.title,
         description: projectV2.shortDescription,
         boards: [], // ProjectV2 doesn't have direct boards - would need different modeling
-        collaborators: projectV2.collaborators?.nodes || [],
+        collaborators: [], // Collaborators not directly accessible in this endpoint
       })) || []
     );
+  }
+
+  static async deleteProject(projectId: string) {
+    const mutation = gql`
+      mutation DeleteProjectV2($projectId: ID!) {
+        deleteProjectV2(input: { projectId: $projectId }) {
+          clientMutationId
+        }
+      }
+    `;
+
+    const result = await client.mutation(mutation, { projectId });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return true; // Return success indicator
+  }
+
+  static async updateProject(projectId: string, title: string) {
+    const mutation = gql`
+      mutation UpdateProjectV2($projectId: ID!, $title: String!) {
+        updateProjectV2(input: { projectId: $projectId, title: $title }) {
+          projectV2 {
+            id
+            title
+          }
+        }
+      }
+    `;
+
+    const result = await client.mutation(mutation, { projectId, title });
+
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    // Map the response to maintain compatibility with existing code
+    if (result.data?.updateProjectV2?.projectV2) {
+      return {
+        id: result.data.updateProjectV2.projectV2.id,
+        name: result.data.updateProjectV2.projectV2.title,
+        boards: [],
+        collaborators: [],
+      };
+    }
+
+    return null;
   }
 }
