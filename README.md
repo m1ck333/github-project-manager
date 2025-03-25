@@ -46,13 +46,36 @@ VITE_GITHUB_TOKEN=your_github_token_here
 npm run dev
 ```
 
+## Available Scripts
+
+### Development & Build
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run preview` - Preview the production build locally
+
+### Code Quality
+
+- `npm run lint` - Check for linting errors without fixing them
+- `npm run lint:fix` - Check for linting errors and fix them automatically
+- `npm run format` - Format code using Prettier
+- `npm run format:check` - Check code formatting without changing files
+- `npm run check` - Check both formatting and linting (ideal for CI)
+- `npm run fix` - Fix both formatting and linting issues in one command (ideal for development)
+
+### Code Generation
+
+- `npm run codegen` - Generate TypeScript types from GraphQL schema
+
 ## Project Structure
 
 ```
 src/
 ├── api/          # API client and GraphQL operations
 ├── components/   # Reusable UI components
-├── pages/        # Page components
+|   ├── ui/       # Basic UI components (buttons, inputs, etc.)
+|   ├── layout/   # Layout components (headers, containers, etc.)
+|   └── features/ # Feature-specific components
 ├── services/     # Business logic and API services
 ├── store/        # MobX stores
 ├── types/        # TypeScript type definitions

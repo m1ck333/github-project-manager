@@ -6,22 +6,17 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  className,
-  ...props
-}) => {
+const Input: React.FC<InputProps> = ({ label, error, className, ...props }) => {
   return (
     <div className={styles.inputWrapper}>
       {label && <label className={styles.label}>{label}</label>}
       <input
-        className={`${styles.input} ${error ? styles.error : ""} ${
-          className || ""
-        }`}
+        className={`${styles.input} ${error ? styles.error : ""} ${className || ""}`}
         {...props}
       />
       {error && <span className={styles.error}>{error}</span>}
     </div>
   );
 };
+
+export default Input;

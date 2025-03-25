@@ -47,14 +47,14 @@ export interface Collaborator {
 }
 
 export enum IssueState {
-  OPEN = "OPEN",
-  CLOSED = "CLOSED",
-  IN_PROGRESS = "IN_PROGRESS",
-  REVIEW = "REVIEW",
+  _OPEN = "OPEN",
+  _CLOSED = "CLOSED",
+  _IN_PROGRESS = "IN_PROGRESS",
+  _REVIEW = "REVIEW",
 }
 
 export enum CollaboratorRole {
-  OWNER = "OWNER",
-  ADMIN = "ADMIN",
-  MEMBER = "MEMBER",
+  _OWNER = "OWNER",
+  _ADMIN = "ADMIN",
+  _MEMBER = "MEMBER",
 }

@@ -43,8 +43,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error ? error.message : "Failed to create project";
+        this.error = error instanceof Error ? error.message : "Failed to create project";
       });
       throw error;
     } finally {
@@ -60,10 +59,7 @@ export class ProjectStore {
       this.error = null;
 
       const validatedData = boardSchema.parse(input);
-      const board = await GitHubService.createBoard(
-        projectId,
-        validatedData.name
-      );
+      const board = await GitHubService.createBoard(projectId, validatedData.name);
 
       if (board) {
         runInAction(() => {
@@ -76,8 +72,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error ? error.message : "Failed to create board";
+        this.error = error instanceof Error ? error.message : "Failed to create board";
       });
       throw error;
     } finally {
@@ -113,8 +108,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error ? error.message : "Failed to create label";
+        this.error = error instanceof Error ? error.message : "Failed to create label";
       });
       throw error;
     } finally {
@@ -124,10 +118,7 @@ export class ProjectStore {
     }
   }
 
-  async createIssue(
-    projectId: string,
-    input: Omit<IssueSchema, "state"> & { state?: IssueState }
-  ) {
+  async createIssue(projectId: string, input: Omit<IssueSchema, "state"> & { state?: IssueState }) {
     try {
       this.loading = true;
       this.error = null;
@@ -135,7 +126,7 @@ export class ProjectStore {
       // Default to 'open' state if not provided
       const issueData = {
         ...input,
-        state: input.state || IssueState.OPEN,
+        state: input.state || IssueState._OPEN,
         labels: input.labels || [],
         assignees: input.assignees || [],
       };
@@ -165,8 +156,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error ? error.message : "Failed to create issue";
+        this.error = error instanceof Error ? error.message : "Failed to create issue";
       });
       throw error;
     } finally {
@@ -188,9 +178,7 @@ export class ProjectStore {
           this.projects.forEach((project) => {
             project.boards.forEach((board) => {
               board.columns.forEach((column) => {
-                const issueIndex = column.issues.findIndex(
-                  (i) => i.id === issueId
-                );
+                const issueIndex = column.issues.findIndex((i) => i.id === issueId);
                 if (issueIndex !== -1) {
                   column.issues[issueIndex].state = state;
                 }
@@ -202,10 +190,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error
-            ? error.message
-            : "Failed to update issue state";
+        this.error = error instanceof Error ? error.message : "Failed to update issue state";
       });
       throw error;
     } finally {
@@ -229,9 +214,7 @@ export class ProjectStore {
 
       if (updatedProject) {
         runInAction(() => {
-          const projectIndex = this.projects.findIndex(
-            (p) => p.id === projectId
-          );
+          const projectIndex = this.projects.findIndex((p) => p.id === projectId);
           if (projectIndex !== -1) {
             this.projects[projectIndex] = updatedProject;
           }
@@ -240,8 +223,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error =
-          error instanceof Error ? error.message : "Failed to add collaborator";
+        this.error = error instanceof Error ? error.message : "Failed to add collaborator";
       });
       throw error;
     } finally {

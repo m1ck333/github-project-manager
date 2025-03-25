@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { ProjectForm } from "./components/ProjectForm/ProjectForm";
-import { Button } from "./components/Button/Button";
+import ProjectForm from "./components/features/ProjectForm";
+import Button from "./components/ui/Button";
 import styles from "./App.module.scss";
 
 function App() {

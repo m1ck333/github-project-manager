@@ -35,26 +35,11 @@ export class GitHubService {
     return result.data?.createProjectV2.projectV2;
   }
 
-  static async createLabel(
-    projectId: string,
-    name: string,
-    color: string,
-    description?: string
-  ) {
+  static async createLabel(projectId: string, name: string, color: string, description?: string) {
     const mutation = gql`
-      mutation CreateLabel(
-        $projectId: ID!
-        $name: String!
-        $color: String!
-        $description: String
-      ) {
+      mutation CreateLabel($projectId: ID!, $name: String!, $color: String!, $description: String) {
         createLabel(
-          input: {
-            projectId: $projectId
-            name: $name
-            color: $color
-            description: $description
-          }
+          input: { projectId: $projectId, name: $name, color: $color, description: $description }
         ) {
           label {
             id
@@ -137,20 +122,10 @@ export class GitHubService {
     return result.data?.updateIssue.issue;
   }
 
-  static async addCollaborator(
-    projectId: string,
-    userId: string,
-    role: string
-  ) {
+  static async addCollaborator(projectId: string, userId: string, role: string) {
     const mutation = gql`
-      mutation AddCollaborator(
-        $projectId: ID!
-        $userId: ID!
-        $role: ProjectRole!
-      ) {
-        addProjectV2Collaborator(
-          input: { projectId: $projectId, userId: $userId, role: $role }
-        ) {
+      mutation AddCollaborator($projectId: ID!, $userId: ID!, $role: ProjectRole!) {
+        addProjectV2Collaborator(input: { projectId: $projectId, userId: $userId, role: $role }) {
           projectV2 {
             id
             collaborators {

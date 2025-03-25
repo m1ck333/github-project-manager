@@ -1,0 +1,20 @@
+# Build artifacts
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Generated files
+*.generated.*
+*.gen.*
+
+# Config files that should use their own formatting
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment files
+.env*
+!.env.example 

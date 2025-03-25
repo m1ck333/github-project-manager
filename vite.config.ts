@@ -16,7 +16,7 @@ export default defineConfig({
           sourceMap: true,
           style: "compressed",
           loadPaths: ["src"],
-          configFile: path.resolve(__dirname, "./config/styles/.sassrc.js"),
+          configFile: path.resolve(__dirname, "./.sassrc.js"),
         },
       },
     },
@@ -26,5 +26,4 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  envDir: "./config/environment",
 });
