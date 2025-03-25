@@ -1,0 +1,37 @@
+@use "src/styles/variables.scss" as *;
+
+.app {
+  min-height: 100vh;
+  background-color: $background-secondary;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md $spacing-lg;
+  background-color: $background-primary;
+  border-bottom: 1px solid $border-color;
+
+  h1 {
+    margin: 0;
+    font-size: $font-size-large;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.main {
+  max-width: $breakpoint-xl;
+  margin: 0 auto;
+  padding: $spacing-lg;
+}
+
+.content {
+  background-color: $background-primary;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-sm;
+  text-align: center;
+  color: $text-secondary;
+}

@@ -1,0 +1,36 @@
+@use "src/styles/variables.scss" as *;
+
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  width: 100%;
+}
+
+.label {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $text-primary;
+}
+
+.input {
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  transition: $transition-base;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+
+  &.error {
+    border-color: $danger-color;
+  }
+}
+
+.error {
+  font-size: $font-size-small;
+  color: $danger-color;
+}

@@ -1,0 +1,18 @@
+@use "colors";
+@use "typography";
+@use "spacing";
+@use "borders";
+@use "transitions";
+@use "shadows";
+@use "breakpoints";
+
+:root {
+  --primary-color: #{colors.$primary-color};
+  --secondary-color: #{colors.$secondary-color};
+  --danger-color: #{colors.$danger-color};
+  --text-primary: #{colors.$text-primary};
+  --text-secondary: #{colors.$text-secondary};
+  --background-primary: #{colors.$background-primary};
+  --background-secondary: #{colors.$background-secondary};
+  --border-color: #{colors.$border-color};
+}

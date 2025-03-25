@@ -1,0 +1,35 @@
+@use "src/styles/variables.scss" as *;
+
+.button {
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-sm;
+  border: none;
+  cursor: pointer;
+  font-size: $font-size-base;
+  font-weight: 500;
+  transition: $transition-base;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.primary {
+    background-color: $primary-color;
+    color: $background-primary;
+  }
+
+  &.secondary {
+    background-color: $secondary-color;
+    color: $background-primary;
+  }
+
+  &.danger {
+    background-color: $danger-color;
+    color: $background-primary;
+  }
+}
