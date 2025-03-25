@@ -2,21 +2,46 @@ import { client } from "../api/client";
 import { gql } from "urql";
 
 export class GitHubService {
-  static async createProject(name: string, description?: string) {
+  static async createProject(name: string) {
     const mutation = gql`
-      mutation CreateProject($name: String!, $description: String) {
-        createProject(input: { name: $name, description: $description }) {
-          project {
+      mutation CreateProjectV2($name: String!, $ownerId: ID!) {
+        createProjectV2(input: { ownerId: $ownerId, title: $name }) {
+          projectV2 {
             id
-            name
-            description
+            title
           }
         }
       }
     `;
 
-    const result = await client.mutation(mutation, { name, description });
-    return result.data?.createProject.project;
+    // Get the user ID from viewer query
+    const viewerQuery = gql`
+      query GetViewer {
+        viewer {
+          id
+        }
+      }
+    `;
+
+    const viewerResult = await client.query(viewerQuery, {}).toPromise();
+    if (viewerResult.error) {
+      throw new Error(viewerResult.error.message);
+    }
+
+    const ownerId = viewerResult.data?.viewer?.id;
+    const result = await client.mutation(mutation, { name, ownerId });
+
+    // Map the response to maintain compatibility with existing code
+    if (result.data?.createProjectV2?.projectV2) {
+      return {
+        id: result.data.createProjectV2.projectV2.id,
+        name: result.data.createProjectV2.projectV2.title,
+        boards: [],
+        collaborators: [],
+      };
+    }
+
+    return null;
   }
 
   static async createBoard(projectId: string, name: string) {
@@ -149,49 +174,34 @@ export class GitHubService {
 
   static async getProjects() {
     const query = gql`
-      query GetProjects {
+      query GetProjectsV2 {
         viewer {
-          projects(first: 10) {
+          projectsV2(first: 10) {
             nodes {
               id
-              name
-              description
-              boards: projectV2Boards(first: 10) {
+              title
+              shortDescription
+              items(first: 10) {
                 nodes {
                   id
-                  name
-                  columns {
-                    nodes {
+                  content {
+                    ... on Issue {
                       id
-                      name
-                      issues: cards(first: 10) {
+                      title
+                      body
+                      state
+                      labels(first: 10) {
                         nodes {
                           id
-                          title
-                          description
-                          state
-                          labels {
-                            nodes {
-                              id
-                              name
-                              color
-                            }
-                          }
+                          name
+                          color
                         }
                       }
                     }
                   }
-                  labels: labels(first: 10) {
-                    nodes {
-                      id
-                      name
-                      color
-                      description
-                    }
-                  }
                 }
               }
-              collaborators: projectCollaborators(first: 10) {
+              collaborators: collaborators(first: 10) {
                 nodes {
                   user {
                     id
@@ -213,6 +223,27 @@ export class GitHubService {
       throw new Error(result.error.message);
     }
 
-    return result.data?.viewer?.projects?.nodes || [];
+    // Map the V2 projects to maintain compatibility with existing code
+    const projectsV2 = result.data?.viewer?.projectsV2?.nodes || [];
+
+    interface ProjectV2Node {
+      id: string;
+      title: string;
+      shortDescription?: string;
+      items?: { nodes: Array<{ id: string }> };
+      collaborators?: {
+        nodes: Array<{ user: { id: string; login: string; avatarUrl: string }; role: string }>;
+      };
+    }
+
+    return (
+      projectsV2.map((projectV2: ProjectV2Node) => ({
+        id: projectV2.id,
+        name: projectV2.title,
+        description: projectV2.shortDescription,
+        boards: [], // ProjectV2 doesn't have direct boards - would need different modeling
+        collaborators: projectV2.collaborators?.nodes || [],
+      })) || []
+    );
   }
 }

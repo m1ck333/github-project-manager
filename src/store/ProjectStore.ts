@@ -52,10 +52,7 @@ export class ProjectStore {
       this.error = null;
 
       const validatedData = projectSchema.parse(input);
-      const project = await GitHubService.createProject(
-        validatedData.name,
-        validatedData.description
-      );
+      const project = await GitHubService.createProject(validatedData.name);
 
       if (project) {
         runInAction(() => {
