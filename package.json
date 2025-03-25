@@ -14,7 +14,8 @@
     "check": "npm run format:check && npm run lint",
     "fix": "npm run format && npm run lint:fix",
     "codegen": "graphql-codegen --config codegen.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "@apollo/client": "^3.9.5",
