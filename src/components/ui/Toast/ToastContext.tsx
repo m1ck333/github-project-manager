@@ -1,14 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import React, { useState, useCallback, ReactNode } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ToastContainer from "./ToastContainer";
 import { ToastType } from "./Toast";
-import { ToastContextValue, ToastData } from "./types";
-
-// Create the context with a default value
-const ToastContext = createContext<ToastContextValue>({
-  showToast: () => "",
-  hideToast: () => {},
-});
+import { ToastData } from "./types";
+import { ToastContext } from "./context";
 
 // Provider component
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -30,9 +25,4 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       <ToastContainer toasts={toasts} onClose={hideToast} />
     </ToastContext.Provider>
   );
-};
-
-// Hook to use the toast context
-export const useToast = () => {
-  return useContext(ToastContext);
 };
