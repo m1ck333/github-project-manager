@@ -1,17 +1,61 @@
-@use "src/styles/variables.scss" as *;
+@use "../../../styles/variables" as *;
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $spacing-md $spacing-lg;
-  background-color: $background-primary;
-  border-bottom: 1px solid $border-color;
+  padding: 1rem 2rem;
+  background-color: $primary-color;
+  color: $white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-  h1 {
+.logo {
+  a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: $white;
+
+    img {
+      height: 32px;
+      width: 32px;
+      margin-right: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+  }
+}
+
+.nav {
+  ul {
+    display: flex;
+    list-style: none;
     margin: 0;
-    font-size: $font-size-large;
-    font-weight: 600;
-    color: $text-primary;
+    padding: 0;
+
+    li {
+      margin-left: 1.5rem;
+
+      a {
+        color: $white;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        &.active {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+      }
+    }
   }
 }

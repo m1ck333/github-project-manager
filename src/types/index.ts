@@ -19,7 +19,7 @@ export enum BoardType {
 }
 
 export interface Board {
-  id: number;
+  id: string;
   name: string;
   type: BoardType;
   issues?: Issue[];
@@ -32,7 +32,7 @@ export enum CollaboratorRole {
 }
 
 export interface Collaborator {
-  id: number;
+  id: string;
   username: string;
   avatar?: string;
   role: CollaboratorRole;

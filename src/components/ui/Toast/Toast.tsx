@@ -23,13 +23,13 @@ const Toast: React.FC<ToastProps> = ({ id, message, type, duration = 5000, onClo
     return () => clearTimeout(timer);
   }, [id, duration, onClose]);
 
+  // Use safer inline styles instead of class names for animations
+  const animationStyle = isVisible
+    ? { animation: "0.3s ease forwards slide-in" }
+    : { animation: "0.3s ease forwards fade-out" };
+
   return (
-    <div
-      className={`${styles.toast} ${styles[type]}`}
-      style={{
-        animation: isVisible ? `${styles.slideIn} 0.3s ease` : `${styles.fadeOut} 0.3s ease`,
-      }}
-    >
+    <div className={`${styles.toast} ${styles[type]}`} style={animationStyle}>
       <div className={styles.message}>{message}</div>
       <button
         className={styles.closeButton}

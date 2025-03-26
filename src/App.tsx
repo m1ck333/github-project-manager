@@ -1,37 +1,29 @@
-import React, { useEffect } from "react";
-import { observer } from "mobx-react-lite";
-import ProjectList from "./components/features/ProjectList";
-import Loading from "./components/ui/Loading";
-import Error from "./components/ui/Error";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import { projectStore } from "./store";
+import Home from "./pages/Home";
+import Projects from "./pages/Projects";
 
-const App: React.FC = observer(() => {
-  const { projects, loading, error } = projectStore;
-
-  useEffect(() => {
-    projectStore.fetchProjects();
-  }, []);
-
-  const handleRetry = () => {
-    projectStore.fetchProjects();
-  };
+// Extract routes to a separate component with keys
+const AppRoutes = () => {
+  const location = useLocation();
 
   return (
-    <Layout>
-      <div className="content-container">
-        {loading ? (
-          <Loading text="Loading projects..." />
-        ) : error ? (
-          <Error message={error} retry={handleRetry} />
-        ) : projects.length > 0 ? (
-          <ProjectList projects={projects} />
-        ) : (
-          <p>No projects yet. Create your first project to get started!</p>
-        )}
-      </div>
-    </Layout>
+    <Routes key={location.pathname}>
+      <Route path="/" element={<Home />} />
+      <Route path="/projects" element={<Projects />} />
+    </Routes>
   );
-});
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Layout>
+        <AppRoutes />
+      </Layout>
+    </Router>
+  );
+};
 
 export default App;

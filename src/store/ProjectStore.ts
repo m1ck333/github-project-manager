@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { GitHubService } from "../services/github.service";
 import { Board, BoardFormData, Collaborator, CollaboratorFormData, Project } from "../types";
+import { v4 as uuidv4 } from "uuid";
 
 export class ProjectStore {
   projects: Project[] = [];
@@ -22,6 +23,7 @@ export class ProjectStore {
       runInAction(() => {
         this.projects = projects.map((project) => ({
           ...project,
+          id: isNaN(project.id) ? Date.now() : project.id,
           boards: [],
           collaborators: [],
         }));
@@ -116,7 +118,7 @@ export class ProjectStore {
     }
 
     const newBoard: Board = {
-      id: Date.now(), // Generate a temporary ID
+      id: uuidv4(), // Use string UUID directly
       name: boardData.name,
       type: boardData.type,
     };
@@ -129,7 +131,7 @@ export class ProjectStore {
     project.boards.push(newBoard);
   }
 
-  deleteBoard(projectId: number, boardId: number) {
+  deleteBoard(projectId: number, boardId: string) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project || !project.boards) {
       this.error = "Project or boards not found";
@@ -148,7 +150,7 @@ export class ProjectStore {
     }
 
     const newCollaborator: Collaborator = {
-      id: Date.now(), // Generate a temporary ID
+      id: uuidv4(), // Use string UUID directly
       username: collaboratorData.username,
       avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
       role: collaboratorData.role,
@@ -172,7 +174,7 @@ export class ProjectStore {
     }
   }
 
-  removeCollaborator(projectId: number, collaboratorId: number) {
+  removeCollaborator(projectId: number, collaboratorId: string) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project || !project.collaborators) {
       this.error = "Project or collaborators not found";

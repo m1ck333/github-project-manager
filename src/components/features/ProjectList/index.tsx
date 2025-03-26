@@ -204,102 +204,113 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
         </div>
 
         {/* Project Cards */}
-        {projects.map((project) => (
-          <div key={project.id} className={styles.projectCard}>
-            <div className={styles.projectHeader}>
-              <h3 onClick={() => toggleProject(project.id)}>{project.name}</h3>
-              <div className={styles.actions}>
+        {projects.map((project, index) => {
+          // Generate a truly unique key for each project
+          const projectKey = `project-${index}-${project.id || ""}-${project.name}`;
+
+          return (
+            <div key={projectKey} className={styles.projectCard}>
+              <div className={styles.projectHeader}>
+                <h3 onClick={() => toggleProject(project.id)}>{project.name}</h3>
+                <div className={styles.actions}>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    iconOnly
+                    onClick={() => handleEdit(project)}
+                    className={styles.actionButton}
+                    aria-label="Edit project"
+                  >
+                    <FiEdit />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="small"
+                    iconOnly
+                    onClick={() => handleDelete(project)}
+                    className={styles.actionButton}
+                    aria-label="Delete project"
+                  >
+                    <FiTrash2 />
+                  </Button>
+                </div>
+              </div>
+
+              {project.description && <p className={styles.description}>{project.description}</p>}
+
+              <div className={styles.projectActions}>
+                <Button variant="secondary" size="small" onClick={() => handleAddBoard(project)}>
+                  <FiColumns /> Add Board
+                </Button>
                 <Button
                   variant="secondary"
                   size="small"
-                  iconOnly
-                  onClick={() => handleEdit(project)}
-                  className={styles.actionButton}
-                  aria-label="Edit project"
+                  onClick={() => handleAddCollaborator(project)}
                 >
-                  <FiEdit />
-                </Button>
-                <Button
-                  variant="danger"
-                  size="small"
-                  iconOnly
-                  onClick={() => handleDelete(project)}
-                  className={styles.actionButton}
-                  aria-label="Delete project"
-                >
-                  <FiTrash2 />
+                  <FiUsers /> Add Collaborator
                 </Button>
               </div>
-            </div>
 
-            {project.description && <p className={styles.description}>{project.description}</p>}
+              <div className={styles.boardsCount}>
+                <span>{project.boards?.length || 0}</span> boards •
+                <span> {project.collaborators?.length || 0}</span> collaborators
+              </div>
 
-            <div className={styles.projectActions}>
-              <Button variant="secondary" size="small" onClick={() => handleAddBoard(project)}>
-                <FiColumns /> Add Board
-              </Button>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={() => handleAddCollaborator(project)}
-              >
-                <FiUsers /> Add Collaborator
-              </Button>
-            </div>
-
-            <div className={styles.boardsCount}>
-              <span>{project.boards?.length || 0}</span> boards •
-              <span> {project.collaborators?.length || 0}</span> collaborators
-            </div>
-
-            {expandedProject === project.id && (
-              <div className={styles.projectDetails}>
-                {project.boards && project.boards.length > 0 && (
-                  <div className={styles.boardsSection}>
-                    <h4>Boards</h4>
-                    <div className={styles.boardsList}>
-                      {project.boards.map((board) => (
-                        <div key={board.id} className={styles.boardCard}>
-                          <h5>{board.name}</h5>
-                        </div>
-                      ))}
+              {expandedProject === project.id && (
+                <div className={styles.projectDetails}>
+                  {project.boards && project.boards.length > 0 && (
+                    <div className={styles.boardsSection}>
+                      <h4>Boards</h4>
+                      <div className={styles.boardsList}>
+                        {project.boards.map((board, index) => {
+                          const boardKey = `board-${index}-${board.id || ""}-${board.name}`;
+                          return (
+                            <div key={boardKey} className={styles.boardCard}>
+                              <h5>{board.name}</h5>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
-
-                {project.collaborators && project.collaborators.length > 0 && (
-                  <div className={styles.collaboratorsSection}>
-                    <h4>Collaborators</h4>
-                    <div className={styles.collaboratorsList}>
-                      {project.collaborators.map((collaborator) => (
-                        <div key={collaborator.id} className={styles.collaboratorCard}>
-                          <div className={styles.collaboratorAvatar}>
-                            <img
-                              src={
-                                collaborator.avatar ||
-                                `https://avatars.githubusercontent.com/${collaborator.username}`
-                              }
-                              alt={collaborator.username}
-                            />
-                          </div>
-                          <div className={styles.collaboratorInfo}>
-                            <h5>{collaborator.username}</h5>
-                            <span className={styles.role}>{collaborator.role}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {(!project.boards || project.boards.length === 0) &&
-                  (!project.collaborators || project.collaborators.length === 0) && (
-                    <p>No boards or collaborators yet. Add some using the buttons above.</p>
                   )}
-              </div>
-            )}
-          </div>
-        ))}
+
+                  {project.collaborators && project.collaborators.length > 0 && (
+                    <div className={styles.collaboratorsSection}>
+                      <h4>Collaborators</h4>
+                      <div className={styles.collaboratorsList}>
+                        {project.collaborators.map((collaborator, index) => {
+                          const collaboratorKey = `collaborator-${index}-${collaborator.id || ""}-${collaborator.username}`;
+                          return (
+                            <div key={collaboratorKey} className={styles.collaboratorCard}>
+                              <div className={styles.collaboratorAvatar}>
+                                <img
+                                  src={
+                                    collaborator.avatar ||
+                                    `https://avatars.githubusercontent.com/${collaborator.username}`
+                                  }
+                                  alt={collaborator.username}
+                                />
+                              </div>
+                              <div className={styles.collaboratorInfo}>
+                                <h5>{collaborator.username}</h5>
+                                <span className={styles.role}>{collaborator.role}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(!project.boards || project.boards.length === 0) &&
+                    (!project.collaborators || project.collaborators.length === 0) && (
+                      <p>No boards or collaborators yet. Add some using the buttons above.</p>
+                    )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Project Creation Modal */}

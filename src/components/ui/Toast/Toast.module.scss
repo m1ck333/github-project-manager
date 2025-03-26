@@ -1,5 +1,25 @@
 @use "src/styles/variables.scss" as *;
 
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .toastContainer {
   position: fixed;
   bottom: 20px;
@@ -19,7 +39,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  animation: slideIn 0.3s ease-in-out;
 
   &.success {
     background-color: #dff2e1;
@@ -64,25 +83,5 @@
 
   &:hover {
     opacity: 1;
-  }
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
   }
 }

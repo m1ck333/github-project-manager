@@ -1,0 +1,18 @@
+@use "../../styles/variables" as *;
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+
+  h1 {
+    margin-bottom: 1.5rem;
+    color: $primary-color;
+  }
+
+  p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+  }
+}

@@ -18,7 +18,7 @@ const ProjectForm: React.FC<ProjectFormProps> = observer(({ onSuccess, onCancel 
     name?: string;
     description?: string;
   }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [_isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {

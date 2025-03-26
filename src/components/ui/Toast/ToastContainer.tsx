@@ -12,9 +12,9 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onClose }) => {
 
   return (
     <div className={styles.toastContainer}>
-      {toasts.map((toast) => (
+      {toasts.map((toast, index) => (
         <Toast
-          key={toast.id}
+          key={String(toast.id) || `toast-${index}`}
           id={toast.id}
           message={toast.message}
           type={toast.type}
