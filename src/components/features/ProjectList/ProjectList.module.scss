@@ -271,16 +271,3 @@
     }
   }
 }
-
-.note {
-  background-color: rgba($secondary-color, 0.1);
-  padding: $spacing-sm;
-  border-radius: $border-radius-sm;
-  margin: $spacing-xs 0;
-
-  p {
-    margin: 0;
-    font-size: $font-size-small;
-    color: $text-secondary;
-  }
-}

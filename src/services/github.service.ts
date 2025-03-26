@@ -3,6 +3,12 @@ import { gql } from "urql";
 import { Project } from "../types";
 
 export class GitHubService {
+  private client;
+
+  constructor() {
+    this.client = client;
+  }
+
   async getProjects(): Promise<Project[]> {
     // Define the query for fetching projects
     const query = gql`
@@ -50,7 +56,7 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.query(query, {}).toPromise();
+    const result = await this.client.query(query, {}).toPromise();
 
     if (result.error) {
       throw new Error(result.error.message);
@@ -72,7 +78,7 @@ export class GitHubService {
 
     return (
       projectsV2.map((projectV2: ProjectV2Node) => ({
-        id: parseInt(projectV2.id.split("_").pop() || "0"),
+        id: projectV2.id, // Store the original GitHub ID
         name: projectV2.title,
         description: projectV2.shortDescription || "",
         html_url: projectV2.url,
@@ -84,22 +90,41 @@ export class GitHubService {
     );
   }
 
-  async createProject(name: string, description: string): Promise<Project> {
-    const mutation = gql`
+  async createProject(name: string): Promise<Project> {
+    // First, get the viewer (logged-in user) to get their ID
+    const viewerQuery = `
+      query {
+        viewer {
+          id
+          login
+        }
+      }
+    `;
+
+    const viewerResult = await this.client.query(viewerQuery, {}).toPromise();
+    const ownerId = viewerResult.data?.viewer?.id;
+
+    if (!ownerId) {
+      throw new Error("Failed to get viewer ID");
+    }
+
+    const mutation = `
       mutation CreateProjectV2($name: String!, $ownerId: ID!) {
         createProjectV2(input: { ownerId: $ownerId, title: $name }) {
           projectV2 {
             id
             title
             url
-            owner {
-              ... on User {
-                login
-                avatarUrl
-              }
-              ... on Organization {
-                login
-                avatarUrl
+            ... on ProjectV2 {
+              owner {
+                ... on User {
+                  login
+                  avatarUrl
+                }
+                ... on Organization {
+                  login
+                  avatarUrl
+                }
               }
             }
           }
@@ -107,46 +132,39 @@ export class GitHubService {
       }
     `;
 
-    // Get the user ID from viewer query
-    const viewerQuery = gql`
-      query GetViewer {
-        viewer {
-          id
-        }
-      }
-    `;
-
-    const viewerResult = await client.query(viewerQuery, {}).toPromise();
-    if (viewerResult.error) {
-      throw new Error(viewerResult.error.message);
-    }
-
-    const ownerId = viewerResult.data?.viewer?.id;
-    const result = await client.mutation(mutation, { name, ownerId });
+    const result = await this.client.mutation(mutation, { name, ownerId }).toPromise();
 
     if (result.error) {
       throw new Error(result.error.message);
     }
 
-    // Map the response to maintain compatibility with existing code
-    if (result.data?.createProjectV2?.projectV2) {
-      const projectData = result.data.createProjectV2.projectV2;
-      return {
-        id: parseInt(projectData.id.split("_").pop() || "0"),
-        name: projectData.title,
-        description: description || "",
-        html_url: projectData.url,
-        owner: {
-          login: projectData.owner.login,
-          avatar_url: projectData.owner.avatarUrl,
-        },
-      };
-    }
+    const projectData = result.data.createProjectV2.projectV2;
 
-    throw new Error("Failed to create project");
+    return {
+      id: projectData.id, // Store the original GitHub ID
+      name: projectData.title,
+      description: "",
+      html_url: projectData.url,
+      owner: {
+        login: projectData.owner.login,
+        avatar_url: projectData.owner.avatarUrl,
+      },
+    };
   }
 
-  async updateProject(projectId: number, name: string, description: string): Promise<Project> {
+  // Helper method to extract node ID from a project
+  private getProjectNodeId(projectId: string | number): string {
+    // If it's already a full node ID, return as is
+    if (typeof projectId === "string") {
+      return projectId;
+    }
+
+    throw new Error("Invalid project ID format");
+  }
+
+  async updateProject(projectId: string, name: string, description: string): Promise<Project> {
+    const projectNodeId = this.getProjectNodeId(projectId);
+
     const mutation = gql`
       mutation UpdateProjectV2($projectId: ID!, $title: String!) {
         updateProjectV2(input: { projectId: $projectId, title: $title }) {
@@ -169,18 +187,19 @@ export class GitHubService {
       }
     `;
 
-    const stringId = `ProjectV2_${projectId}`;
-    const result = await client.mutation(mutation, { projectId: stringId, title: name });
+    const updateResult = await this.client
+      .mutation(mutation, { projectId: projectNodeId, title: name })
+      .toPromise();
 
-    if (result.error) {
-      throw new Error(result.error.message);
+    if (updateResult.error) {
+      throw new Error(updateResult.error.message);
     }
 
     // Map the response to maintain compatibility with existing code
-    if (result.data?.updateProjectV2?.projectV2) {
-      const projectData = result.data.updateProjectV2.projectV2;
+    if (updateResult.data?.updateProjectV2?.projectV2) {
+      const projectData = updateResult.data.updateProjectV2.projectV2;
       return {
-        id: parseInt(projectData.id.split("_").pop() || "0"),
+        id: projectData.id,
         name: projectData.title,
         description: description || "",
         html_url: projectData.url,
@@ -194,7 +213,9 @@ export class GitHubService {
     throw new Error("Failed to update project");
   }
 
-  async deleteProject(projectId: number): Promise<void> {
+  async deleteProject(projectId: string): Promise<void> {
+    const projectNodeId = this.getProjectNodeId(projectId);
+
     const mutation = gql`
       mutation DeleteProjectV2($projectId: ID!) {
         deleteProjectV2(input: { projectId: $projectId }) {
@@ -203,11 +224,12 @@ export class GitHubService {
       }
     `;
 
-    const stringId = `ProjectV2_${projectId}`;
-    const result = await client.mutation(mutation, { projectId: stringId });
+    const deleteResult = await this.client
+      .mutation(mutation, { projectId: projectNodeId })
+      .toPromise();
 
-    if (result.error) {
-      throw new Error(result.error.message);
+    if (deleteResult.error) {
+      throw new Error(deleteResult.error.message);
     }
   }
 
@@ -217,31 +239,30 @@ export class GitHubService {
     return service.getProjects();
   }
 
-  static async createProject(name: string, description: string = "") {
+  static async createProject(name: string) {
     const service = new GitHubService();
-    return service.createProject(name, description);
+    return service.createProject(name);
   }
 
   static async updateProject(projectId: string | number, title: string, description: string = "") {
     const service = new GitHubService();
-    const numericId =
-      typeof projectId === "string" ? parseInt(projectId.split("_").pop() || "0") : projectId;
-    return service.updateProject(numericId, title, description);
+    return service.updateProject(projectId.toString(), title, description);
   }
 
   static async deleteProject(projectId: string | number) {
     const service = new GitHubService();
-    const numericId =
-      typeof projectId === "string" ? parseInt(projectId.split("_").pop() || "0") : projectId;
-    await service.deleteProject(numericId);
+    await service.deleteProject(projectId.toString());
     return true;
   }
 
-  static async createBoard(projectId: string, name: string) {
+  static async createBoard(projectId: string | number, name: string) {
+    const service = new GitHubService();
+    const projectNodeId = service.getProjectNodeId(projectId.toString());
+
     const mutation = gql`
       mutation CreateBoard($projectId: ID!, $name: String!) {
-        createProjectV2(input: { projectId: $projectId, name: $name }) {
-          projectV2 {
+        createProjectV2Field(input: { projectId: $projectId, name: $name }) {
+          projectV2Field {
             id
             name
           }
@@ -249,15 +270,25 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.mutation(mutation, { projectId, name });
-    return result.data?.createProjectV2.projectV2;
+    const result = await service.client
+      .mutation(mutation, { projectId: projectNodeId, name })
+      .toPromise();
+    return result.data?.createProjectV2Field.projectV2Field;
   }
 
-  static async createLabel(projectId: string, name: string, color: string, description?: string) {
+  static async createLabel(
+    projectId: string | number,
+    name: string,
+    color: string,
+    description?: string
+  ) {
+    const service = new GitHubService();
+    const projectNodeId = service.getProjectNodeId(projectId.toString());
+
     const mutation = gql`
       mutation CreateLabel($projectId: ID!, $name: String!, $color: String!, $description: String) {
         createLabel(
-          input: { projectId: $projectId, name: $name, color: $color, description: $description }
+          input: { repositoryId: $projectId, name: $name, color: $color, description: $description }
         ) {
           label {
             id
@@ -269,21 +300,26 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.mutation(mutation, {
-      projectId,
-      name,
-      color,
-      description,
-    });
+    const result = await service.client
+      .mutation(mutation, {
+        projectId: projectNodeId,
+        name,
+        color,
+        description,
+      })
+      .toPromise();
     return result.data?.createLabel.label;
   }
 
   static async createIssue(
-    projectId: string,
+    projectId: string | number,
     title: string,
     description?: string,
     labels: string[] = []
   ) {
+    const service = new GitHubService();
+    const projectNodeId = service.getProjectNodeId(projectId.toString());
+
     const mutation = gql`
       mutation CreateIssue(
         $projectId: ID!
@@ -292,18 +328,13 @@ export class GitHubService {
         $labels: [String!]
       ) {
         createIssue(
-          input: {
-            projectId: $projectId
-            title: $title
-            description: $description
-            labels: $labels
-          }
+          input: { repositoryId: $projectId, title: $title, body: $description, labelIds: $labels }
         ) {
           issue {
             id
             title
-            description
-            labels {
+            body
+            labels(first: 10) {
               nodes {
                 id
                 name
@@ -315,16 +346,20 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.mutation(mutation, {
-      projectId,
-      title,
-      description,
-      labels,
-    });
+    const result = await service.client
+      .mutation(mutation, {
+        projectId: projectNodeId,
+        title,
+        description,
+        labels,
+      })
+      .toPromise();
     return result.data?.createIssue.issue;
   }
 
   static async updateIssueState(issueId: string, state: string) {
+    const service = new GitHubService();
+
     const mutation = gql`
       mutation UpdateIssueState($issueId: ID!, $state: IssueState!) {
         updateIssue(input: { id: $issueId, state: $state }) {
@@ -336,13 +371,16 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.mutation(mutation, { issueId, state });
+    const result = await service.client.mutation(mutation, { issueId, state }).toPromise();
     return result.data?.updateIssue.issue;
   }
 
-  static async addCollaborator(projectId: string, userId: string, role: string) {
+  static async addCollaborator(projectId: string | number, userId: string, role: string) {
+    const service = new GitHubService();
+    const projectNodeId = service.getProjectNodeId(projectId.toString());
+
     const mutation = gql`
-      mutation AddCollaborator($projectId: ID!, $userId: ID!, $role: ProjectRole!) {
+      mutation AddCollaborator($projectId: ID!, $userId: ID!, $role: ProjectV2Collaborator!) {
         addProjectV2Collaborator(input: { projectId: $projectId, userId: $userId, role: $role }) {
           projectV2 {
             id
@@ -361,7 +399,14 @@ export class GitHubService {
       }
     `;
 
-    const result = await client.mutation(mutation, { projectId, userId, role });
+    const result = await service.client
+      .mutation(mutation, {
+        projectId: projectNodeId,
+        userId,
+        role,
+      })
+      .toPromise();
+
     return result.data?.addProjectV2Collaborator.projectV2;
   }
 }

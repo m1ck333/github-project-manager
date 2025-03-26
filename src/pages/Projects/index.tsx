@@ -25,10 +25,8 @@ const Projects: React.FC = observer(() => {
           <Loading text="Loading projects..." />
         ) : error ? (
           <Error message={error} retry={handleRetry} />
-        ) : projects.length > 0 ? (
-          <ProjectList projects={projects} />
         ) : (
-          <p>No projects yet. Create your first project to get started!</p>
+          <ProjectList projects={projects} />
         )}
       </div>
     </div>

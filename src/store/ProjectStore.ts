@@ -23,7 +23,6 @@ export class ProjectStore {
       runInAction(() => {
         this.projects = projects.map((project) => ({
           ...project,
-          id: isNaN(project.id) ? Date.now() : project.id,
           boards: [],
           collaborators: [],
         }));
@@ -37,30 +36,17 @@ export class ProjectStore {
     }
   }
 
-  async createProject(name: string, description: string) {
-    this.loading = true;
-    this.error = null;
-
+  async createProject(name: string) {
     try {
-      const project = await this.gitHubService.createProject(name, description);
-
-      runInAction(() => {
-        this.projects.push({
-          ...project,
-          boards: [],
-          collaborators: [],
-        });
-        this.loading = false;
-      });
+      await this.gitHubService.createProject(name);
+      await this.fetchProjects();
     } catch (error) {
-      runInAction(() => {
-        this.error = (error as Error).message;
-        this.loading = false;
-      });
+      console.error("Error creating project:", error);
+      throw error;
     }
   }
 
-  async updateProject(projectId: number, name: string, description: string) {
+  async updateProject(projectId: string, name: string, description: string) {
     this.loading = true;
     this.error = null;
 
@@ -90,7 +76,7 @@ export class ProjectStore {
     }
   }
 
-  async deleteProject(projectId: number) {
+  async deleteProject(projectId: string) {
     this.loading = true;
     this.error = null;
 
@@ -110,7 +96,7 @@ export class ProjectStore {
   }
 
   // Boards management
-  addBoard(projectId: number, boardData: BoardFormData) {
+  addBoard(projectId: string, boardData: BoardFormData) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project) {
       this.error = "Project not found";
@@ -131,7 +117,7 @@ export class ProjectStore {
     project.boards.push(newBoard);
   }
 
-  deleteBoard(projectId: number, boardId: string) {
+  deleteBoard(projectId: string, boardId: string) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project || !project.boards) {
       this.error = "Project or boards not found";
@@ -142,7 +128,7 @@ export class ProjectStore {
   }
 
   // Collaborators management
-  addCollaborator(projectId: number, collaboratorData: CollaboratorFormData) {
+  addCollaborator(projectId: string, collaboratorData: CollaboratorFormData) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project) {
       this.error = "Project not found";
@@ -174,7 +160,7 @@ export class ProjectStore {
     }
   }
 
-  removeCollaborator(projectId: number, collaboratorId: string) {
+  removeCollaborator(projectId: string, collaboratorId: string) {
     const project = this.projects.find((p) => p.id === projectId);
     if (!project || !project.collaborators) {
       this.error = "Project or collaborators not found";
@@ -184,7 +170,7 @@ export class ProjectStore {
     project.collaborators = project.collaborators.filter((collab) => collab.id !== collaboratorId);
   }
 
-  selectProject(projectId: number) {
+  selectProject(projectId: string) {
     this.selectedProject = this.projects.find((p) => p.id === projectId) || null;
   }
 

@@ -52,10 +52,6 @@ const EditProjectForm: React.FC<EditProjectFormProps> = observer(
           required
         />
 
-        <div className={styles.note}>
-          <p>Note: GitHub API doesn't support setting descriptions for ProjectsV2.</p>
-        </div>
-
         <div className={styles.actions}>
           <Button type="button" variant="secondary" onClick={onCancel} disabled={isUpdating}>
             Cancel
