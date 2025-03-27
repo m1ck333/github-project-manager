@@ -5,6 +5,7 @@ import { projectStore } from "../../store";
 import ProjectBoard from "../../components/features/ProjectBoard";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import Container from "../../components/layout/Container";
 import IssueForm from "../../components/features/IssueForm";
 import LabelForm from "../../components/features/LabelForm";
 import { FiArrowLeft, FiPlus, FiTag, FiColumns, FiUsers } from "react-icons/fi";
@@ -49,85 +50,98 @@ const ProjectPage: React.FC = observer(() => {
   }, [projectId]);
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/projects");
   };
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading project...</div>;
+    return (
+      <Container size="large" withPadding>
+        <div className={styles.loading}>Loading project...</div>
+      </Container>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>{error}</div>;
+    return (
+      <Container size="large" withPadding>
+        <div className={styles.error}>{error}</div>
+      </Container>
+    );
   }
 
   const project = projectStore.selectedProject;
   if (!project) {
-    return <div className={styles.error}>Project not found</div>;
+    return (
+      <Container size="large" withPadding>
+        <div className={styles.error}>Project not found</div>
+      </Container>
+    );
   }
 
   return (
-    <div className={styles.projectPage}>
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
-          <FiArrowLeft /> Back to Projects
-        </button>
-        <h1>{project.name}</h1>
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={() => setShowColumnForm(true)}>
-            <FiColumns /> Add Column
-          </Button>
-          <Button variant="secondary" onClick={() => setShowLabelForm(true)}>
-            <FiTag /> Create Label
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => navigate(`/projects/${project.id}/collaborators`)}
-          >
-            <FiUsers /> Manage Collaborators
-          </Button>
-          <Button variant="primary" onClick={() => setShowIssueForm(true)}>
-            <FiPlus /> New Issue
-          </Button>
+    <Container size="large" withPadding title={project.name}>
+      <div className={styles.pageContent}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <FiArrowLeft /> Back to Projects
+          </button>
+          <div className={styles.actions}>
+            <Button variant="secondary" onClick={() => setShowColumnForm(true)}>
+              <FiColumns /> Add Column
+            </Button>
+            <Button variant="secondary" onClick={() => setShowLabelForm(true)}>
+              <FiTag /> Create Label
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/projects/${project.id}/collaborators`)}
+            >
+              <FiUsers /> Manage Collaborators
+            </Button>
+            <Button variant="primary" onClick={() => setShowIssueForm(true)}>
+              <FiPlus /> New Issue
+            </Button>
+          </div>
         </div>
+
+        <ProjectBoard project={project} />
+
+        {/* Issue Creation Modal */}
+        <Modal
+          isOpen={showIssueForm}
+          onClose={() => setShowIssueForm(false)}
+          title="Create New Issue"
+        >
+          <IssueForm
+            projectId={project.id}
+            onSuccess={() => setShowIssueForm(false)}
+            onCancel={() => setShowIssueForm(false)}
+          />
+        </Modal>
+
+        {/* Label Creation Modal */}
+        <Modal
+          isOpen={showLabelForm}
+          onClose={() => setShowLabelForm(false)}
+          title="Create New Label"
+        >
+          <LabelForm
+            projectId={project.id}
+            onSuccess={() => setShowLabelForm(false)}
+            onCancel={() => setShowLabelForm(false)}
+          />
+        </Modal>
+
+        {/* Column Creation Modal */}
+        <Modal isOpen={showColumnForm} onClose={() => setShowColumnForm(false)} title="Add Column">
+          <SimpleColumnForm
+            projectId={project.id}
+            onSuccess={() => setShowColumnForm(false)}
+            onCancel={() => setShowColumnForm(false)}
+          />
+        </Modal>
       </div>
-
-      <ProjectBoard project={project} />
-
-      {/* Issue Creation Modal */}
-      <Modal
-        isOpen={showIssueForm}
-        onClose={() => setShowIssueForm(false)}
-        title="Create New Issue"
-      >
-        <IssueForm
-          projectId={project.id}
-          onSuccess={() => setShowIssueForm(false)}
-          onCancel={() => setShowIssueForm(false)}
-        />
-      </Modal>
-
-      {/* Label Creation Modal */}
-      <Modal
-        isOpen={showLabelForm}
-        onClose={() => setShowLabelForm(false)}
-        title="Create New Label"
-      >
-        <LabelForm
-          projectId={project.id}
-          onSuccess={() => setShowLabelForm(false)}
-          onCancel={() => setShowLabelForm(false)}
-        />
-      </Modal>
-
-      {/* Column Creation Modal */}
-      <Modal isOpen={showColumnForm} onClose={() => setShowColumnForm(false)} title="Add Column">
-        <SimpleColumnForm
-          projectId={project.id}
-          onSuccess={() => setShowColumnForm(false)}
-          onCancel={() => setShowColumnForm(false)}
-        />
-      </Modal>
-    </div>
+    </Container>
   );
 });
 

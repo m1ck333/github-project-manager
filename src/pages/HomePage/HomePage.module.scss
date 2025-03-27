@@ -1,29 +1,22 @@
 @use "../../styles/variables" as *;
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+.content {
   text-align: center;
 
-  h1 {
-    margin-bottom: 1.5rem;
-    color: $primary-color;
-  }
-
   p {
-    font-size: 1.2rem;
+    font-size: $font-size-medium;
     line-height: 1.6;
+    margin-bottom: $spacing-lg;
   }
 }
 
 .actions {
-  margin-top: 2rem;
+  margin-top: $spacing-lg;
   display: flex;
   justify-content: center;
 
   button {
     min-width: 180px;
-    font-weight: 500;
+    font-weight: $font-weight-medium;
   }
 }

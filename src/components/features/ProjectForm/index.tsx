@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import Button from "../../ui/Button";
 import { useToast } from "../../../components/ui/Toast";
 import { ProjectFormData } from "../../../types";
-import styles from "./ProjectForm.module.scss";
+import styles from "../ProjectList/ProjectList.module.scss";
 import { projectStore } from "../../../store";
+import Input from "@/components/ui/Input";
 
 interface ProjectFormProps {
   onSuccess: () => void;
@@ -44,25 +45,23 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, onCancel }) => {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
-        <label htmlFor="name">Project Name</label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter project name"
-          disabled={isSubmitting}
-          required
-        />
-        {error && <div className={styles.error}>{error}</div>}
-      </div>
+      <Input
+        label="Project Name"
+        id="name"
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter project name"
+        disabled={isSubmitting}
+        required
+        error={error}
+      />
 
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" disabled={isSubmitting || !name.trim()}>
           {isSubmitting ? "Creating..." : "Create Project"}
         </Button>
       </div>

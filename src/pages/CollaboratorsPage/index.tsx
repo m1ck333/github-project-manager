@@ -6,6 +6,7 @@ import { Collaborator, CollaboratorRole, CollaboratorFormData } from "../../type
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
+import Container from "../../components/layout/Container";
 import { useToast } from "../../components/ui/Toast";
 import { FiArrowLeft, FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
 import styles from "./CollaboratorsPage.module.scss";
@@ -90,117 +91,132 @@ const CollaboratorsPage: React.FC = observer(() => {
   };
 
   if (isLoading) {
-    return <div className={styles.loading}>Loading collaborators...</div>;
+    return (
+      <Container size="large" withPadding title="Loading">
+        <div className={styles.loading}>Loading collaborators...</div>
+      </Container>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>{error}</div>;
+    return (
+      <Container size="large" withPadding title="Error">
+        <div className={styles.error}>{error}</div>
+      </Container>
+    );
   }
 
   const project = projectStore.selectedProject;
   if (!project) {
-    return <div className={styles.error}>Project not found</div>;
+    return (
+      <Container size="large" withPadding title="Not Found">
+        <div className={styles.error}>Project not found</div>
+      </Container>
+    );
   }
 
   return (
-    <div className={styles.collaboratorsPage}>
-      <div className={styles.header}>
-        <button className={styles.backButton} onClick={handleBack}>
-          <FiArrowLeft /> Back to Project
-        </button>
-        <h1>{project.name} - Collaborators</h1>
-        <div className={styles.actions}>
-          <Button variant="primary" onClick={() => setIsAddingCollaborator(true)}>
-            <FiPlus /> Add Collaborator
-          </Button>
-        </div>
-      </div>
-
-      <div className={styles.collaboratorsList}>
-        {collaborators.filter((c) => !c.isNote).length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiUsers size={48} />
-            <p>No collaborators yet. Add collaborators to work together on this project.</p>
+    <Container size="large" withPadding title={`${project.name} - Collaborators`}>
+      <div className={styles.pageContent}>
+        <div className={styles.header}>
+          <button className={styles.backButton} onClick={handleBack}>
+            <FiArrowLeft /> Back to Project
+          </button>
+          <div className={styles.actions}>
+            <Button variant="primary" onClick={() => setIsAddingCollaborator(true)}>
+              <FiPlus /> Add Collaborator
+            </Button>
           </div>
-        ) : (
-          collaborators.map((collaborator, index) => {
-            // Skip note items in the main list
-            if (collaborator.isNote) return null;
+        </div>
 
-            const collaboratorKey = `collaborator-${index}-${collaborator.id || ""}-${collaborator.username}`;
+        <div className={styles.collaboratorsList}>
+          {collaborators.filter((c) => !c.isNote).length === 0 ? (
+            <div className={styles.emptyState}>
+              <FiUsers size={48} />
+              <p>No collaborators yet. Add collaborators to work together on this project.</p>
+            </div>
+          ) : (
+            collaborators.map((collaborator, index) => {
+              // Skip note items in the main list
+              if (collaborator.isNote) return null;
 
-            return (
-              <div key={collaboratorKey} className={styles.collaboratorCard}>
-                <div className={styles.collaboratorAvatar}>
-                  {collaborator.isTeam ? (
-                    <div className={styles.teamIcon}>
-                      <FiUsers size={20} />
+              const collaboratorKey = `collaborator-${index}-${collaborator.id || ""}-${collaborator.username}`;
+
+              return (
+                <div key={collaboratorKey} className={styles.collaboratorCard}>
+                  <div className={styles.collaboratorAvatar}>
+                    {collaborator.isTeam ? (
+                      <div className={styles.teamIcon}>
+                        <FiUsers size={20} />
+                      </div>
+                    ) : (
+                      <img
+                        src={
+                          collaborator.avatar ||
+                          `https://avatars.githubusercontent.com/${collaborator.username}`
+                        }
+                        alt={collaborator.username}
+                      />
+                    )}
+                  </div>
+                  <div className={styles.collaboratorInfo}>
+                    <h3>
+                      {collaborator.username} {collaborator.isCurrentUser ? "(You)" : ""}
+                    </h3>
+                    <div className={styles.roleInfo}>
+                      <span className={styles.role}>{collaborator.role}</span>
+                      {collaborator.isOrganization && (
+                        <span className={styles.badge}>Organization</span>
+                      )}
+                      {collaborator.isTeam && <span className={styles.badge}>Team</span>}
                     </div>
-                  ) : (
-                    <img
-                      src={
-                        collaborator.avatar ||
-                        `https://avatars.githubusercontent.com/${collaborator.username}`
+                  </div>
+                  {!collaborator.isCurrentUser && (
+                    <Button
+                      variant="danger"
+                      size="small"
+                      iconOnly
+                      onClick={() =>
+                        handleRemoveCollaborator(collaborator.id, collaborator.username)
                       }
-                      alt={collaborator.username}
-                    />
+                      className={styles.removeButton}
+                    >
+                      <FiTrash2 />
+                    </Button>
                   )}
                 </div>
-                <div className={styles.collaboratorInfo}>
-                  <h3>
-                    {collaborator.username} {collaborator.isCurrentUser ? "(You)" : ""}
-                  </h3>
-                  <div className={styles.roleInfo}>
-                    <span className={styles.role}>{collaborator.role}</span>
-                    {collaborator.isOrganization && (
-                      <span className={styles.badge}>Organization</span>
-                    )}
-                    {collaborator.isTeam && <span className={styles.badge}>Team</span>}
-                  </div>
-                </div>
-                {!collaborator.isCurrentUser && (
-                  <Button
-                    variant="danger"
-                    size="small"
-                    iconOnly
-                    onClick={() => handleRemoveCollaborator(collaborator.id, collaborator.username)}
-                    className={styles.removeButton}
-                  >
-                    <FiTrash2 />
-                  </Button>
-                )}
+              );
+            })
+          )}
+        </div>
+
+        {/* Display notes about API limitations at the bottom */}
+        <div className={styles.notesSection}>
+          {collaborators
+            .filter((c) => c.isNote)
+            .map((note, index) => (
+              <div
+                key={`note-${index}`}
+                className={`${styles.noteCard} ${note.username.includes("GitHub API Limitations") ? styles.headerNote : ""}`}
+              >
+                <p>{note.username}</p>
               </div>
-            );
-          })
-        )}
-      </div>
+            ))}
+        </div>
 
-      {/* Display notes about API limitations at the bottom */}
-      <div className={styles.notesSection}>
-        {collaborators
-          .filter((c) => c.isNote)
-          .map((note, index) => (
-            <div
-              key={`note-${index}`}
-              className={`${styles.noteCard} ${note.username.includes("GitHub API Limitations") ? styles.headerNote : ""}`}
-            >
-              <p>{note.username}</p>
-            </div>
-          ))}
+        {/* Add Collaborator Modal */}
+        <Modal
+          isOpen={isAddingCollaborator}
+          onClose={() => setIsAddingCollaborator(false)}
+          title="Add Collaborator"
+        >
+          <AddCollaboratorForm
+            onSubmit={handleAddCollaborator}
+            onCancel={() => setIsAddingCollaborator(false)}
+          />
+        </Modal>
       </div>
-
-      {/* Add Collaborator Modal */}
-      <Modal
-        isOpen={isAddingCollaborator}
-        onClose={() => setIsAddingCollaborator(false)}
-        title="Add Collaborator"
-      >
-        <AddCollaboratorForm
-          onSubmit={handleAddCollaborator}
-          onCancel={() => setIsAddingCollaborator(false)}
-        />
-      </Modal>
-    </div>
+    </Container>
   );
 });
 
@@ -254,7 +270,6 @@ const AddCollaboratorForm: React.FC<{
           id="role"
           value={role}
           onChange={(e) => setRole(e.target.value as CollaboratorRole)}
-          className={styles.select}
         >
           <option value={CollaboratorRole.READ}>Read</option>
           <option value={CollaboratorRole.WRITE}>Write</option>

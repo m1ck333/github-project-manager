@@ -1,0 +1,43 @@
+@use "src/styles/variables.scss" as *;
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+// Size variants
+.small {
+  max-width: 800px;
+}
+
+.medium {
+  max-width: 1200px;
+}
+
+.large {
+  max-width: $breakpoint-xl;
+}
+
+// Optional styles
+.withPadding {
+  padding: $spacing-lg;
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-md;
+  }
+}
+
+.withBg {
+  background-color: $background-primary;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+}
+
+.title {
+  margin-bottom: $spacing-lg;
+  color: $primary-color;
+  text-align: center;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+}

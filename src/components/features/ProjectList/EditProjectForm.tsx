@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Project } from "../../../types";
+import { Project, ProjectFormData } from "../../../types";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
 import { projectStore } from "../../../store";
@@ -28,7 +28,11 @@ const EditProjectForm: React.FC<EditProjectFormProps> = observer(
 
       try {
         setIsUpdating(true);
-        await projectStore.updateProject(project.id, name);
+        const projectData: ProjectFormData = {
+          name,
+          description: project.description || "",
+        };
+        await projectStore.updateProject(project.id, projectData);
         showToast(`Project "${name}" updated successfully`, "success");
         onSuccess();
       } catch (error) {

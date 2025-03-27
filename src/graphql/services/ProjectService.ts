@@ -105,7 +105,6 @@ export class ProjectService {
     const input = {
       projectId: id,
       title: projectData.name,
-      description: projectData.description,
     };
 
     const { data, error } = await this.client

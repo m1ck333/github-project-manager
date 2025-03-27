@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import {
-  Project,
-  CollaboratorRole,
-  ColumnType,
-  ColumnFormData,
-  CollaboratorFormData,
-} from "../../../types";
+import { Project, ColumnType, ColumnFormData } from "../../../types";
 import Button from "../../ui/Button";
 import Input from "../../ui/Input";
 import Modal from "../../ui/Modal";
@@ -14,7 +8,15 @@ import ProjectForm from "../ProjectForm";
 import EditProjectForm from "./EditProjectForm";
 import { projectStore } from "../../../store";
 import { useToast } from "../../../components/ui/Toast";
-import { FiEdit, FiTrash2, FiPlus, FiLink, FiCalendar, FiArrowRight } from "react-icons/fi";
+import {
+  FiEdit,
+  FiTrash2,
+  FiPlus,
+  FiCalendar,
+  FiArrowRight,
+  FiColumns,
+  FiUsers,
+} from "react-icons/fi";
 import styles from "./ProjectList.module.scss";
 import ProjectBoard from "../ProjectBoard";
 import { useNavigate, Link } from "react-router-dom";
@@ -92,95 +94,6 @@ const AddColumnForm: React.FC<{
   );
 });
 
-// Add Collaborator Form component
-const AddCollaboratorForm: React.FC<{
-  projectId: string;
-  onSuccess: () => void;
-  onCancel: () => void;
-}> = observer(({ projectId, onSuccess, onCancel }) => {
-  const [username, setUsername] = useState("");
-  const [role, setRole] = useState<CollaboratorRole>(CollaboratorRole.READ);
-  const [errors, setErrors] = useState<{ username?: string; role?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showToast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    if (!username.trim()) {
-      setErrors({ username: "Username is required" });
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const collaboratorData: CollaboratorFormData = { username, role };
-      await projectStore.addCollaborator(projectId, collaboratorData);
-      showToast(`Collaborator ${username} added successfully`, "success");
-      onSuccess();
-    } catch (error) {
-      console.error("Error adding collaborator:", error);
-
-      if (error instanceof Error) {
-        // Handle different error types
-        const errorMessage = error.message;
-
-        if (errorMessage.includes("Could not resolve to a User")) {
-          setErrors({ username: `User '${username}' not found on GitHub` });
-          showToast(`User '${username}' not found on GitHub`, "error");
-        } else if (errorMessage.includes("NOT_AUTHORIZED")) {
-          setErrors({ username: "You are not authorized to add collaborators to this project" });
-          showToast("Not authorized to add collaborators", "error");
-        } else {
-          setErrors({ username: errorMessage });
-          showToast(`Failed to add collaborator: ${errorMessage}`, "error");
-        }
-      } else {
-        setErrors({ username: "Failed to add collaborator" });
-        showToast("Failed to add collaborator", "error");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <Input
-        label="GitHub Username"
-        value={username}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
-        error={errors.username}
-        required
-        placeholder="GitHub username"
-      />
-
-      <div className={styles.selectGroup}>
-        <label htmlFor="role">Role</label>
-        <select
-          id="role"
-          value={role}
-          onChange={(e) => setRole(e.target.value as CollaboratorRole)}
-        >
-          <option value={CollaboratorRole.READ}>Read</option>
-          <option value={CollaboratorRole.WRITE}>Write</option>
-          <option value={CollaboratorRole.ADMIN}>Admin</option>
-        </select>
-      </div>
-
-      <div className={styles.actions}>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button type="submit" variant="primary" disabled={isSubmitting || !username.trim()}>
-          {isSubmitting ? "Adding..." : "Add Collaborator"}
-        </Button>
-      </div>
-    </form>
-  );
-});
-
 const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -188,7 +101,6 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
   const [deleteProject, setDeleteProject] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [addColumnProject, setAddColumnProject] = useState<Project | null>(null);
-  const [addCollaboratorProject, setAddCollaboratorProject] = useState<Project | null>(null);
   const [viewBoardProject, setViewBoardProject] = useState<Project | null>(null);
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -207,10 +119,6 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
 
   const handleAddColumn = (project: Project) => {
     setAddColumnProject(project);
-  };
-
-  const handleAddCollaborator = (project: Project) => {
-    setAddCollaboratorProject(project);
   };
 
   const handleViewBoard = (project: Project) => {
@@ -284,10 +192,29 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
                 </div>
               </div>
 
+              <div className={styles.projectDescription}>
+                {project.description ? (
+                  <p>{project.description}</p>
+                ) : (
+                  <p className={styles.emptyDescription}>No description provided</p>
+                )}
+              </div>
+
+              <div className={styles.projectStats}>
+                <div className={styles.stat}>
+                  <FiColumns size={14} />
+                  <span>{project.columns?.length || 0} Columns</span>
+                </div>
+                <div className={styles.stat}>
+                  <FiUsers size={14} />
+                  <span>{project.collaborators?.length || 0} Collaborators</span>
+                </div>
+              </div>
+
               <div className={styles.projectExtraInfo}>
-                <span>
+                <span className={styles.projectExtraInfoDate}>
                   <FiCalendar size={14} />
-                  Created on {new Date(project.createdAt).toLocaleDateString()}
+                  <i>Created on {new Date(project.createdAt).toLocaleDateString()}</i>
                 </span>
                 <Link
                   to={`/projects/${project.id}`}
@@ -336,21 +263,6 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
             projectId={addColumnProject.id}
             onSuccess={() => setAddColumnProject(null)}
             onCancel={() => setAddColumnProject(null)}
-          />
-        </Modal>
-      )}
-
-      {/* Add Collaborator Modal */}
-      {addCollaboratorProject && (
-        <Modal
-          isOpen={!!addCollaboratorProject}
-          onClose={() => setAddCollaboratorProject(null)}
-          title="Add Collaborator"
-        >
-          <AddCollaboratorForm
-            projectId={addCollaboratorProject.id}
-            onSuccess={() => setAddCollaboratorProject(null)}
-            onCancel={() => setAddCollaboratorProject(null)}
           />
         </Modal>
       )}

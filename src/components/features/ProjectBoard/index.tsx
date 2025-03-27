@@ -4,10 +4,11 @@ import { Project, Issue } from "../../../types";
 import { projectStore } from "../../../store";
 import Button from "../../ui/Button";
 import Modal from "../../ui/Modal";
+import Tooltip from "../../ui/Tooltip";
 import IssueForm from "../IssueForm";
 import LabelForm from "../LabelForm";
 import { useToast } from "../../ui/Toast";
-import { FiPlus, FiTag, FiFileText } from "react-icons/fi";
+import { FiPlus, FiTag, FiFileText, FiHelpCircle } from "react-icons/fi";
 import styles from "./ProjectBoard.module.scss";
 
 interface ProjectBoardProps {
@@ -178,16 +179,16 @@ const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) => {
           ) : (
             <div className={styles.noBoardsMessage}>
               <p>
-                This project doesn't have any columns yet. Create columns to organize your work.
+                This project doesn't have any columns yet. Create columns to organize your work.{" "}
+                <Tooltip
+                  content="To add a column, click the 'Add Column' button in the project header. Columns help you organize your project tasks into different statuses."
+                  position="bottom"
+                >
+                  <span className={styles.helpIcon}>
+                    <FiHelpCircle size={16} />
+                  </span>
+                </Tooltip>
               </p>
-              <Button
-                variant="primary"
-                onClick={() =>
-                  showToast("Use the 'Add Column' button in the project details", "info")
-                }
-              >
-                Learn how to add columns
-              </Button>
             </div>
           )}
         </div>

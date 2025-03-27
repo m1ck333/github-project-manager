@@ -1,113 +1,109 @@
-.projectPage {
-  padding: 24px;
+@use "sass:color";
+@use "src/styles/variables.scss" as *;
+
+.pageContent {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: $spacing-lg;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 16px;
-
-  h1 {
-    margin: 0;
-    flex-grow: 1;
-    font-size: 28px;
-    color: #24292e;
-  }
+  gap: $spacing-md;
+  justify-content: space-between;
 }
 
 .backButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  color: #24292e;
-  font-size: 14px;
-  font-weight: 500;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background-color: $background-secondary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  color: $text-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: $transition-base;
 
   &:hover {
-    background-color: #eaecef;
+    background-color: color.adjust($background-secondary, $lightness: -3%);
   }
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .description {
-  background-color: #f6f8fa;
-  padding: 16px;
-  border-radius: 6px;
-  border: 1px solid #e1e4e8;
-  color: #586069;
-  font-size: 14px;
-  margin-bottom: 8px;
+  background-color: $background-secondary;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  font-size: $font-size-small;
+  margin-bottom: $spacing-sm;
 }
 
 .loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px;
-  font-size: 16px;
-  color: #586069;
+  padding: $spacing-xl $spacing-lg;
+  font-size: $font-size-base;
+  color: $text-secondary;
 }
 
 .error {
-  background-color: #ffebe9;
-  color: #d73a4a;
-  padding: 16px;
-  border-radius: 6px;
-  margin: 16px;
-  font-weight: 500;
+  background-color: rgba($danger-color, 0.1);
+  color: $danger-color;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  margin: $spacing-md;
+  font-weight: $font-weight-medium;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-md;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 
   label {
-    font-weight: 500;
-    color: #333;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
   }
 }
 
 .input,
 .select {
-  padding: 10px 12px;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  font-size: $font-size-small;
 
   &:focus {
     outline: none;
-    border-color: #0366d6;
-    box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.15);
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.15);
   }
 }
 
 .select {
-  background-color: #fff;
+  background-color: $background-primary;
   height: 38px;
 }
 
 .error {
-  color: #d73a4a;
-  font-size: 14px;
-  margin-top: 4px;
+  color: $danger-color;
+  font-size: $font-size-small;
+  margin-top: $spacing-xs;
 }

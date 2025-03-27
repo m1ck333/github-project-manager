@@ -1,68 +1,60 @@
-@use "../../styles/variables" as *;
+@use "sass:color";
+@use "src/styles/variables.scss" as *;
 
-.collaboratorsPage {
-  padding: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
+.pageContent {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: $spacing-lg;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 16px;
-
-  h1 {
-    margin: 0;
-    flex-grow: 1;
-    font-size: 24px;
-    color: $text-primary;
-  }
+  justify-content: space-between;
+  gap: $spacing-md;
 }
 
 .backButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background-color: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  color: #24292e;
-  font-size: 14px;
-  font-weight: 500;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background-color: $background-secondary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  color: $text-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: $transition-base;
 
   &:hover {
-    background-color: #eaecef;
+    background-color: color.adjust($background-secondary, $lightness: -3%);
   }
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .collaboratorsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: $spacing-md;
 }
 
 .collaboratorCard {
   display: flex;
   align-items: center;
-  padding: 16px;
-  border-radius: 8px;
-  background-color: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  transition: all 0.2s ease;
+  padding: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+  transition: $transition-base;
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: $shadow-sm;
     transform: translateY(-2px);
   }
 }
@@ -70,33 +62,37 @@
 .collaboratorAvatar {
   width: 50px;
   height: 50px;
-  margin-right: 16px;
   border-radius: 50%;
   overflow: hidden;
+  margin-right: $spacing-md;
+  background-color: color.adjust($background-secondary, $lightness: -5%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
+}
 
-  .teamIcon {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e8eaf6;
-    color: #3f51b5;
-  }
+.teamIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  background-color: color.adjust($background-secondary, $lightness: -10%);
+  width: 100%;
+  height: 100%;
 }
 
 .collaboratorInfo {
   flex: 1;
 
   h3 {
-    margin: 0 0 8px;
-    font-size: 16px;
+    margin: 0 0 $spacing-xs;
+    font-size: $font-size-medium;
     color: $text-primary;
   }
 }
@@ -104,112 +100,124 @@
 .roleInfo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: $spacing-xs;
 }
 
 .role {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 2px $spacing-sm;
   background-color: $primary-color;
-  color: white;
-  font-size: 12px;
-  font-weight: 500;
+  color: $white;
+  border-radius: 12px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
 }
 
 .badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  background-color: #f1f8ff;
-  color: #0366d6;
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid #c8e1ff;
+  padding: 2px $spacing-xs;
+  background-color: $secondary-color;
+  color: $white;
+  border-radius: 4px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
 }
 
 .removeButton {
-  margin-left: 16px;
+  margin-left: $spacing-sm;
 }
 
 .emptyState {
-  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  color: $text-tertiary;
   text-align: center;
-  color: $text-secondary;
-
-  svg {
-    color: #e1e4e8;
-    margin-bottom: 16px;
-  }
+  gap: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  border: 1px dashed $border-color;
 
   p {
-    font-size: 16px;
     margin: 0;
+    font-size: $font-size-medium;
   }
 }
 
 .notesSection {
-  margin-top: 24px;
+  margin-top: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
 
-  .noteCard {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    font-size: 14px;
+.noteCard {
+  padding: $spacing-md;
+  background-color: rgba($primary-color, 0.05);
+  border-left: 3px solid $primary-color;
+  border-radius: $border-radius-sm;
+  color: $text-secondary;
 
-    &.headerNote {
-      background-color: #f1f8ff;
-      border-left: 4px solid #0366d6;
+  p {
+    margin: 0;
+    font-size: $font-size-small;
+    line-height: 1.5;
+  }
 
-      p {
-        font-weight: 600;
-        margin: 0;
-        color: #0366d6;
-      }
-    }
+  &.headerNote {
+    background-color: rgba($secondary-color, 0.05);
+    border-left: 3px solid $secondary-color;
 
     p {
-      margin: 0;
-      color: $text-secondary;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
     }
   }
 }
 
-.loading,
-.error {
+.loading {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 200px;
-  font-size: 16px;
+  justify-content: center;
+  padding: $spacing-xl;
+  font-size: $font-size-base;
+  color: $text-secondary;
 }
 
 .error {
+  background-color: rgba($danger-color, 0.1);
   color: $danger-color;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  margin: $spacing-md;
+  font-weight: $font-weight-medium;
 }
 
 .form {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-md;
 }
 
 .selectGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-xs;
 
   label {
-    font-weight: 500;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
     color: $text-primary;
   }
 
-  .select {
-    padding: 10px 12px;
-    border: 1px solid #e1e4e8;
-    border-radius: 6px;
-    font-size: 14px;
+  select {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    background-color: $background-primary;
+    color: $text-primary;
 
     &:focus {
       outline: none;
@@ -221,6 +229,6 @@
 .formActions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
 }

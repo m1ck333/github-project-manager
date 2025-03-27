@@ -12,12 +12,14 @@
   border: 1px solid $border-color;
   border-radius: $border-radius-md;
   padding: 1.25rem;
-  margin-bottom: 1rem;
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: 280px;
 
   &:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -60,7 +62,7 @@
   justify-content: center;
   cursor: pointer;
   transition: $transition-base;
-  height: 250px;
+  height: 280px;
 
   &:hover {
     border-color: $primary-color;
@@ -128,20 +130,60 @@
   color: $danger-color;
 }
 
+.projectDescription {
+  flex: 1;
+  overflow: hidden;
+  margin: $spacing-md 0;
+
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: $font-size-small;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .emptyDescription {
+    color: $text-tertiary;
+    font-style: italic;
+  }
+}
+
+.projectStats {
+  display: flex;
+  justify-content: space-between;
+  margin: $spacing-sm 0;
+
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    color: $text-secondary;
+    font-size: $font-size-small;
+
+    span {
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
 .projectExtraInfo {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.875rem;
   color: $text-secondary;
-  margin-top: 0.75rem;
+  margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid rgba($border-color, 0.5);
 
-  span {
+  .projectExtraInfoDate {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 }
 
@@ -155,28 +197,6 @@
 
   &:hover {
     text-decoration: underline;
-  }
-}
-
-.projectDescription {
-  flex: 1;
-  overflow: hidden;
-  margin: $spacing-md 0;
-
-  p {
-    margin: 0;
-    color: $text-secondary;
-    font-size: $font-size-small;
-    line-height: 1.5;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-  }
-
-  .emptyDescription {
-    color: $text-tertiary;
-    font-style: italic;
   }
 }
 
@@ -444,7 +464,7 @@
       background-color: #fffde7;
       border-left: 4px solid #ffb300;
       font-style: italic;
-      grid-column: 1 / -1; // Span all columns
+      grid-column: 1 / -1;
 
       .noteText {
         margin: 0;
@@ -457,7 +477,7 @@
     &.headerNote {
       background-color: #e3f2fd;
       border-left: 4px solid #2196f3;
-      grid-column: 1 / -1; // Span all columns
+      grid-column: 1 / -1;
 
       .noteHeader {
         margin: 0;
@@ -541,27 +561,9 @@
   }
 }
 
-.projectStats {
+.actions {
   display: flex;
-  gap: $spacing-md;
-  margin: $spacing-md 0;
-  padding: $spacing-sm 0;
-  border-top: 1px solid $border-color;
-  border-bottom: 1px solid $border-color;
-}
-
-.statItem {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
-  color: $text-secondary;
-  font-size: $font-size-small;
-
-  svg {
-    color: $primary-color;
-  }
-
-  span {
-    font-weight: $font-weight-medium;
-  }
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
 }

@@ -1,5 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { ColumnFormData, Project, ProjectFormData } from "../types";
+import {
+  ColumnFormData,
+  Project,
+  ProjectFormData,
+  CollaboratorFormData,
+  Collaborator,
+} from "../types";
 import { projectService, columnService, issueService } from "../graphql/services";
 
 export class ProjectStore {
@@ -366,6 +372,83 @@ export class ProjectStore {
       });
 
       return issue;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  async addCollaborator(projectId: string, collaboratorData: CollaboratorFormData) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const project = this.projects.find((p) => p.id === projectId);
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      // This would typically call a service method to add the collaborator via API
+      // For demonstration purposes, we'll create a mock collaborator
+      const mockCollaborator: Collaborator = {
+        id: `temp-${Date.now()}`,
+        username: collaboratorData.username,
+        avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
+        role: collaboratorData.role,
+      };
+
+      // Update the UI optimistically
+      runInAction(() => {
+        if (!project.collaborators) {
+          project.collaborators = [];
+        }
+        project.collaborators.push(mockCollaborator);
+        this.loading = false;
+      });
+
+      console.warn(
+        `Collaborator addition not implemented in the API. Added ${collaboratorData.username} to UI only.`
+      );
+
+      return mockCollaborator;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  async removeCollaborator(projectId: string, collaboratorId: string) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const project = this.projects.find((p) => p.id === projectId);
+      if (!project || !project.collaborators) {
+        throw new Error("Project or collaborators not found");
+      }
+
+      // This would typically call a service method to remove the collaborator via API
+      // For demonstration purposes, we'll just update the UI
+
+      // Update the UI optimistically
+      runInAction(() => {
+        project.collaborators = project.collaborators!.filter(
+          (collaborator) => collaborator.id !== collaboratorId
+        );
+        this.loading = false;
+      });
+
+      console.warn(
+        `Collaborator removal not implemented in the API. Removed collaborator ${collaboratorId} from UI only.`
+      );
+
+      return true;
     } catch (error) {
       runInAction(() => {
         this.error = (error as Error).message;
