@@ -1,0 +1,12 @@
+# Import the project fields fragment
+#import "../fragments/projectFields.graphql"
+
+# Query to get a project by its ID
+query GetProject($id: ID!) {
+  node(id: $id) {
+    __typename
+    ... on ProjectV2 {
+      ...ProjectFields
+    }
+  }
+}

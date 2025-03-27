@@ -1,0 +1,11 @@
+# Auto-generated files
+src/types/github-schema.ts
+src/graphql/generated/**/*
+
+# Build output
+dist/
+build/
+.next/
+
+# Node modules
+node_modules/ 

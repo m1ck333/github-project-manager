@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useToast } from "../../../components/ui/Toast";
-import { projectStore } from "../../../store";
 import Button from "../../ui/Button";
-import Input from "../../ui/Input";
+import { useToast } from "../../../components/ui/Toast";
+import { ProjectFormData } from "../../../types";
 import styles from "./ProjectForm.module.scss";
+import { projectStore } from "../../../store";
 
 interface ProjectFormProps {
   onSuccess: () => void;
@@ -12,45 +12,58 @@ interface ProjectFormProps {
 
 const ProjectForm: React.FC<ProjectFormProps> = ({ onSuccess, onCancel }) => {
   const [name, setName] = useState("");
-  const [errors, setErrors] = useState<{ name?: string }>({});
-  const [_isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
+    setError("");
+
+    if (!name.trim()) {
+      setError("Project name is required");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await projectStore.createProject(name);
+      // Create project with just a name
+      const projectData: ProjectFormData = { name, description: "" };
+      await projectStore.createProject(projectData);
       showToast("Project created successfully", "success");
       onSuccess();
-    } catch (error) {
-      showToast("Failed to create project", "error");
-      if (error instanceof Error) {
-        setErrors({ name: error.message });
-      }
+    } catch (err) {
+      const errorMessage = (err as Error).message || "Failed to create project";
+      setError(errorMessage);
+      showToast(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <Input
-        label="Project Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        error={errors.name}
-        required
-      />
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <div className={styles.formGroup}>
+        <label htmlFor="name">Project Name</label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter project name"
+          disabled={isSubmitting}
+          required
+        />
+        {error && <div className={styles.error}>{error}</div>}
+      </div>
 
       <div className={styles.actions}>
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={_isSubmitting}>
-          Create Project
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting ? "Creating..." : "Create Project"}
         </Button>
       </div>
     </form>

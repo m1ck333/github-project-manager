@@ -1,0 +1,12 @@
+#import "../fragments/labelFields.graphql"
+
+query GetLabels($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    id
+    labels(first: 30) {
+      nodes {
+        ...LabelFields
+      }
+    }
+  }
+}

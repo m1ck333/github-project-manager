@@ -4,7 +4,7 @@ import ProjectList from "../../components/features/ProjectList";
 import Loading from "../../components/ui/Loading";
 import Error from "../../components/ui/Error";
 import { projectStore } from "../../store";
-import styles from "./Projects.module.scss";
+import styles from "./ProjectsPage.module.scss";
 
 const Projects: React.FC = observer(() => {
   const { projects, loading, error } = projectStore;

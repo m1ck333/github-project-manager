@@ -1,0 +1,16 @@
+schema:
+  - https://api.github.com/graphql:
+      headers:
+        Authorization: Bearer ${VITE_GITHUB_TOKEN}
+        User-Agent: GitHub-Project-Manager-App
+documents:
+  - src/**/*.tsx
+  - src/**/*.ts
+  - src/services/github.service.ts
+extensions:
+  endpoints:
+    default:
+      url: https://api.github.com/graphql
+      headers:
+        Authorization: Bearer ${VITE_GITHUB_TOKEN}
+        User-Agent: GitHub-Project-Manager-App

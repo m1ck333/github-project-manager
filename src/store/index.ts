@@ -1,6 +1,9 @@
 import { ProjectStore } from "./ProjectStore";
-import { GitHubService } from "../services/github.service";
 
-// Create the stores
-const gitHubService = new GitHubService();
-export const projectStore = new ProjectStore(gitHubService);
+// Create the store instance
+export const projectStore = new ProjectStore();
+
+// Export the store
+export default {
+  projectStore,
+};

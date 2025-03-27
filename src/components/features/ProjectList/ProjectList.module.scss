@@ -8,20 +8,44 @@
 }
 
 .projectCard {
+  background-color: $background-primary;
   border: 1px solid $border-color;
   border-radius: $border-radius-md;
-  padding: $spacing-lg;
-  background-color: $background-primary;
-  box-shadow: $shadow-sm;
-  transition: $transition-base;
-  display: flex;
-  flex-direction: column;
-  height: 250px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    box-shadow: $shadow-md;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba($primary-color, 0.3);
     transform: translateY(-2px);
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background-color: rgba($primary-color, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230366d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'%3E%3C/path%3E%3Cpolyline points='15 3 21 3 21 9'%3E%3C/polyline%3E%3Cline x1='10' y1='14' x2='21' y2='3'%3E%3C/line%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover:after {
+    opacity: 1;
   }
 }
 
@@ -67,53 +91,93 @@
 .projectHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: $spacing-md;
-
-  h3 {
-    cursor: pointer;
-    margin: 0;
-    font-size: $font-size-large;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    &:hover {
-      color: $primary-color;
-    }
-  }
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-.actions {
-  display: flex;
-  white-space: nowrap;
-  margin-left: $spacing-sm;
-  gap: $spacing-xs;
+.projectTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: $text-primary;
 }
 
 .projectActions {
   display: flex;
-  gap: $spacing-xs;
-  margin-top: auto;
-  margin-bottom: $spacing-md;
+  gap: 0.5rem;
 }
 
-.actionButton {
-  min-width: 70px;
-}
-
-.description {
-  margin-bottom: $spacing-sm;
+.editButton,
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: $text-secondary;
-  font-size: $font-size-base;
-  flex-grow: 1;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.deleteButton:hover {
+  color: $danger-color;
+}
+
+.projectExtraInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: $text-secondary;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba($border-color, 0.5);
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: $primary-color;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.projectDescription {
+  flex: 1;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
+  margin: $spacing-md 0;
+
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: $font-size-small;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+  }
+
+  .emptyDescription {
+    color: $text-tertiary;
+    font-style: italic;
+  }
 }
 
 .boardsCount {
@@ -177,23 +241,90 @@
 .collaboratorCard {
   display: flex;
   align-items: center;
-  padding: $spacing-sm;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
-  background-color: $background-secondary;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f6f8fa;
+  margin-bottom: 10px;
+
+  &.noteCard {
+    background-color: #fffde7;
+    border-left: 3px solid #ffb300;
+    font-style: italic;
+
+    .noteText {
+      margin: 0;
+      color: #666;
+      font-size: 0.9em;
+      line-height: 1.4;
+    }
+  }
+
+  &.headerNote {
+    background-color: #e3f2fd;
+    border-left: 3px solid #2196f3;
+
+    .noteHeader {
+      margin: 0;
+      font-weight: bold;
+      color: #0d47a1;
+    }
+  }
+
+  &.orgCard {
+    background-color: #e1f5fe;
+    border-left: 4px solid #03a9f4;
+
+    .collaboratorInfo {
+      .role {
+        background-color: #03a9f4;
+      }
+    }
+  }
+
+  &.teamCard {
+    background-color: #e8eaf6;
+    border-left: 4px solid #3f51b5;
+
+    .collaboratorInfo {
+      .role {
+        background-color: #3f51b5;
+      }
+    }
+  }
+
+  &.currentUser {
+    background-color: #e8f5e9;
+    border-left: 3px solid #4caf50;
+
+    .collaboratorInfo {
+      .role {
+        background-color: #4caf50;
+      }
+    }
+  }
 }
 
 .collaboratorAvatar {
-  width: 32px;
-  height: 32px;
+  width: 50px;
+  height: 50px;
+  margin-right: 16px;
   border-radius: 50%;
   overflow: hidden;
-  margin-right: $spacing-sm;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .teamIcon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e8eaf6;
+    color: #3f51b5;
   }
 }
 
@@ -246,6 +377,19 @@
   gap: $spacing-md;
 }
 
+.infoNote {
+  background-color: rgba($primary-color, 0.1);
+  border-left: 3px solid $primary-color;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-small;
+  margin-bottom: $spacing-md;
+  border-radius: $border-radius-sm;
+
+  p {
+    margin: 0;
+  }
+}
+
 .selectGroup {
   display: flex;
   flex-direction: column;
@@ -269,5 +413,155 @@
       outline: none;
       border-color: $primary-color;
     }
+  }
+}
+
+.collaboratorsModalContent {
+  max-width: 800px;
+  margin: 0 auto;
+
+  .collaboratorsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .collaboratorModalCard {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: #f6f8fa;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.noteCard {
+      background-color: #fffde7;
+      border-left: 4px solid #ffb300;
+      font-style: italic;
+      grid-column: 1 / -1; // Span all columns
+
+      .noteText {
+        margin: 0;
+        color: #666;
+        font-size: 0.95em;
+        line-height: 1.5;
+      }
+    }
+
+    &.headerNote {
+      background-color: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      grid-column: 1 / -1; // Span all columns
+
+      .noteHeader {
+        margin: 0;
+        font-weight: bold;
+        color: #0d47a1;
+        font-size: 1.1em;
+      }
+    }
+
+    &.orgCard {
+      background-color: #e1f5fe;
+      border-left: 4px solid #03a9f4;
+
+      .collaboratorInfo {
+        .role {
+          background-color: #03a9f4;
+        }
+      }
+    }
+
+    &.teamCard {
+      background-color: #e8eaf6;
+      border-left: 4px solid #3f51b5;
+
+      .collaboratorInfo {
+        .role {
+          background-color: #3f51b5;
+        }
+      }
+    }
+
+    &.currentUser {
+      background-color: #e8f5e9;
+      border-left: 4px solid #4caf50;
+
+      .collaboratorInfo {
+        .role {
+          background-color: #4caf50;
+        }
+      }
+    }
+
+    .collaboratorAvatar {
+      width: 50px;
+      height: 50px;
+      margin-right: 16px;
+      border-radius: 50%;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .collaboratorInfo {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 4px;
+        font-size: 1.1em;
+      }
+
+      .role {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        background-color: #6c757d;
+        color: white;
+        font-size: 0.8em;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .modalActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+}
+
+.projectStats {
+  display: flex;
+  gap: $spacing-md;
+  margin: $spacing-md 0;
+  padding: $spacing-sm 0;
+  border-top: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $text-secondary;
+  font-size: $font-size-small;
+
+  svg {
+    color: $primary-color;
+  }
+
+  span {
+    font-weight: $font-weight-medium;
   }
 }

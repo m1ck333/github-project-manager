@@ -6,9 +6,10 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
+  size?: "small" | "medium" | "large";
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, size = "medium" }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,9 +51,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
 
   if (!isOpen) return null;
 
+  // Apply size-specific classes
+  const sizeClass = {
+    small: styles.modalSmall,
+    medium: styles.modalMedium,
+    large: styles.modalLarge,
+  }[size];
+
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent} ref={modalRef}>
+      <div className={`${styles.modalContent} ${sizeClass}`} ref={modalRef}>
         <div className={styles.modalHeader}>
           {title && <h2 className={styles.modalTitle}>{title}</h2>}
           <button className={styles.closeButton} onClick={onClose}>

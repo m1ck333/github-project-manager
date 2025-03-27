@@ -1,0 +1,8 @@
+# Query to get the current viewer's information
+query GetViewer {
+  viewer {
+    id
+    login
+    avatarUrl
+  }
+}

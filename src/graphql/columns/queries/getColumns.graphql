@@ -1,0 +1,18 @@
+#import "../fragments/columnFields.graphql"
+
+query GetColumns($projectId: ID!) {
+  node(id: $projectId) {
+    __typename
+    ... on ProjectV2 {
+      id
+      fields(first: 20) {
+        nodes {
+          __typename
+          ... on ProjectV2SingleSelectField {
+            ...ColumnFields
+          }
+        }
+      }
+    }
+  }
+}

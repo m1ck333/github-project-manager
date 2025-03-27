@@ -1,50 +1,62 @@
 export interface Project {
   id: string;
   name: string;
-  description: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    login: string;
+    avatarUrl: string;
+  };
+  url: string;
   html_url: string;
   owner: {
     login: string;
     avatar_url: string;
   };
-  boards?: Board[];
+  columns?: Column[];
   collaborators?: Collaborator[];
 }
 
-export enum BoardType {
-  TODO = "Todo",
-  IN_PROGRESS = "In Progress",
-  DONE = "Done",
-  BACKLOG = "Backlog",
+export enum ColumnType {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+  BACKLOG = "BACKLOG",
 }
 
-export interface Board {
+export interface Column {
   id: string;
   name: string;
-  type: BoardType;
-  issues?: Issue[];
+  type: ColumnType;
 }
 
 export enum CollaboratorRole {
-  ADMIN = "Admin",
-  WRITE = "Write",
-  READ = "Read",
+  READ = "READ",
+  WRITE = "WRITE",
+  ADMIN = "ADMIN",
 }
 
 export interface Collaborator {
   id: string;
   username: string;
-  avatar?: string;
+  avatar: string;
   role: CollaboratorRole;
+  isOrganization?: boolean;
+  isNote?: boolean;
+  isCurrentUser?: boolean;
+  isTeam?: boolean;
 }
 
 export interface Issue {
-  id: number;
+  id: string;
   title: string;
-  description?: string;
-  labels?: string[];
-  assignee?: string;
-  status: BoardType;
+  body?: string;
+  statusId?: string;
+  labels?: Label[];
+  number?: number;
+  isDraft?: boolean;
+  projectItemId?: string;
 }
 
 export interface ProjectFormData {
@@ -52,12 +64,27 @@ export interface ProjectFormData {
   description: string;
 }
 
-export interface BoardFormData {
+export interface ColumnFormData {
   name: string;
-  type: BoardType;
+  type: ColumnType;
 }
 
 export interface CollaboratorFormData {
   username: string;
   role: CollaboratorRole;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+  description?: string;
+}
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  type: "ISSUE" | "PULL_REQUEST" | "DRAFT_ISSUE";
+  content?: Issue;
+  columnId?: string;
 }

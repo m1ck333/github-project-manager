@@ -1,0 +1,19 @@
+fragment ProjectFields on ProjectV2 {
+  id
+  title
+  shortDescription
+  url
+  createdAt
+  updatedAt
+  owner {
+    __typename
+    ... on User {
+      login
+      avatarUrl
+    }
+    ... on Organization {
+      login
+      avatarUrl
+    }
+  }
+}

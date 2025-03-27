@@ -1,0 +1,48 @@
+schema:
+  - https://api.github.com/graphql:
+      headers:
+        Authorization: "Bearer ${GITHUB_TOKEN}"
+        User-Agent: "GitHub-Project-Manager-App"
+
+documents: "./src/graphql/**/*.graphql"
+
+config:
+  skipTypename: false
+  withHooks: true
+  withHOC: false
+  withComponent: false
+  scalars:
+    DateTime: string
+    GitObjectID: string
+    URI: string
+
+generates:
+  src/types/github-schema.ts:
+    plugins:
+      - typescript
+    config:
+      enumsAsTypes: true
+      futureProofEnums: true
+
+  src/graphql/generated/:
+    preset: client
+    presetConfig:
+      gqlTagName: "gql"
+      fragmentMasking:
+        unmaskFunctionName: "getFragmentData"
+    config:
+      dedupeFragments: true
+      dedupeOperations: true
+      inlineFragmentTypes: "combine"
+      exportFragmentSpreadSubTypes: true
+      skipTypename: false
+      withHooks: true
+      withHOC: false
+      withComponent: false
+      urqlImportFrom: "@urql/core"
+      futureProofEnums: true
+      documentMode: "documentNode"
+
+hooks:
+  afterOneFileWrite:
+    - prettier --write

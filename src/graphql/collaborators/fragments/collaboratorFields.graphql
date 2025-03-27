@@ -1,0 +1,6 @@
+fragment CollaboratorFields on User {
+  id
+  login
+  avatarUrl
+  name
+}

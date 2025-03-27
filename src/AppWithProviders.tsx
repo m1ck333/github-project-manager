@@ -1,6 +1,6 @@
 import React from "react";
 import { Provider } from "urql";
-import { client } from "./api/client";
+import { client } from "./graphql/client";
 import App from "./App";
 import { ToastProvider } from "./components/ui/Toast";
 

@@ -16,3 +16,14 @@
     line-height: 1.6;
   }
 }
+
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+
+  button {
+    min-width: 180px;
+    font-weight: 500;
+  }
+}

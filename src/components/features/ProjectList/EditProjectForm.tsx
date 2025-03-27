@@ -16,7 +16,6 @@ interface EditProjectFormProps {
 const EditProjectForm: React.FC<EditProjectFormProps> = observer(
   ({ project, onSuccess, onCancel }) => {
     const [name, setName] = useState(project.name);
-    const [_description, _setDescription] = useState(project.description || "");
     const [errors, setErrors] = useState<{
       name?: string;
     }>({});
@@ -29,7 +28,7 @@ const EditProjectForm: React.FC<EditProjectFormProps> = observer(
 
       try {
         setIsUpdating(true);
-        await projectStore.updateProject(project.id, name, project.description);
+        await projectStore.updateProject(project.id, name);
         showToast(`Project "${name}" updated successfully`, "success");
         onSuccess();
       } catch (error) {

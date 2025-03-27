@@ -1,0 +1,5 @@
+mutation UpdateProjectCollaborators($projectId: ID!, $collaborators: [ProjectV2Collaborator!]!) {
+  updateProjectV2Collaborators(input: { projectId: $projectId, collaborators: $collaborators }) {
+    clientMutationId
+  }
+}

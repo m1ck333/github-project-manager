@@ -1,0 +1,226 @@
+@use "../../styles/variables" as *;
+
+.collaboratorsPage {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h1 {
+    margin: 0;
+    flex-grow: 1;
+    font-size: 24px;
+    color: $text-primary;
+  }
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  color: #24292e;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #eaecef;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.collaboratorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.collaboratorCard {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+}
+
+.collaboratorAvatar {
+  width: 50px;
+  height: 50px;
+  margin-right: 16px;
+  border-radius: 50%;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .teamIcon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e8eaf6;
+    color: #3f51b5;
+  }
+}
+
+.collaboratorInfo {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: $text-primary;
+  }
+}
+
+.roleInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background-color: $primary-color;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background-color: #f1f8ff;
+  color: #0366d6;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #c8e1ff;
+}
+
+.removeButton {
+  margin-left: 16px;
+}
+
+.emptyState {
+  padding: 48px 0;
+  text-align: center;
+  color: $text-secondary;
+
+  svg {
+    color: #e1e4e8;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.notesSection {
+  margin-top: 24px;
+
+  .noteCard {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+
+    &.headerNote {
+      background-color: #f1f8ff;
+      border-left: 4px solid #0366d6;
+
+      p {
+        font-weight: 600;
+        margin: 0;
+        color: #0366d6;
+      }
+    }
+
+    p {
+      margin: 0;
+      color: $text-secondary;
+    }
+  }
+}
+
+.loading,
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 16px;
+}
+
+.error {
+  color: $danger-color;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-weight: 500;
+    color: $text-primary;
+  }
+
+  .select {
+    padding: 10px 12px;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    font-size: 14px;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}

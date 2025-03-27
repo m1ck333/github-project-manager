@@ -1,0 +1,11 @@
+# Import the project fields fragment
+#import "../fragments/projectFields.graphql"
+
+# Mutation to create a new project
+mutation CreateProject($input: CreateProjectV2Input!) {
+  createProjectV2(input: $input) {
+    projectV2 {
+      ...ProjectFields
+    }
+  }
+}

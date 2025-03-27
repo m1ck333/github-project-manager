@@ -1,0 +1,11 @@
+# Import the project fields fragment
+#import "../fragments/projectFields.graphql"
+
+# Mutation to update an existing project
+mutation UpdateProject($input: UpdateProjectV2Input!) {
+  updateProjectV2(input: $input) {
+    projectV2 {
+      ...ProjectFields
+    }
+  }
+}
