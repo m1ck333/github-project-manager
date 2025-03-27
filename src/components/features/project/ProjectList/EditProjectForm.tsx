@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Project, ProjectFormData } from "../../../types";
-import Button from "../../ui/Button";
-import Input from "../../ui/Input";
-import { projectStore } from "../../../store";
-import { useToast } from "../../../components/ui/Toast";
+import { Project, ProjectFormData } from "../../../../types";
+import Button from "../../../ui/Button";
+import Input from "../../../ui/Input";
+import { projectStore } from "../../../../store";
+import { useToast } from "../../../ui/Toast";
 import styles from "./ProjectList.module.scss";
 
 interface EditProjectFormProps {

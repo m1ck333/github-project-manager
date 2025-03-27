@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import { projectStore } from "../../store";
-import ProjectBoard from "../../components/features/ProjectBoard";
+import ProjectBoard from "../../components/features/project/ProjectBoard";
+import ProjectRepositories from "../../components/features/project/ProjectRepositories";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import Container from "../../components/layout/Container";
-import IssueForm from "../../components/features/IssueForm";
-import LabelForm from "../../components/features/LabelForm";
-import { FiArrowLeft, FiPlus, FiTag, FiColumns, FiUsers } from "react-icons/fi";
+import IssueForm from "../../components/features/issue/IssueForm";
+import LabelForm from "../../components/features/label/LabelForm";
+import { FiArrowLeft, FiPlus, FiTag, FiColumns, FiUsers, FiGithub } from "react-icons/fi";
 import styles from "./ProjectPage.module.scss";
 import { ColumnType } from "../../types";
 
@@ -27,6 +28,7 @@ const ProjectPage: React.FC = observer(() => {
 
       try {
         setIsLoading(true);
+        document.title = "Loading Project | Project Manager";
         // If the project isn't in the store already, fetch it
         if (!projectStore.projects.find((p) => p.id === projectId)) {
           await projectStore.fetchProjects();
@@ -34,9 +36,16 @@ const ProjectPage: React.FC = observer(() => {
 
         // Select the project
         projectStore.selectProject(projectId);
+
+        // Update title with project name
+        if (projectStore.selectedProject) {
+          document.title = `${projectStore.selectedProject.name} | Project Manager`;
+        }
+
         setIsLoading(false);
       } catch (err) {
         setError((err as Error).message || "Failed to load project");
+        document.title = "Error | Project Manager";
         setIsLoading(false);
       }
     };
@@ -105,6 +114,9 @@ const ProjectPage: React.FC = observer(() => {
         </div>
 
         <ProjectBoard project={project} />
+
+        {/* Project Repositories Section */}
+        <ProjectRepositories projectId={project.id} />
 
         {/* Issue Creation Modal */}
         <Modal

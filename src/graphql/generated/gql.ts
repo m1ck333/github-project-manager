@@ -51,6 +51,16 @@ const documents = {
     types.GetProjectsDocument,
   "query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}":
     types.GetViewerDocument,
+  "query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}":
+    types.GetUserRepositoriesDocument,
+  "fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}":
+    types.RepositoryFieldsFragmentDoc,
+  "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}":
+    types.GetRepositoryDocument,
+  "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}":
+    types.GetRepoCollaboratorsDocument,
+  "query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}":
+    types.GetUserDocument,
 };
 
 /**
@@ -181,6 +191,36 @@ export function gql(
 export function gql(
   source: "query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}"
 ): (typeof documents)["query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}"
+): (typeof documents)["fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}"
+): (typeof documents)["query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}"
+): (typeof documents)["query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

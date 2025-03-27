@@ -1,10 +1,59 @@
-$primary-color: #2ea44f;
-$secondary-color: #6e7681;
-$danger-color: #d73a49;
-$text-primary: #24292e;
-$text-secondary: #6e7681;
-$text-tertiary: #8b949e;
-$background-primary: #ffffff;
-$background-secondary: #f6f8fa;
-$border-color: #e1e4e8;
+$primary-50: #e6f7ef;
+$primary-100: #c3ebd5;
+$primary-200: #9fdfbc;
+$primary-300: #7bd3a2;
+$primary-400: #58c689;
+$primary-500: #2ea44f;
+$primary-600: #248a40;
+$primary-700: #1a7032;
+$primary-800: #115723;
+$primary-900: #083d15;
+
+$primary-color: $primary-500;
+
 $white: #ffffff;
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+$black: #000000;
+
+$secondary-color: $gray-600;
+
+$error-50: #fef2f2;
+$error-100: #fee2e2;
+$error-500: #ef4444;
+$error-600: #dc2626;
+$error-700: #b91c1c;
+
+$danger-color: $error-600;
+
+$success-50: #ecfdf5;
+$success-100: #d1fae5;
+$success-500: #10b981;
+$success-600: #059669;
+$success-700: #047857;
+
+$warning-50: #fffbeb;
+$warning-100: #fef3c7;
+$warning-500: #f59e0b;
+$warning-600: #d97706;
+$warning-700: #b45309;
+
+$text-primary: $gray-900;
+$text-secondary: $gray-600;
+$text-tertiary: $gray-500;
+$text-disabled: $gray-400;
+
+$background-primary: $white;
+$background-secondary: $gray-50;
+$background-tertiary: $gray-100;
+
+$border-color: $gray-200;
+$border-color-focus: $primary-400;

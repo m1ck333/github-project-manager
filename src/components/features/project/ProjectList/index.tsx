@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Project, ColumnType, ColumnFormData } from "../../../types";
-import Button from "../../ui/Button";
-import Input from "../../ui/Input";
-import Modal from "../../ui/Modal";
+import { Project, ColumnType, ColumnFormData } from "../../../../types";
+import Button from "../../../ui/Button";
+import Input from "../../../ui/Input";
+import Modal from "../../../ui/Modal";
 import ProjectForm from "../ProjectForm";
 import EditProjectForm from "./EditProjectForm";
-import { projectStore } from "../../../store";
-import { useToast } from "../../../components/ui/Toast";
+import { projectStore, repositoryStore } from "../../../../store";
+import { useToast } from "../../../ui/Toast";
 import {
   FiEdit,
   FiTrash2,
@@ -16,6 +16,7 @@ import {
   FiArrowRight,
   FiColumns,
   FiUsers,
+  FiGithub,
 } from "react-icons/fi";
 import styles from "./ProjectList.module.scss";
 import ProjectBoard from "../ProjectBoard";
@@ -202,8 +203,8 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
 
               <div className={styles.projectStats}>
                 <div className={styles.stat}>
-                  <FiColumns size={14} />
-                  <span>{project.columns?.length || 0} Columns</span>
+                  <FiGithub size={14} />
+                  <span>{project.repositories?.length || 0} Repositories</span>
                 </div>
                 <div className={styles.stat}>
                   <FiUsers size={14} />

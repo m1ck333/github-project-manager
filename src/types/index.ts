@@ -16,6 +16,7 @@ export interface Project {
   };
   columns?: Column[];
   collaborators?: Collaborator[];
+  repositories?: Repository[];
 }
 
 export enum ColumnType {
@@ -87,4 +88,30 @@ export interface ProjectItem {
   type: "ISSUE" | "PULL_REQUEST" | "DRAFT_ISSUE";
   content?: Issue;
   columnId?: string;
+}
+
+export interface Repository {
+  id: string;
+  name: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+  description?: string;
+  html_url: string;
+  createdAt?: string;
+  collaborators?: RepositoryCollaborator[];
+}
+
+export interface RepositoryCollaborator {
+  id: string;
+  login: string;
+  avatarUrl: string;
+  permission: string;
+  isCurrentUser?: boolean;
+}
+
+export interface RepositoryCollaboratorFormData {
+  username: string;
+  permission: "read" | "triage" | "write" | "maintain" | "admin";
 }

@@ -1,0 +1,114 @@
+@use "@/styles/variables" as *;
+
+.projectRepositories {
+  margin-top: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: $gray-900;
+  }
+}
+
+.repositoriesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.repositoryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  background-color: $white;
+}
+
+.repoInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.ownerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.repoDetails {
+  h4 {
+    margin: 0 0 $spacing-xs 0;
+    font-size: 1rem;
+    color: $gray-900;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: $gray-600;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  color: $gray-500;
+  text-align: center;
+  border: 2px dashed $gray-200;
+  border-radius: $border-radius-md;
+
+  svg {
+    margin-bottom: $spacing-md;
+    color: $gray-400;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-md;
+  color: $gray-600;
+}
+
+.error {
+  background-color: $error-50;
+  color: $error-700;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $error-600;
+}
+
+.modalForm {
+  width: 100%;
+}
+
+.formGroup {
+  margin-bottom: $spacing-md;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-size: 0.9rem;
+    color: $gray-700;
+    font-weight: 500;
+  }
+}

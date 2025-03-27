@@ -5,8 +5,16 @@ import {
   ProjectFormData,
   CollaboratorFormData,
   Collaborator,
+  Repository,
 } from "../types";
-import { projectService, columnService, issueService } from "../graphql/services";
+import {
+  projectService,
+  columnService,
+  issueService,
+  collaboratorService,
+  repositoryService,
+} from "../graphql/services";
+import { repositoryStore } from "./index";
 
 export class ProjectStore {
   projects: Project[] = [];
@@ -391,29 +399,31 @@ export class ProjectStore {
         throw new Error("Project not found");
       }
 
-      // This would typically call a service method to add the collaborator via API
-      // For demonstration purposes, we'll create a mock collaborator
-      const mockCollaborator: Collaborator = {
-        id: `temp-${Date.now()}`,
-        username: collaboratorData.username,
-        avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
-        role: collaboratorData.role,
-      };
+      // Call the CollaboratorService to add the collaborator via GraphQL API
+      const success = await collaboratorService.addProjectCollaborator(projectId, collaboratorData);
 
-      // Update the UI optimistically
-      runInAction(() => {
-        if (!project.collaborators) {
-          project.collaborators = [];
-        }
-        project.collaborators.push(mockCollaborator);
-        this.loading = false;
-      });
+      // If the API call was successful, create the collaborator object for the UI
+      if (success) {
+        const mockCollaborator: Collaborator = {
+          id: `temp-${Date.now()}`,
+          username: collaboratorData.username,
+          avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
+          role: collaboratorData.role,
+        };
 
-      console.warn(
-        `Collaborator addition not implemented in the API. Added ${collaboratorData.username} to UI only.`
-      );
+        // Update the UI
+        runInAction(() => {
+          if (!project.collaborators) {
+            project.collaborators = [];
+          }
+          project.collaborators.push(mockCollaborator);
+          this.loading = false;
+        });
 
-      return mockCollaborator;
+        return mockCollaborator;
+      } else {
+        throw new Error("Failed to add collaborator via API");
+      }
     } catch (error) {
       runInAction(() => {
         this.error = (error as Error).message;
@@ -433,20 +443,87 @@ export class ProjectStore {
         throw new Error("Project or collaborators not found");
       }
 
-      // This would typically call a service method to remove the collaborator via API
-      // For demonstration purposes, we'll just update the UI
+      // Find the collaborator in our store to get their username
+      const collaborator = project.collaborators.find((c) => c.id === collaboratorId);
+      if (!collaborator) {
+        throw new Error("Collaborator not found in project");
+      }
 
-      // Update the UI optimistically
+      // Pass the username to the service for lookup
+      const success = await collaboratorService.removeProjectCollaborator(
+        projectId,
+        collaborator.username
+      );
+
+      if (success) {
+        // Update the UI
+        runInAction(() => {
+          project.collaborators = project.collaborators!.filter(
+            (collaborator) => collaborator.id !== collaboratorId
+          );
+          this.loading = false;
+        });
+
+        return true;
+      } else {
+        throw new Error("Failed to remove collaborator via API");
+      }
+    } catch (error) {
       runInAction(() => {
-        project.collaborators = project.collaborators!.filter(
-          (collaborator) => collaborator.id !== collaboratorId
-        );
+        this.error = (error as Error).message;
         this.loading = false;
       });
+      throw error;
+    }
+  }
 
-      console.warn(
-        `Collaborator removal not implemented in the API. Removed collaborator ${collaboratorId} from UI only.`
+  // Add methods for repository-project relationship
+  async linkRepositoryToProject(
+    projectId: string,
+    repositoryOwner: string,
+    repositoryName: string
+  ) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // Find the project
+      const project = this.projects.find((p) => p.id === projectId);
+      if (!project) {
+        throw new Error(`Project with ID ${projectId} not found`);
+      }
+
+      // Make sure the repository exists or fetch it
+      let repository: Repository | null = null;
+
+      // Try to find it in the repository store first
+      const existingRepo = repositoryStore.repositories.find(
+        (r) => r.owner.login === repositoryOwner && r.name === repositoryName
       );
+
+      if (existingRepo) {
+        repository = existingRepo;
+      } else {
+        // Fetch it if not found
+        repository = await repositoryService.getRepository(repositoryOwner, repositoryName);
+        if (!repository) {
+          throw new Error(`Repository ${repositoryOwner}/${repositoryName} not found`);
+        }
+      }
+
+      // Update the project with the new repository
+      runInAction(() => {
+        if (!project.repositories) {
+          project.repositories = [];
+        }
+
+        // Check if repository is already linked
+        if (!project.repositories.some((r) => r.id === repository!.id)) {
+          project.repositories.push(repository!);
+        }
+
+        this.loading = false;
+      });
 
       return true;
     } catch (error) {
@@ -454,7 +531,61 @@ export class ProjectStore {
         this.error = (error as Error).message;
         this.loading = false;
       });
-      throw error;
+      return false;
+    }
+  }
+
+  async unlinkRepositoryFromProject(projectId: string, repositoryId: string) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // Find the project
+      const project = this.projects.find((p) => p.id === projectId);
+      if (!project || !project.repositories) {
+        throw new Error(`Project with ID ${projectId} not found or has no repositories`);
+      }
+
+      // Remove the repository from the project
+      runInAction(() => {
+        project.repositories = project.repositories!.filter((r) => r.id !== repositoryId);
+        this.loading = false;
+      });
+
+      return true;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      return false;
+    }
+  }
+
+  async getProjectRepositories(projectId: string) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // Find the project
+      const project = this.projects.find((p) => p.id === projectId);
+      if (!project) {
+        throw new Error(`Project with ID ${projectId} not found`);
+      }
+
+      // In a real implementation, you would fetch the repositories from the API
+      // For this example, we'll just return what's already in the project
+      runInAction(() => {
+        this.loading = false;
+      });
+
+      return project.repositories || [];
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      return [];
     }
   }
 }

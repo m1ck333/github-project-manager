@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CollaboratorRole, IssueState } from "../types";
+import { CollaboratorRole } from "../types";
 
 export const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -19,7 +19,6 @@ export const labelSchema = z.object({
 export const issueSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  state: z.nativeEnum(IssueState),
   labels: z.array(z.string()),
   assignees: z.array(z.string()),
 });

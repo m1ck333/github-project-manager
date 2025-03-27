@@ -73,6 +73,15 @@ const Header: React.FC = () => {
               Projects
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="/repositories"
+              className={({ isActive }) => (isActive ? styles.active : "")}
+              onClick={() => setMenuOpen(false)}
+            >
+              Repositories
+            </NavLink>
+          </li>
         </ul>
       </nav>
     </header>

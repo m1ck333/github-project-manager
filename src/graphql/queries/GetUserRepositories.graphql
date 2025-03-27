@@ -1,0 +1,17 @@
+query GetUserRepositories {
+  viewer {
+    repositories(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        name
+        description
+        url
+        createdAt
+        owner {
+          login
+          avatarUrl
+        }
+      }
+    }
+  }
+}

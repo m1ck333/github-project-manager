@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { projectStore } from "../../../store";
-import { Label } from "../../../types";
-import Button from "../../ui/Button";
-import Input from "../../ui/Input";
-import { useToast } from "../../../components/ui/Toast";
+import { projectStore } from "../../../../store";
+import { Label } from "../../../../types";
+import Button from "../../../ui/Button";
+import Input from "../../../ui/Input";
+import { useToast } from "../../../ui/Toast";
 import styles from "./IssueForm.module.scss";
 
 interface IssueFormProps {

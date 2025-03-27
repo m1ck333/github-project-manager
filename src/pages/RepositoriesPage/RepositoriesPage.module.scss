@@ -1,0 +1,209 @@
+@use "../../styles/variables" as *;
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-md;
+
+  .search {
+    flex: 1;
+    max-width: 400px;
+  }
+}
+
+.repositoriesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-lg;
+}
+
+.addCard {
+  height: 100%;
+  min-height: 200px;
+  background-color: rgba($primary-color, 0.05);
+  border: 2px dashed $primary-color;
+  border-radius: $border-radius-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .addIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background-color: rgba($primary-color, 0.1);
+    border-radius: 50%;
+    margin-bottom: $spacing-sm;
+
+    svg {
+      color: $primary-color;
+    }
+  }
+
+  p {
+    color: $primary-color;
+    font-weight: $font-weight-medium;
+    margin: 0;
+  }
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  color: $gray-500;
+  text-align: center;
+  border: 2px dashed $gray-200;
+  border-radius: $border-radius-md;
+
+  svg {
+    margin-bottom: $spacing-md;
+    color: $gray-400;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-md;
+  color: $gray-600;
+}
+
+.error {
+  background-color: $error-50;
+  color: $error-700;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $error-600;
+}
+
+.modalForm {
+  width: 100%;
+}
+
+.formGroup {
+  margin-bottom: $spacing-md;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-size: 0.9rem;
+    color: $gray-700;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.repositoryCard {
+  background-color: $white;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.repoHeader {
+  margin-bottom: $spacing-sm;
+}
+
+.repoOwner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+  color: $gray-600;
+  font-size: 0.875rem;
+}
+
+.ownerAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.repoName {
+  margin: 0;
+  font-size: 1.25rem;
+  color: $gray-900;
+  font-weight: 600;
+}
+
+.repoDescription {
+  color: $gray-700;
+  font-size: 0.9rem;
+  margin-top: 0;
+  margin-bottom: $spacing-sm;
+  flex-grow: 1;
+
+  /* Ensure long descriptions don't break the layout */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.repoStats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: $spacing-sm;
+  border-top: 1px solid $gray-100;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $gray-600;
+  font-size: 0.875rem;
+
+  a {
+    color: $primary-600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,250 @@
+@use "../../styles/variables" as *;
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.githubLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $primary-600;
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.repoInfo {
+  background-color: $white;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.repoOwner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  font-size: 0.9rem;
+  color: $gray-600;
+}
+
+.ownerAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.description {
+  h3 {
+    font-size: 1rem;
+    color: $gray-800;
+    margin-top: 0;
+    margin-bottom: $spacing-xs;
+  }
+
+  p {
+    color: $gray-700;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.collaboratorsSection {
+  background-color: $white;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  h2 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: $gray-900;
+  }
+}
+
+.addForm {
+  background-color: $gray-50;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.formGroup {
+  margin-bottom: $spacing-sm;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-size: 0.9rem;
+    color: $gray-700;
+  }
+}
+
+.collaboratorsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.collaboratorCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  background-color: $white;
+
+  &:hover {
+    background-color: $gray-50;
+  }
+}
+
+.collaboratorInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.collaboratorAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.collaboratorDetails {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.collaboratorName {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-weight: 500;
+  color: $gray-900;
+}
+
+.collaboratorPermission {
+  font-size: 0.8rem;
+  color: $gray-600;
+  padding: 2px 6px;
+  background-color: $gray-100;
+  border-radius: $border-radius-sm;
+  display: inline-block;
+  text-transform: capitalize;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.emptyCollaborators {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  text-align: center;
+  color: $gray-500;
+  border: 2px dashed $gray-200;
+  border-radius: $border-radius-md;
+
+  svg {
+    margin-bottom: $spacing-md;
+    color: $gray-400;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-md;
+  color: $gray-600;
+}
+
+.error {
+  background-color: $error-50;
+  color: $error-700;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $error-600;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.notFound {
+  text-align: center;
+  padding: $spacing-xl 0;
+  color: $gray-600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.select {
+  width: 100%;
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-sm;
+  background-color: $white;
+  font-size: 1rem;
+  color: $gray-800;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-400;
+    box-shadow: 0 0 0 2px rgba($primary-500, 0.2);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $gray-400;
+  }
+
+  &:disabled {
+    background-color: $gray-100;
+    cursor: not-allowed;
+  }
+}

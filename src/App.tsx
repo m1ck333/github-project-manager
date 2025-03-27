@@ -5,6 +5,8 @@ import Home from "./pages/HomePage";
 import Projects from "./pages/ProjectsPage";
 import ProjectPage from "./pages/ProjectPage";
 import CollaboratorsPage from "./pages/CollaboratorsPage";
+import RepositoriesPage from "./pages/RepositoriesPage";
+import RepositoryDetailPage from "./pages/RepositoryDetailPage";
 
 // Extract routes to a separate component with keys
 const AppRoutes = () => {
@@ -16,6 +18,8 @@ const AppRoutes = () => {
       <Route path="/projects" element={<Projects />} />
       <Route path="/projects/:projectId" element={<ProjectPage />} />
       <Route path="/projects/:projectId/collaborators" element={<CollaboratorsPage />} />
+      <Route path="/repositories" element={<RepositoriesPage />} />
+      <Route path="/repositories/:owner/:name" element={<RepositoryDetailPage />} />
     </Routes>
   );
 };

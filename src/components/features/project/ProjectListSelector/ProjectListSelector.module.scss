@@ -1,0 +1,85 @@
+@use "@/styles/variables" as *;
+
+.projectSelector {
+  width: 100%;
+  padding: $spacing-md 0;
+}
+
+.projectList {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.projectItem {
+  padding: $spacing-md;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-md;
+  background-color: $white;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+
+  &:hover {
+    background-color: $gray-50;
+    transform: translateY(-1px);
+  }
+}
+
+.projectInfo {
+  h4 {
+    margin: 0 0 $spacing-xs 0;
+    font-size: 1rem;
+    color: $gray-900;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: $gray-600;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  color: $gray-500;
+  text-align: center;
+  border: 2px dashed $gray-200;
+  border-radius: $border-radius-md;
+
+  p {
+    margin-bottom: $spacing-md;
+  }
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-md;
+  color: $gray-600;
+}
+
+.error {
+  background-color: $error-50;
+  color: $error-700;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $error-600;
+  margin-bottom: $spacing-md;
+}

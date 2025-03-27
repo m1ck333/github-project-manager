@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Button from "../../ui/Button";
-import { useToast } from "../../../components/ui/Toast";
-import { ProjectFormData } from "../../../types";
+import Button from "../../../ui/Button";
+import { useToast } from "../../../ui/Toast";
+import { ProjectFormData } from "../../../../types";
 import styles from "../ProjectList/ProjectList.module.scss";
-import { projectStore } from "../../../store";
+import { projectStore } from "../../../../store";
 import Input from "@/components/ui/Input";
 
 interface ProjectFormProps {

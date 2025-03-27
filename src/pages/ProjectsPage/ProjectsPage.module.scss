@@ -9,8 +9,23 @@
 }
 
 .projectsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
   background-color: $background-primary;
   border-radius: $border-radius-md;
   padding: $spacing-lg;
   box-shadow: $shadow-sm;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-md;
+
+  .search {
+    flex: 1;
+    max-width: 400px;
+  }
 }

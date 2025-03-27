@@ -1,0 +1,10 @@
+fragment RepositoryFields on Repository {
+  id
+  name
+  description
+  url
+  owner {
+    login
+    avatarUrl
+  }
+}
