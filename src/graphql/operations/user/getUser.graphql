@@ -1,0 +1,13 @@
+# Query to get a GitHub user by login
+#
+# This query fetches specific user information based on their login
+query GetUser($login: String!) {
+  user(login: $login) {
+    id
+    login
+    name
+    avatarUrl
+    url
+    bio
+  }
+}

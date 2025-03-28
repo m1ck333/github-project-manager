@@ -4,13 +4,25 @@
  * Service class to handle all collaborator-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
+import { gql } from "urql";
+
 import { CollaboratorFormData, CollaboratorRole } from "../../types";
 import { client } from "../client";
-import {
-  ProjectV2Roles,
-  UpdateProjectCollaboratorsDocument,
-  GetUserDocument,
-} from "../generated/graphql";
+import { ProjectV2Roles, UpdateProjectCollaboratorsDocument } from "../operations/operation-names";
+
+// Define the GetUser query directly since it's not in the operations folder
+const GetUserDocument = gql`
+  query GetUser($login: String!) {
+    user(login: $login) {
+      id
+      login
+      name
+      avatarUrl
+      url
+      bio
+    }
+  }
+`;
 
 /**
  * Service for managing project collaborators
@@ -36,7 +48,7 @@ export class CollaboratorService {
       // First, get the user's global node ID by looking them up by username
       const { data: userData, error: userError } = await this.client
         .query(GetUserDocument, {
-          username: collaboratorData.username,
+          login: collaboratorData.username,
         })
         .toPromise();
 
@@ -93,7 +105,7 @@ export class CollaboratorService {
       // Get the user's global node ID
       const { data: userData, error: userError } = await this.client
         .query(GetUserDocument, {
-          username: collaboratorId,
+          login: collaboratorId,
         })
         .toPromise();
 

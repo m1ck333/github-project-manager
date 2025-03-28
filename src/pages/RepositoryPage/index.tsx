@@ -1,12 +1,23 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiGithub, FiExternalLink } from "react-icons/fi";
+import {
+  FiArrowLeft,
+  FiUser,
+  FiUserX,
+  FiUserPlus,
+  FiGithub,
+  FiExternalLink,
+  FiLink,
+} from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import { repositoryStore } from "../../store";
+import Modal from "../../components/ui/Modal";
+import { useToast } from "../../components/ui/Toast";
+import { repositoryStore, projectStore } from "../../store";
+import { Project } from "../../types";
 
 import styles from "./RepositoryPage.module.scss";
 
@@ -38,19 +49,45 @@ const Select: React.FC<SelectProps> = ({ id, value, onChange, options }) => {
 const RepositoryPage: React.FC = observer(() => {
   const { owner, name } = useParams<{ owner: string; name: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [username, setUsername] = useState("");
   const [permission, setPermission] = useState<"read" | "write" | "admin">("read");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLinkProjectModal, setShowLinkProjectModal] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [isLinkingProject, setIsLinkingProject] = useState(false);
 
   useEffect(() => {
     if (owner && name) {
-      // First fetch repository
-      repositoryStore.fetchRepository(owner, name);
-      // Then fetch collaborators
-      repositoryStore.fetchRepositoryCollaborators(owner, name);
+      // Use a single loading operation
+      repositoryStore.loading = true;
+
+      // Fetch repository with collaborators in a single request
+      repositoryStore
+        .fetchRepository(owner, name)
+        .catch((error) => console.error("Error loading repository data:", error))
+        .finally(() => {
+          repositoryStore.loading = false;
+        });
     }
   }, [owner, name]);
+
+  // Separate effect to fetch projects only when modal is opened
+  useEffect(() => {
+    if (showLinkProjectModal) {
+      projectStore
+        .fetchProjects()
+        .then((projects) => {
+          // Auto-select the first project if available and none selected
+          if (projects && projects.length > 0) {
+            // Always select the first project when modal opens for better UX
+            setSelectedProjectId(projects[0].id);
+          }
+        })
+        .catch((error) => console.error("Error fetching projects:", error));
+    }
+  }, [showLinkProjectModal]); // Remove selectedProjectId dependency to prevent circular updates
 
   useEffect(() => {
     document.title = `${name} | Repository`;
@@ -70,8 +107,13 @@ const RepositoryPage: React.FC = observer(() => {
       setUsername("");
       setPermission("read");
       setShowAddForm(false);
+      showToast("Collaborator added successfully", "success");
     } catch (error) {
       console.error("Error adding collaborator:", error);
+      showToast(
+        `Failed to add collaborator: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -82,8 +124,52 @@ const RepositoryPage: React.FC = observer(() => {
 
     try {
       await repositoryStore.removeRepositoryCollaborator(owner, name, collaboratorId);
+      showToast("Collaborator removed successfully", "success");
     } catch (error) {
       console.error("Error removing collaborator:", error);
+      showToast("Failed to remove collaborator", "error");
+    }
+  };
+
+  const handleLinkToProject = async () => {
+    if (!owner || !name) {
+      showToast("Missing repository information", "error");
+      return;
+    }
+
+    if (!selectedProjectId) {
+      showToast("Please select a project first", "warning");
+      return;
+    }
+
+    setIsLinkingProject(true);
+
+    try {
+      // Find the project to get its name for better UX
+      const project = projectStore.projects.find((p) => p.id === selectedProjectId);
+
+      const success = await projectStore.linkRepositoryToProject(selectedProjectId, owner, name);
+
+      if (success) {
+        showToast(`Successfully linked to ${project?.name || "project"}`, "success");
+
+        // Close modal and reset
+        setShowLinkProjectModal(false);
+        setSelectedProjectId("");
+
+        // Force project refresh (to ensure persistence)
+        await projectStore.fetchProjects();
+      } else {
+        showToast("Failed to link repository to project", "error");
+      }
+    } catch (error) {
+      console.error("Error linking repository to project:", error);
+      showToast(
+        `Error: ${error instanceof Error ? error.message : "Unknown error occurred"}`,
+        "error"
+      );
+    } finally {
+      setIsLinkingProject(false);
     }
   };
 
@@ -138,14 +224,23 @@ const RepositoryPage: React.FC = observer(() => {
           <Button variant="secondary" onClick={handleGoBack} className={styles.backButton}>
             <FiArrowLeft /> Back to Repositories
           </Button>
-          <a
-            href={repository.html_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.githubLink}
-          >
-            <FiGithub /> View on GitHub <FiExternalLink size={14} />
-          </a>
+          <div className={styles.headerActions}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowLinkProjectModal(true)}
+              className={styles.linkButton}
+            >
+              <FiLink /> Link to Project
+            </Button>
+            <a
+              href={repository.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.githubLink}
+            >
+              <FiGithub /> View on GitHub <FiExternalLink size={14} />
+            </a>
+          </div>
         </div>
 
         <div className={styles.repoInfo}>
@@ -242,6 +337,67 @@ const RepositoryPage: React.FC = observer(() => {
             )}
           </div>
         </div>
+
+        {/* Project linking modal */}
+        <Modal
+          isOpen={showLinkProjectModal}
+          onClose={() => setShowLinkProjectModal(false)}
+          title="Link to Project"
+        >
+          <div className={styles.linkProjectForm}>
+            <p>Select a project to link this repository to:</p>
+
+            {projectStore.loading ? (
+              <div className={styles.loading}>Loading projects...</div>
+            ) : projectStore.projects.length === 0 ? (
+              <div className={styles.noProjects}>
+                <p>No projects found. Create a project first.</p>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setShowLinkProjectModal(false);
+                    navigate("/projects");
+                  }}
+                >
+                  Go to Projects
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className={styles.projectList}>
+                  {projectStore.projects.map((project: Project) => (
+                    <div
+                      key={project.id}
+                      className={`${styles.projectOption} ${selectedProjectId === project.id ? styles.selectedProject : ""}`}
+                      onClick={() => setSelectedProjectId(project.id)}
+                    >
+                      <strong>{project.name}</strong>
+                      <span>{project.id.substring(0, 8)}...</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={styles.modalActions}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowLinkProjectModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={handleLinkToProject}
+                    disabled={isLinkingProject || !selectedProjectId}
+                  >
+                    {isLinkingProject ? "Linking..." : "Link to Project"}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </Modal>
       </div>
     </Container>
   );

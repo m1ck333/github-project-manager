@@ -1,0 +1,17 @@
+# Fragment for issue fields
+fragment IssueFields on Issue {
+  id
+  title
+  body
+  number
+  createdAt
+  updatedAt
+  labels(first: 10) {
+    nodes {
+      id
+      name
+      color
+      description
+    }
+  }
+}

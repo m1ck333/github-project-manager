@@ -7,7 +7,7 @@ import { env } from "@/config/env";
 import { GITHUB_URL } from "@/constants/github";
 import { OPERATIONS } from "@/constants/operations";
 
-import { GetViewerDocument, GetViewerQuery } from "../generated/graphql";
+import { GetViewerDocument, GetViewerQuery, User } from "../generated/graphql";
 import { executeNamedQuery } from "../operationUtils";
 
 export interface GitHubUserProfile {
@@ -80,6 +80,18 @@ export class UserService {
   }
 
   /**
+   * Map viewer data to GitHubUserProfile
+   */
+  private mapUserToProfile(user: Pick<User, "id" | "login" | "avatarUrl">): GitHubUserProfile {
+    return {
+      id: user.id,
+      login: user.login,
+      avatarUrl: user.avatarUrl,
+      url: `${GITHUB_URL}/${user.login}`,
+    };
+  }
+
+  /**
    * Validate the GitHub token
    * @returns Token validation result
    */
@@ -128,12 +140,7 @@ export class UserService {
       }
 
       // Create user profile from viewer data
-      this.userProfile = {
-        id: data.viewer.id,
-        login: data.viewer.login,
-        avatarUrl: data.viewer.avatarUrl,
-        url: `${GITHUB_URL}/${data.viewer.login}`,
-      };
+      this.userProfile = this.mapUserToProfile(data.viewer);
 
       this.validationResult = {
         isValid: true,

@@ -4,12 +4,9 @@
  * Service class to handle all column-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
-import { gql } from "urql";
-
 import { Column, ColumnFormData, ColumnType } from "../../types";
 import { client } from "../client";
-import { getFragmentData } from "../generated/fragment-masking";
-import { GetColumnsDocument, ColumnFieldsFragmentDoc } from "../generated/graphql";
+import { GetColumnsDocument } from "../operations/operation-names";
 
 /**
  * Service for managing project columns (status fields)
@@ -18,50 +15,8 @@ export class ColumnService {
   private client = client;
 
   /**
-   * Query to get Status field ID and options for a project
-   */
-  private GET_STATUS_FIELD = gql`
-    query GetStatusField($projectId: ID!) {
-      node(id: $projectId) {
-        ... on ProjectV2 {
-          fields(first: 20) {
-            nodes {
-              ... on ProjectV2SingleSelectField {
-                id
-                name
-                options {
-                  id
-                  name
-                  color
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  /**
-   * Mutation to create a Status field if it doesn't exist
-   */
-  private CREATE_STATUS_FIELD = gql`
-    mutation CreateStatusField($projectId: ID!) {
-      createProjectV2Field(
-        input: { projectId: $projectId, name: "Status", dataType: SINGLE_SELECT }
-      ) {
-        projectV2Field {
-          id
-          name
-        }
-      }
-    }
-  `;
-
-  /**
    * Get columns for a project
    */
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   async getColumns(projectId: string): Promise<Column[]> {
     const { data, error } = await this.client.query(GetColumnsDocument, { projectId }).toPromise();
 
@@ -75,10 +30,10 @@ export class ColumnService {
     }
 
     // Find the Status field and extract its options
-    const statusField = data.node.fields.nodes.find(
-      (field: any) =>
-        field && field.__typename === "ProjectV2SingleSelectField" && field.name === "Status"
-    );
+    const statusField = data.node.fields.nodes.find((field) => {
+      if (!field) return false;
+      return field.__typename === "ProjectV2SingleSelectField" && field.name === "Status";
+    });
 
     if (
       !statusField ||
@@ -88,48 +43,13 @@ export class ColumnService {
       return [];
     }
 
-    const columnData = getFragmentData(ColumnFieldsFragmentDoc, statusField);
-
+    // Directly use the options from the statusField
     // Map options to our Column type
-    return columnData.options.map((option) => ({
+    return statusField.options.map((option: { id: string; name: string }) => ({
       id: option.id,
       name: option.name,
       type: this.mapNameToColumnType(option.name),
     }));
-  }
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-
-  /**
-   * Helper to get or create a Status field
-   */
-  private async getOrCreateStatusField(projectId: string): Promise<string | null> {
-    // First try to get existing Status field
-    const { data: fieldData } = await this.client
-      .query(this.GET_STATUS_FIELD, { projectId })
-      .toPromise();
-
-    if (fieldData?.node && fieldData.node.__typename === "ProjectV2") {
-      const statusField = fieldData.node.fields.nodes.find(
-        (field) =>
-          field && field.__typename === "ProjectV2SingleSelectField" && field.name === "Status"
-      );
-
-      if (statusField) {
-        return statusField.id;
-      }
-    }
-
-    // If no Status field exists, create one
-    const { data: createData, error } = await this.client
-      .mutation(this.CREATE_STATUS_FIELD, { projectId })
-      .toPromise();
-
-    if (error || !createData?.createProjectV2Field?.projectV2Field?.id) {
-      console.error("Error creating Status field:", error);
-      return null;
-    }
-
-    return createData.createProjectV2Field.projectV2Field.id;
   }
 
   /**
@@ -153,24 +73,6 @@ export class ColumnService {
 
     // Default to TODO
     return ColumnType.TODO;
-  }
-
-  /**
-   * Map column type to a color
-   */
-  private getColorForColumnType(type: ColumnType): string {
-    switch (type) {
-      case ColumnType.TODO:
-        return "BLUE";
-      case ColumnType.IN_PROGRESS:
-        return "YELLOW";
-      case ColumnType.DONE:
-        return "GREEN";
-      case ColumnType.BACKLOG:
-        return "PURPLE";
-      default:
-        return "GRAY";
-    }
   }
 
   /**

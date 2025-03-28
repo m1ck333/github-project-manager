@@ -1,19 +1,17 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState, ReactNode } from "react";
-import { FiGithub, FiAlertCircle } from "react-icons/fi";
+import React, { useState, useEffect, ChangeEvent } from "react";
+import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import RepositoryCard from "../../components/features/respository/RepositoryCard";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog";
 import GridCardAdd from "../../components/ui/GridCardAdd";
 import GridContainer from "../../components/ui/GridContainer";
-import InfoBox from "../../components/ui/InfoBox";
 import Input from "../../components/ui/Input";
-import Loading from "../../components/ui/Loading";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
-import { env } from "../../config/env";
 import { repositoryStore } from "../../store";
 import { Repository } from "../../types";
 
@@ -21,194 +19,171 @@ import styles from "./RepositoriesPage.module.scss";
 
 const RepositoriesPage: React.FC = observer(() => {
   const { repositories, loading, error } = repositoryStore;
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const _toast = useToast();
+  const [repoName, setRepoName] = useState("");
+  const [repoDesc, setRepoDesc] = useState("");
+  const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [deleteRepository, setDeleteRepository] = useState<Repository | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const toast = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Your Repositories | GitHub Project Manager";
+    document.title = "Repositories | GitHub Project Manager";
+    fetchRepositories();
   }, []);
 
-  const handleAddRepositoryClick = () => {
-    setShowAddModal(true);
+  const fetchRepositories = async () => {
+    try {
+      await repositoryStore.fetchUserRepositories();
+
+      // For each repository, fetch collaborators
+      const repos = repositoryStore.repositories;
+      for (const repo of repos) {
+        if (!repo.collaborators) {
+          repositoryStore.fetchRepositoryCollaborators(repo.owner.login, repo.name);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching repositories:", error);
+    }
   };
 
-  const handleModalClose = () => {
-    setShowAddModal(false);
+  const handleCreateRepository = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!repoName.trim()) {
+      setNameError("Repository name is required");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await repositoryStore.createRepository(repoName.trim(), repoDesc.trim(), visibility);
+
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error("Failed to create repository:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const resetForm = () => {
+    setRepoName("");
+    setRepoDesc("");
+    setVisibility("PUBLIC");
+    setNameError("");
+  };
+
+  const handleRefresh = () => {
+    fetchRepositories();
+  };
+
+  const handleRetry = () => {
+    repositoryStore.clearError();
+    repositoryStore.fetchUserRepositories();
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleRepositoryClick = (repo: Repository) => {
-    navigate(`/repositories/${repo.owner.login}/${repo.name}`);
-  };
-
-  // Filter repositories by search query
-  const filteredRepositories = searchQuery
-    ? repositories.filter(
-        (repo) =>
-          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          repo.owner.login.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-    : repositories;
-
-  const emptySearchResults = (
-    <InfoBox variant="info" title="No Results">
-      <p>No repositories found matching your search</p>
-    </InfoBox>
+  // Filter repositories based on search query
+  const filteredRepositories = repositories.filter(
+    (repo: Repository) =>
+      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      repo.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      false
   );
 
-  let content: ReactNode;
+  // Handle repository deletion
+  const handleDeleteRepository = (repository: Repository) => {
+    setDeleteRepository(repository);
+  };
 
-  // Show error message if token is missing
-  if (!env.githubToken) {
-    content = (
-      <InfoBox
-        title="GitHub Token Missing"
-        variant="error"
-        icon={<FiAlertCircle />}
-        className={styles.infoBox}
-      >
-        <p>
-          Please add your GitHub token to the <code>.env</code> file to access your repositories.
-        </p>
-        <p className={styles.codeExample}>
-          <code>REACT_APP_GITHUB_TOKEN=your_github_token</code>
-        </p>
-      </InfoBox>
-    );
-  }
-  // Show loading state
-  else if (loading) {
-    content = <Loading text="Loading repositories..." />;
-  }
-  // Show error message
-  else if (error) {
-    content = (
-      <InfoBox title="Error Loading Repositories" variant="error" icon={<FiAlertCircle />}>
-        <p>{error}</p>
-        <Button
-          onClick={() => repositoryStore.clearError()}
-          variant="secondary"
-          className={styles.retryButton}
-        >
-          Dismiss
-        </Button>
-      </InfoBox>
-    );
-  }
-  // Show empty state
-  else if (repositories.length === 0) {
-    content = (
-      <InfoBox title="No Repositories Found" variant="info" icon={<FiGithub />}>
-        <p>You don't have any GitHub repositories yet.</p>
-        <Button onClick={handleAddRepositoryClick} variant="primary">
-          Create Repository
-        </Button>
-      </InfoBox>
-    );
-  }
-  // Show repositories grid
-  else {
-    content = (
+  const navigateToRepository = (repository: Repository) => {
+    navigate(`/repositories/${repository.owner.login}/${repository.name}`);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteRepository) {
+      try {
+        setIsDeleting(true);
+        // Implement the actual deletion
+        await repositoryStore.deleteRepository(deleteRepository.owner.login, deleteRepository.name);
+        toast.toast.success(`Repository "${deleteRepository.name}" deleted successfully`);
+        setDeleteRepository(null);
+      } catch (error) {
+        toast.toast.error(`Failed to delete repository: ${(error as Error).message}`);
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+  };
+
+  return (
+    <Container size="large" withPadding title="Repositories">
       <GridContainer
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
-        title="Repositories"
         loading={loading}
         error={error}
-        emptyState={emptySearchResults}
+        onRefresh={handleRefresh}
+        onRetry={handleRetry}
         loadingText="Loading repositories..."
+        emptyState={
+          <div className={styles.emptyState}>
+            <FiGithub size={48} />
+            <p>No repositories found. Create a repository to get started.</p>
+          </div>
+        }
       >
-        {filteredRepositories.map((repository) => (
+        <GridCardAdd label="Create Repository" onClick={() => setIsModalOpen(true)} />
+
+        {filteredRepositories.map((repository: Repository) => (
           <RepositoryCard
             key={repository.id}
             repository={repository}
-            onClick={() => handleRepositoryClick(repository)}
+            onClick={() => navigateToRepository(repository)}
+            onDelete={handleDeleteRepository}
           />
         ))}
-        <GridCardAdd onClick={handleAddRepositoryClick} label="Create Repository" />
       </GridContainer>
-    );
-  }
 
-  return (
-    <Container title="Your Repositories">
-      {content}
-
-      <CreateRepositoryModal show={showAddModal} onClose={handleModalClose} />
-    </Container>
-  );
-});
-
-interface CreateRepositoryModalProps {
-  show: boolean;
-  onClose: () => void;
-}
-
-const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = observer(
-  ({ show, onClose }) => {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">("PRIVATE");
-    const [nameError, setNameError] = useState("");
-    const _toast = useToast();
-
-    const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!name.trim()) {
-        setNameError("Repository name is required");
-        return;
-      }
-
-      if (!/^[a-zA-Z0-9._-]+$/.test(name)) {
-        setNameError(
-          "Repository name can only contain letters, numbers, hyphens, periods, and underscores"
-        );
-        return;
-      }
-
-      try {
-        await repositoryStore.createRepository(name.trim(), description.trim(), visibility);
-        _toast.showToast(`Repository ${name} was created successfully`, "success");
-        onClose();
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        _toast.showToast(`Error creating repository: ${errorMsg}`, "error");
-      }
-    };
-
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setName(e.target.value);
-      setNameError("");
-    };
-
-    return (
-      <Modal title="Create New Repository" isOpen={show} onClose={onClose}>
-        <form onSubmit={handleSubmit} className={styles.form}>
+      {/* Create Repository Modal */}
+      <Modal
+        title="Create Repository"
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetForm();
+        }}
+      >
+        <form onSubmit={handleCreateRepository} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="name">Repository Name</label>
+            <label htmlFor="repoName">Repository Name</label>
             <Input
-              id="name"
-              value={name}
-              onChange={handleNameChange}
-              placeholder="e.g. my-awesome-project"
+              id="repoName"
+              value={repoName}
+              onChange={(e) => setRepoName(e.target.value)}
+              placeholder="example-repo"
               error={nameError}
             />
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="description">Description (optional)</label>
+            <label htmlFor="repoDesc">Description (optional)</label>
             <Input
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="A short description of your repository"
+              id="repoDesc"
+              value={repoDesc}
+              onChange={(e) => setRepoDesc(e.target.value)}
+              placeholder="A brief description of your repository"
             />
           </div>
 
@@ -219,35 +194,68 @@ const CreateRepositoryModal: React.FC<CreateRepositoryModalProps> = observer(
                 <input
                   type="radio"
                   name="visibility"
-                  checked={visibility === "PRIVATE"}
-                  onChange={() => setVisibility("PRIVATE")}
+                  value="PUBLIC"
+                  checked={visibility === "PUBLIC"}
+                  onChange={() => setVisibility("PUBLIC")}
                 />
-                <span>Private</span>
+                Public
               </label>
               <label className={styles.radioLabel}>
                 <input
                   type="radio"
                   name="visibility"
-                  checked={visibility === "PUBLIC"}
-                  onChange={() => setVisibility("PUBLIC")}
+                  value="PRIVATE"
+                  checked={visibility === "PRIVATE"}
+                  onChange={() => setVisibility("PRIVATE")}
                 />
-                <span>Public</span>
+                Private
               </label>
             </div>
           </div>
 
+          <div className={styles.infoBox}>
+            <p>This will create a repository on GitHub.</p>
+          </div>
+
           <div className={styles.modalActions}>
-            <Button onClick={onClose} variant="secondary" type="button">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setIsModalOpen(false);
+                resetForm();
+              }}
+            >
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
+            <Button type="submit" variant="primary" disabled={isSubmitting || !repoName.trim()}>
               Create Repository
             </Button>
           </div>
         </form>
       </Modal>
-    );
-  }
-);
+
+      {/* Delete Confirmation Modal */}
+      {deleteRepository && (
+        <Modal
+          isOpen={!!deleteRepository}
+          onClose={() => !isDeleting && setDeleteRepository(null)}
+          title="Delete Repository"
+        >
+          <ConfirmationDialog
+            title="Delete Repository Confirmation"
+            message={`Are you sure you want to delete repository "${deleteRepository.name}"?`}
+            warningMessage="This action cannot be undone."
+            confirmLabel={isDeleting ? "Deleting..." : "Delete Repository"}
+            isSubmitting={isDeleting}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeleteRepository(null)}
+            confirmVariant="danger"
+          />
+        </Modal>
+      )}
+    </Container>
+  );
+});
 
 export default RepositoriesPage;

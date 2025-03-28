@@ -1,0 +1,19 @@
+# Import the project fields fragment
+#import "../../fragments/projectFields.graphql"
+
+# Query to get projects owned by the current user
+query GetProjects {
+  viewer {
+    projectsV2(first: 20, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        title
+        number
+        closed
+        url
+        createdAt
+        updatedAt
+      }
+    }
+  }
+}

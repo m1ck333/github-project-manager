@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 import GitHubTokenWarning from "../../components/features/github/GitHubTokenWarning";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
-import { userService } from "../../graphql/services";
 import { useAppInitialization } from "../../hooks/useAppInitialization";
+import { userStore } from "../../store";
 
 import styles from "./HomePage.module.scss";
 
@@ -20,7 +20,7 @@ const Home: React.FC = observer(() => {
     document.title = "GitHub Project Manager";
   }, []);
 
-  const hasToken = userService.hasToken();
+  const hasToken = userStore.hasToken();
 
   return (
     <Container className={styles.homePage}>

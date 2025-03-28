@@ -32,7 +32,7 @@ const config: CodegenConfig = {
       },
     },
   },
-  documents: ["./src/graphql/**/*.graphql"],
+  documents: ["./src/graphql/operations/**/*.graphql"],
   generates: {
     // Generate the base schema types
     "./src/types/github-schema.ts": {

@@ -1,10 +1,15 @@
 import { ToastType } from "./Toast";
 import ToastContainer from "./ToastContainer";
-import { ToastProvider } from "./ToastContext";
-import { toast } from "./toastHelpers.ts";
-import { ToastContextValue, ToastData } from "./types";
-import { useToast } from "./useToast";
+import {
+  ToastContext,
+  ToastProvider,
+  useToast,
+  ToastContextValue,
+  ToastData,
+} from "./ToastContext";
 
-export { ToastContainer, ToastProvider, useToast, toast };
+// Export components
+export { ToastContainer, ToastContext, ToastProvider, useToast };
 
+// Export types
 export type { ToastContextValue, ToastData, ToastType };

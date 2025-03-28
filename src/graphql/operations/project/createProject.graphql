@@ -1,0 +1,13 @@
+# Mutation to create a new GitHub Project (v2)
+mutation CreateProject($input: CreateProjectV2Input!) {
+  createProjectV2(input: $input) {
+    projectV2 {
+      id
+      title
+      number
+      url
+      createdAt
+      updatedAt
+    }
+  }
+}

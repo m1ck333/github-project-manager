@@ -1,0 +1,16 @@
+# Mutation to create a new repository
+mutation CreateRepository($input: CreateRepositoryInput!) {
+  createRepository(input: $input) {
+    repository {
+      id
+      name
+      owner {
+        login
+        avatarUrl
+      }
+      description
+      url
+      createdAt
+    }
+  }
+}

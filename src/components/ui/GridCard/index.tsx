@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import styles from "./GridCard.module.scss";
 
-interface GridCardProps {
+export interface GridCardProps {
   title: string;
   subtitle?: string;
   description?: string;
@@ -22,6 +22,7 @@ interface GridCardProps {
     onClick: (e: React.MouseEvent) => void;
     ariaLabel?: string;
   }>;
+  footer?: ReactNode;
   createdAt?: string;
   htmlUrl?: string;
   viewPath?: string;
@@ -36,6 +37,7 @@ const GridCard: React.FC<GridCardProps> = ({
   avatar,
   stats,
   actions,
+  footer,
   createdAt,
   htmlUrl,
   viewPath,
@@ -94,39 +96,50 @@ const GridCard: React.FC<GridCardProps> = ({
         </div>
       )}
 
-      {/* Only render footer if we have at least one of createdAt, htmlUrl, or viewPath */}
-      {(formattedDate || htmlUrl || viewPath) && (
-        <div className={styles.footer}>
-          {formattedDate && (
-            <span className={styles.dateInfo}>
-              <FiCalendar size={14} />
-              <span>Created on {formattedDate}</span>
-            </span>
-          )}
+      {/* Custom footer or standard footer */}
+      {footer ? (
+        <div className={styles.footer}>{footer}</div>
+      ) : (
+        (formattedDate || htmlUrl || viewPath) && (
+          <div className={styles.footer}>
+            {formattedDate && (
+              <span className={styles.dateInfo}>
+                <FiCalendar size={14} />
+                <span>Created on {formattedDate}</span>
+              </span>
+            )}
 
-          <div className={styles.footerLinks}>
-            {htmlUrl && (
-              <a
-                href={htmlUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className={styles.footerLink}
-              >
-                <FiGithub size={14} /> View on GitHub
-              </a>
-            )}
-            {viewPath && (
-              <Link
-                to={viewPath}
-                className={styles.viewButton}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FiArrowRight size={14} /> View Details
-              </Link>
-            )}
+            <div className={styles.footerLinks}>
+              {htmlUrl && (
+                <a
+                  href={htmlUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={styles.footerLink}
+                >
+                  <FiGithub size={14} /> View on GitHub
+                </a>
+              )}
+              {viewPath && (
+                <Link
+                  to={viewPath}
+                  className={styles.viewButton}
+                  onClick={(e) => {
+                    // Stop propagation to avoid double navigation
+                    e.stopPropagation();
+                    // If onClick handler exists, call it directly
+                    if (onClick) {
+                      onClick();
+                    }
+                  }}
+                >
+                  <FiArrowRight size={14} /> View Details
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );

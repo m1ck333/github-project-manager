@@ -1,8 +1,0 @@
-# Mutation to delete a project
-mutation DeleteProject($input: DeleteProjectV2Input!) {
-  deleteProjectV2(input: $input) {
-    projectV2 {
-      id
-    }
-  }
-}

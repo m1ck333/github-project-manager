@@ -1,7 +1,0 @@
-#import "../fragments/repositoryFields.graphql"
-
-query GetRepository($owner: String!, $name: String!) {
-  repository(owner: $owner, name: $name) {
-    ...RepositoryFields
-  }
-}

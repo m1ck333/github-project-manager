@@ -5,14 +5,15 @@
  * and transforming between API and application data structures.
  */
 
-import { ProjectFieldsFragment } from "../graphql/generated/graphql";
 import { Project } from "../types";
+
+import { ProjectV2 } from "./generated/graphql";
 // Since ProjectV2 is a GraphQL type from the GitHub schema, we need to import it from the generated schema
 
 /**
  * Transform a GitHub ProjectV2 object to our local Project type
  */
-export function transformProjectV2ToProject(projectV2: ProjectFieldsFragment): Project {
+export function transformProjectV2ToProject(projectV2: ProjectV2): Project {
   // Extract owner details safely with type checking
   let ownerLogin = "unknown";
   let ownerAvatarUrl = "";

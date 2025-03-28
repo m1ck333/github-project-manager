@@ -1,0 +1,15 @@
+# Query to get collaborators for a GitHub repository
+query GetRepoCollaborators($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    collaborators(first: 100) {
+      nodes {
+        id
+        login
+        avatarUrl
+      }
+      edges {
+        permission
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+# Mutation to create a draft issue in a project
+mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {
+  addProjectV2DraftIssue(input: { projectId: $projectId, title: $title, body: $body }) {
+    projectItem {
+      id
+      project {
+        id
+      }
+      content {
+        ... on DraftIssue {
+          id
+          title
+          body
+        }
+      }
+    }
+  }
+}

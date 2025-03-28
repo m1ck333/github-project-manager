@@ -15,11 +15,23 @@
   width: 100%;
   height: 100%;
   border: 1px solid $border-color;
+  position: relative;
+  outline: none;
 
   &:hover {
     transform: translateY(-4px);
     box-shadow: $shadow-md;
     border-color: rgba($primary-color, 0.3);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
   }
 }
 
@@ -69,6 +81,8 @@
 .actionButtons {
   display: flex;
   gap: $spacing-sm;
+  position: relative;
+  z-index: 2;
 }
 
 .actionButton {
@@ -84,6 +98,8 @@
   transition:
     background-color 0.2s,
     color 0.2s;
+  position: relative;
+  z-index: 2;
 
   &:hover {
     background-color: $background-secondary;
@@ -148,6 +164,8 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  position: relative;
+  z-index: 2;
 }
 
 .footerLink,
@@ -159,6 +177,8 @@
   color: $primary-color;
   font-weight: 500;
   text-decoration: none;
+  position: relative;
+  z-index: 2;
 
   &:hover {
     text-decoration: underline;

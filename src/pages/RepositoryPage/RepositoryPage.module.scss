@@ -13,7 +13,19 @@
   margin-bottom: $spacing-md;
 }
 
+.headerActions {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+}
+
 .backButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.linkButton {
   display: flex;
   align-items: center;
   gap: $spacing-xs;
@@ -221,30 +233,92 @@
   gap: $spacing-md;
 }
 
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.linkProjectForm {
+  padding: $spacing-sm;
+
+  p {
+    margin: 0 0 $spacing-md 0;
+    color: $gray-700;
+  }
+}
+
+.noProjects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $spacing-lg 0;
+
+  p {
+    margin-bottom: $spacing-md;
+    color: $gray-600;
+  }
+}
+
 .select {
   width: 100%;
-  padding: $spacing-xs $spacing-sm;
-  border: 1px solid $gray-300;
+  padding: 8px 12px;
   border-radius: $border-radius-sm;
+  border: 1px solid $gray-300;
   background-color: $white;
-  font-size: 1rem;
+  font-size: 14px;
   color: $gray-800;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
 
   &:focus {
     outline: none;
     border-color: $primary-400;
     box-shadow: 0 0 0 2px rgba($primary-500, 0.2);
   }
+}
 
-  &:hover:not(:disabled) {
-    border-color: $gray-400;
-  }
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid $gray-200;
+  border-radius: 4px;
+  background-color: $gray-50;
+}
 
-  &:disabled {
+.projectOption {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid $gray-200;
+  background-color: $white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &:hover {
     background-color: $gray-100;
-    cursor: not-allowed;
+    border-color: $gray-300;
   }
+
+  strong {
+    font-weight: 500;
+    color: $gray-800;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: $gray-600;
+  }
+}
+
+.selectedProject {
+  background-color: rgba($primary-500, 0.05);
+  border-color: $primary-500;
+  box-shadow: 0 0 0 1px rgba($primary-500, 0.2);
 }

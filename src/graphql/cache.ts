@@ -4,15 +4,23 @@
  * This file contains cache configuration for the URQL client.
  * It helps optimize data fetching by reducing duplicate requests.
  */
-import { cacheExchange } from "@urql/core";
+import { cacheExchange } from "@urql/exchange-graphcache";
 import { offlineExchange } from "@urql/exchange-graphcache";
 import { relayPagination } from "@urql/exchange-graphcache/extras";
 
 /**
- * Basic cache exchange configuration
+ * Basic cache configuration
+ *
+ * For the default settings, we can use simpleCacheExchange
+ * which is already included with the client in src/graphql/client.ts
  */
 export const basicCache = cacheExchange({
   // No custom configuration needed for basic use cases
+  keys: {
+    // Define custom key extraction for types that don't have an id
+    ProjectV2Item: (data) => (data.id ? String(data.id) : null),
+    ProjectV2ItemContent: (data) => (data.id ? String(data.id) : null),
+  },
 });
 
 /**

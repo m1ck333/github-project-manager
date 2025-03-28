@@ -1,9 +1,0 @@
-fragment ColumnFields on ProjectV2SingleSelectField {
-  id
-  name
-  options {
-    id
-    name
-    color
-  }
-}

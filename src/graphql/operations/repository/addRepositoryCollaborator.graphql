@@ -1,0 +1,10 @@
+# Mutation to add a collaborator to a repository
+mutation AddRepositoryCollaborator(
+  $repositoryId: ID!
+  $userLogin: String!
+  $permission: RepositoryPermission!
+) {
+  addAssignable: addAssigneesToAssignable(input: { assignableId: $repositoryId, assigneeIds: [] }) {
+    clientMutationId
+  }
+}

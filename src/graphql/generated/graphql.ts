@@ -32035,14 +32035,6 @@ export type WorkflowsParametersInput = {
   workflows: Array<WorkflowFileReferenceInput>;
 };
 
-export type CollaboratorFieldsFragment = {
-  __typename?: "User";
-  id: string;
-  login: string;
-  avatarUrl: any;
-  name?: string | null;
-} & { " $fragmentName"?: "CollaboratorFieldsFragment" };
-
 export type UpdateProjectCollaboratorsMutationVariables = Exact<{
   projectId: Scalars["ID"];
   collaborators: Array<ProjectV2Collaborator> | ProjectV2Collaborator;
@@ -32056,30 +32048,288 @@ export type UpdateProjectCollaboratorsMutation = {
   } | null;
 };
 
-export type GetRepositoryCollaboratorsQueryVariables = Exact<{
-  owner: Scalars["String"];
-  name: Scalars["String"];
+export type GetColumnsQueryVariables = Exact<{
+  projectId: Scalars["ID"];
 }>;
 
-export type GetRepositoryCollaboratorsQuery = {
+export type GetColumnsQuery = {
   __typename?: "Query";
-  repository?: {
-    __typename?: "Repository";
-    id: string;
-    collaborators?: {
-      __typename?: "RepositoryCollaboratorConnection";
-      nodes?: Array<
-        | ({ __typename?: "User" } & {
-            " $fragmentRefs"?: { CollaboratorFieldsFragment: CollaboratorFieldsFragment };
-          })
-        | null
-      > | null;
-      edges?: Array<{
-        __typename?: "RepositoryCollaboratorEdge";
-        permission: RepositoryPermission;
-      } | null> | null;
-    } | null;
-  } | null;
+  node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
+    | { __typename?: "AddedToProjectEvent" }
+    | { __typename?: "App" }
+    | { __typename?: "AssignedEvent" }
+    | { __typename?: "AutoMergeDisabledEvent" }
+    | { __typename?: "AutoMergeEnabledEvent" }
+    | { __typename?: "AutoRebaseEnabledEvent" }
+    | { __typename?: "AutoSquashEnabledEvent" }
+    | { __typename?: "AutomaticBaseChangeFailedEvent" }
+    | { __typename?: "AutomaticBaseChangeSucceededEvent" }
+    | { __typename?: "BaseRefChangedEvent" }
+    | { __typename?: "BaseRefDeletedEvent" }
+    | { __typename?: "BaseRefForcePushedEvent" }
+    | { __typename?: "Blob" }
+    | { __typename?: "Bot" }
+    | { __typename?: "BranchProtectionRule" }
+    | { __typename?: "BypassForcePushAllowance" }
+    | { __typename?: "BypassPullRequestAllowance" }
+    | { __typename?: "CWE" }
+    | { __typename?: "CheckRun" }
+    | { __typename?: "CheckSuite" }
+    | { __typename?: "ClosedEvent" }
+    | { __typename?: "CodeOfConduct" }
+    | { __typename?: "CommentDeletedEvent" }
+    | { __typename?: "Commit" }
+    | { __typename?: "CommitComment" }
+    | { __typename?: "CommitCommentThread" }
+    | { __typename?: "Comparison" }
+    | { __typename?: "ConnectedEvent" }
+    | { __typename?: "ConvertToDraftEvent" }
+    | { __typename?: "ConvertedNoteToIssueEvent" }
+    | { __typename?: "ConvertedToDiscussionEvent" }
+    | { __typename?: "CrossReferencedEvent" }
+    | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
+    | { __typename?: "DeployKey" }
+    | { __typename?: "DeployedEvent" }
+    | { __typename?: "Deployment" }
+    | { __typename?: "DeploymentEnvironmentChangedEvent" }
+    | { __typename?: "DeploymentReview" }
+    | { __typename?: "DeploymentStatus" }
+    | { __typename?: "DisconnectedEvent" }
+    | { __typename?: "Discussion" }
+    | { __typename?: "DiscussionCategory" }
+    | { __typename?: "DiscussionComment" }
+    | { __typename?: "DiscussionPoll" }
+    | { __typename?: "DiscussionPollOption" }
+    | { __typename?: "DraftIssue" }
+    | { __typename?: "Enterprise" }
+    | { __typename?: "EnterpriseAdministratorInvitation" }
+    | { __typename?: "EnterpriseIdentityProvider" }
+    | { __typename?: "EnterpriseMemberInvitation" }
+    | { __typename?: "EnterpriseRepositoryInfo" }
+    | { __typename?: "EnterpriseServerInstallation" }
+    | { __typename?: "EnterpriseServerUserAccount" }
+    | { __typename?: "EnterpriseServerUserAccountEmail" }
+    | { __typename?: "EnterpriseServerUserAccountsUpload" }
+    | { __typename?: "EnterpriseUserAccount" }
+    | { __typename?: "Environment" }
+    | { __typename?: "ExternalIdentity" }
+    | { __typename?: "Gist" }
+    | { __typename?: "GistComment" }
+    | { __typename?: "HeadRefDeletedEvent" }
+    | { __typename?: "HeadRefForcePushedEvent" }
+    | { __typename?: "HeadRefRestoredEvent" }
+    | { __typename?: "IpAllowListEntry" }
+    | { __typename?: "Issue" }
+    | { __typename?: "IssueComment" }
+    | { __typename?: "IssueType" }
+    | { __typename?: "IssueTypeAddedEvent" }
+    | { __typename?: "IssueTypeChangedEvent" }
+    | { __typename?: "IssueTypeRemovedEvent" }
+    | { __typename?: "Label" }
+    | { __typename?: "LabeledEvent" }
+    | { __typename?: "Language" }
+    | { __typename?: "License" }
+    | { __typename?: "LinkedBranch" }
+    | { __typename?: "LockedEvent" }
+    | { __typename?: "Mannequin" }
+    | { __typename?: "MarkedAsDuplicateEvent" }
+    | { __typename?: "MarketplaceCategory" }
+    | { __typename?: "MarketplaceListing" }
+    | { __typename?: "MemberFeatureRequestNotification" }
+    | { __typename?: "MembersCanDeleteReposClearAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
+    | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
+    | { __typename?: "MergedEvent" }
+    | { __typename?: "MigrationSource" }
+    | { __typename?: "Milestone" }
+    | { __typename?: "MilestonedEvent" }
+    | { __typename?: "MovedColumnsInProjectEvent" }
+    | { __typename?: "OIDCProvider" }
+    | { __typename?: "OauthApplicationCreateAuditEntry" }
+    | { __typename?: "OrgAddBillingManagerAuditEntry" }
+    | { __typename?: "OrgAddMemberAuditEntry" }
+    | { __typename?: "OrgBlockUserAuditEntry" }
+    | { __typename?: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgCreateAuditEntry" }
+    | { __typename?: "OrgDisableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgDisableSamlAuditEntry" }
+    | { __typename?: "OrgDisableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgEnableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgEnableSamlAuditEntry" }
+    | { __typename?: "OrgEnableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgInviteMemberAuditEntry" }
+    | { __typename?: "OrgInviteToBusinessAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessApprovedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessBlockedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessDeniedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessRequestedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessUnblockedAuditEntry" }
+    | { __typename?: "OrgRemoveBillingManagerAuditEntry" }
+    | { __typename?: "OrgRemoveMemberAuditEntry" }
+    | { __typename?: "OrgRemoveOutsideCollaboratorAuditEntry" }
+    | { __typename?: "OrgRestoreMemberAuditEntry" }
+    | { __typename?: "OrgUnblockUserAuditEntry" }
+    | { __typename?: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
+    | { __typename?: "Organization" }
+    | { __typename?: "OrganizationIdentityProvider" }
+    | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
+    | { __typename?: "Package" }
+    | { __typename?: "PackageFile" }
+    | { __typename?: "PackageTag" }
+    | { __typename?: "PackageVersion" }
+    | { __typename?: "ParentIssueAddedEvent" }
+    | { __typename?: "ParentIssueRemovedEvent" }
+    | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
+    | { __typename?: "PinnedEvent" }
+    | { __typename?: "PinnedIssue" }
+    | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
+    | { __typename?: "PrivateRepositoryForkingEnableAuditEntry" }
+    | { __typename?: "Project" }
+    | { __typename?: "ProjectCard" }
+    | { __typename?: "ProjectColumn" }
+    | {
+        __typename?: "ProjectV2";
+        fields: {
+          __typename?: "ProjectV2FieldConfigurationConnection";
+          nodes?: Array<
+            | { __typename?: "ProjectV2Field" }
+            | { __typename?: "ProjectV2IterationField" }
+            | {
+                __typename?: "ProjectV2SingleSelectField";
+                id: string;
+                name: string;
+                options: Array<{
+                  __typename?: "ProjectV2SingleSelectFieldOption";
+                  id: string;
+                  name: string;
+                  color: ProjectV2SingleSelectFieldOptionColor;
+                }>;
+              }
+            | null
+          > | null;
+        };
+      }
+    | { __typename?: "ProjectV2Field" }
+    | { __typename?: "ProjectV2Item" }
+    | { __typename?: "ProjectV2ItemFieldDateValue" }
+    | { __typename?: "ProjectV2ItemFieldIterationValue" }
+    | { __typename?: "ProjectV2ItemFieldNumberValue" }
+    | { __typename?: "ProjectV2ItemFieldSingleSelectValue" }
+    | { __typename?: "ProjectV2ItemFieldTextValue" }
+    | { __typename?: "ProjectV2IterationField" }
+    | { __typename?: "ProjectV2SingleSelectField" }
+    | { __typename?: "ProjectV2StatusUpdate" }
+    | { __typename?: "ProjectV2View" }
+    | { __typename?: "ProjectV2Workflow" }
+    | { __typename?: "PublicKey" }
+    | { __typename?: "PullRequest" }
+    | { __typename?: "PullRequestCommit" }
+    | { __typename?: "PullRequestCommitCommentThread" }
+    | { __typename?: "PullRequestReview" }
+    | { __typename?: "PullRequestReviewComment" }
+    | { __typename?: "PullRequestReviewThread" }
+    | { __typename?: "PullRequestThread" }
+    | { __typename?: "Push" }
+    | { __typename?: "PushAllowance" }
+    | { __typename?: "Query" }
+    | { __typename?: "Reaction" }
+    | { __typename?: "ReadyForReviewEvent" }
+    | { __typename?: "Ref" }
+    | { __typename?: "ReferencedEvent" }
+    | { __typename?: "Release" }
+    | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
+    | { __typename?: "RemovedFromProjectEvent" }
+    | { __typename?: "RenamedTitleEvent" }
+    | { __typename?: "ReopenedEvent" }
+    | { __typename?: "RepoAccessAuditEntry" }
+    | { __typename?: "RepoAddMemberAuditEntry" }
+    | { __typename?: "RepoAddTopicAuditEntry" }
+    | { __typename?: "RepoArchivedAuditEntry" }
+    | { __typename?: "RepoChangeMergeSettingAuditEntry" }
+    | { __typename?: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigLockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoCreateAuditEntry" }
+    | { __typename?: "RepoDestroyAuditEntry" }
+    | { __typename?: "RepoRemoveMemberAuditEntry" }
+    | { __typename?: "RepoRemoveTopicAuditEntry" }
+    | { __typename?: "Repository" }
+    | { __typename?: "RepositoryInvitation" }
+    | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
+    | { __typename?: "RepositoryTopic" }
+    | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
+    | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
+    | { __typename?: "RepositoryVulnerabilityAlert" }
+    | { __typename?: "ReviewDismissalAllowance" }
+    | { __typename?: "ReviewDismissedEvent" }
+    | { __typename?: "ReviewRequest" }
+    | { __typename?: "ReviewRequestRemovedEvent" }
+    | { __typename?: "ReviewRequestedEvent" }
+    | { __typename?: "SavedReply" }
+    | { __typename?: "SecurityAdvisory" }
+    | { __typename?: "SponsorsActivity" }
+    | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
+    | { __typename?: "SponsorsTier" }
+    | { __typename?: "Sponsorship" }
+    | { __typename?: "SponsorshipNewsletter" }
+    | { __typename?: "Status" }
+    | { __typename?: "StatusCheckRollup" }
+    | { __typename?: "StatusContext" }
+    | { __typename?: "SubIssueAddedEvent" }
+    | { __typename?: "SubIssueRemovedEvent" }
+    | { __typename?: "SubscribedEvent" }
+    | { __typename?: "Tag" }
+    | { __typename?: "Team" }
+    | { __typename?: "TeamAddMemberAuditEntry" }
+    | { __typename?: "TeamAddRepositoryAuditEntry" }
+    | { __typename?: "TeamChangeParentTeamAuditEntry" }
+    | { __typename?: "TeamDiscussion" }
+    | { __typename?: "TeamDiscussionComment" }
+    | { __typename?: "TeamRemoveMemberAuditEntry" }
+    | { __typename?: "TeamRemoveRepositoryAuditEntry" }
+    | { __typename?: "Topic" }
+    | { __typename?: "TransferredEvent" }
+    | { __typename?: "Tree" }
+    | { __typename?: "UnassignedEvent" }
+    | { __typename?: "UnlabeledEvent" }
+    | { __typename?: "UnlockedEvent" }
+    | { __typename?: "UnmarkedAsDuplicateEvent" }
+    | { __typename?: "UnpinnedEvent" }
+    | { __typename?: "UnsubscribedEvent" }
+    | { __typename?: "User" }
+    | { __typename?: "UserBlockedEvent" }
+    | { __typename?: "UserContentEdit" }
+    | { __typename?: "UserList" }
+    | { __typename?: "UserNamespaceRepository" }
+    | { __typename?: "UserStatus" }
+    | { __typename?: "VerifiableDomain" }
+    | { __typename?: "Workflow" }
+    | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
+    | null;
 };
 
 export type ColumnFieldsFragment = {
@@ -32094,293 +32344,14 @@ export type ColumnFieldsFragment = {
   }>;
 } & { " $fragmentName"?: "ColumnFieldsFragment" };
 
-export type GetColumnsQueryVariables = Exact<{
-  projectId: Scalars["ID"];
-}>;
-
-export type GetColumnsQuery = {
-  __typename?: "Query";
-  node?:
-    | { __typename: "AddedToMergeQueueEvent" }
-    | { __typename: "AddedToProjectEvent" }
-    | { __typename: "App" }
-    | { __typename: "AssignedEvent" }
-    | { __typename: "AutoMergeDisabledEvent" }
-    | { __typename: "AutoMergeEnabledEvent" }
-    | { __typename: "AutoRebaseEnabledEvent" }
-    | { __typename: "AutoSquashEnabledEvent" }
-    | { __typename: "AutomaticBaseChangeFailedEvent" }
-    | { __typename: "AutomaticBaseChangeSucceededEvent" }
-    | { __typename: "BaseRefChangedEvent" }
-    | { __typename: "BaseRefDeletedEvent" }
-    | { __typename: "BaseRefForcePushedEvent" }
-    | { __typename: "Blob" }
-    | { __typename: "Bot" }
-    | { __typename: "BranchProtectionRule" }
-    | { __typename: "BypassForcePushAllowance" }
-    | { __typename: "BypassPullRequestAllowance" }
-    | { __typename: "CWE" }
-    | { __typename: "CheckRun" }
-    | { __typename: "CheckSuite" }
-    | { __typename: "ClosedEvent" }
-    | { __typename: "CodeOfConduct" }
-    | { __typename: "CommentDeletedEvent" }
-    | { __typename: "Commit" }
-    | { __typename: "CommitComment" }
-    | { __typename: "CommitCommentThread" }
-    | { __typename: "Comparison" }
-    | { __typename: "ConnectedEvent" }
-    | { __typename: "ConvertToDraftEvent" }
-    | { __typename: "ConvertedNoteToIssueEvent" }
-    | { __typename: "ConvertedToDiscussionEvent" }
-    | { __typename: "CrossReferencedEvent" }
-    | { __typename: "DemilestonedEvent" }
-    | { __typename: "DependencyGraphManifest" }
-    | { __typename: "DeployKey" }
-    | { __typename: "DeployedEvent" }
-    | { __typename: "Deployment" }
-    | { __typename: "DeploymentEnvironmentChangedEvent" }
-    | { __typename: "DeploymentReview" }
-    | { __typename: "DeploymentStatus" }
-    | { __typename: "DisconnectedEvent" }
-    | { __typename: "Discussion" }
-    | { __typename: "DiscussionCategory" }
-    | { __typename: "DiscussionComment" }
-    | { __typename: "DiscussionPoll" }
-    | { __typename: "DiscussionPollOption" }
-    | { __typename: "DraftIssue" }
-    | { __typename: "Enterprise" }
-    | { __typename: "EnterpriseAdministratorInvitation" }
-    | { __typename: "EnterpriseIdentityProvider" }
-    | { __typename: "EnterpriseMemberInvitation" }
-    | { __typename: "EnterpriseRepositoryInfo" }
-    | { __typename: "EnterpriseServerInstallation" }
-    | { __typename: "EnterpriseServerUserAccount" }
-    | { __typename: "EnterpriseServerUserAccountEmail" }
-    | { __typename: "EnterpriseServerUserAccountsUpload" }
-    | { __typename: "EnterpriseUserAccount" }
-    | { __typename: "Environment" }
-    | { __typename: "ExternalIdentity" }
-    | { __typename: "Gist" }
-    | { __typename: "GistComment" }
-    | { __typename: "HeadRefDeletedEvent" }
-    | { __typename: "HeadRefForcePushedEvent" }
-    | { __typename: "HeadRefRestoredEvent" }
-    | { __typename: "IpAllowListEntry" }
-    | { __typename: "Issue" }
-    | { __typename: "IssueComment" }
-    | { __typename: "IssueType" }
-    | { __typename: "IssueTypeAddedEvent" }
-    | { __typename: "IssueTypeChangedEvent" }
-    | { __typename: "IssueTypeRemovedEvent" }
-    | { __typename: "Label" }
-    | { __typename: "LabeledEvent" }
-    | { __typename: "Language" }
-    | { __typename: "License" }
-    | { __typename: "LinkedBranch" }
-    | { __typename: "LockedEvent" }
-    | { __typename: "Mannequin" }
-    | { __typename: "MarkedAsDuplicateEvent" }
-    | { __typename: "MarketplaceCategory" }
-    | { __typename: "MarketplaceListing" }
-    | { __typename: "MemberFeatureRequestNotification" }
-    | { __typename: "MembersCanDeleteReposClearAuditEntry" }
-    | { __typename: "MembersCanDeleteReposDisableAuditEntry" }
-    | { __typename: "MembersCanDeleteReposEnableAuditEntry" }
-    | { __typename: "MentionedEvent" }
-    | { __typename: "MergeQueue" }
-    | { __typename: "MergeQueueEntry" }
-    | { __typename: "MergedEvent" }
-    | { __typename: "MigrationSource" }
-    | { __typename: "Milestone" }
-    | { __typename: "MilestonedEvent" }
-    | { __typename: "MovedColumnsInProjectEvent" }
-    | { __typename: "OIDCProvider" }
-    | { __typename: "OauthApplicationCreateAuditEntry" }
-    | { __typename: "OrgAddBillingManagerAuditEntry" }
-    | { __typename: "OrgAddMemberAuditEntry" }
-    | { __typename: "OrgBlockUserAuditEntry" }
-    | { __typename: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgCreateAuditEntry" }
-    | { __typename: "OrgDisableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgDisableSamlAuditEntry" }
-    | { __typename: "OrgDisableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgEnableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgEnableSamlAuditEntry" }
-    | { __typename: "OrgEnableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgInviteMemberAuditEntry" }
-    | { __typename: "OrgInviteToBusinessAuditEntry" }
-    | { __typename: "OrgOauthAppAccessApprovedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessBlockedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessDeniedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessRequestedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessUnblockedAuditEntry" }
-    | { __typename: "OrgRemoveBillingManagerAuditEntry" }
-    | { __typename: "OrgRemoveMemberAuditEntry" }
-    | { __typename: "OrgRemoveOutsideCollaboratorAuditEntry" }
-    | { __typename: "OrgRestoreMemberAuditEntry" }
-    | { __typename: "OrgUnblockUserAuditEntry" }
-    | { __typename: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
-    | { __typename: "Organization" }
-    | { __typename: "OrganizationIdentityProvider" }
-    | { __typename: "OrganizationInvitation" }
-    | { __typename: "OrganizationMigration" }
-    | { __typename: "Package" }
-    | { __typename: "PackageFile" }
-    | { __typename: "PackageTag" }
-    | { __typename: "PackageVersion" }
-    | { __typename: "ParentIssueAddedEvent" }
-    | { __typename: "ParentIssueRemovedEvent" }
-    | { __typename: "PinnedDiscussion" }
-    | { __typename: "PinnedEnvironment" }
-    | { __typename: "PinnedEvent" }
-    | { __typename: "PinnedIssue" }
-    | { __typename: "PrivateRepositoryForkingDisableAuditEntry" }
-    | { __typename: "PrivateRepositoryForkingEnableAuditEntry" }
-    | { __typename: "Project" }
-    | { __typename: "ProjectCard" }
-    | { __typename: "ProjectColumn" }
-    | {
-        __typename: "ProjectV2";
-        id: string;
-        fields: {
-          __typename?: "ProjectV2FieldConfigurationConnection";
-          nodes?: Array<
-            | { __typename: "ProjectV2Field" }
-            | { __typename: "ProjectV2IterationField" }
-            | ({ __typename: "ProjectV2SingleSelectField" } & {
-                " $fragmentRefs"?: { ColumnFieldsFragment: ColumnFieldsFragment };
-              })
-            | null
-          > | null;
-        };
-      }
-    | { __typename: "ProjectV2Field" }
-    | { __typename: "ProjectV2Item" }
-    | { __typename: "ProjectV2ItemFieldDateValue" }
-    | { __typename: "ProjectV2ItemFieldIterationValue" }
-    | { __typename: "ProjectV2ItemFieldNumberValue" }
-    | { __typename: "ProjectV2ItemFieldSingleSelectValue" }
-    | { __typename: "ProjectV2ItemFieldTextValue" }
-    | { __typename: "ProjectV2IterationField" }
-    | { __typename: "ProjectV2SingleSelectField" }
-    | { __typename: "ProjectV2StatusUpdate" }
-    | { __typename: "ProjectV2View" }
-    | { __typename: "ProjectV2Workflow" }
-    | { __typename: "PublicKey" }
-    | { __typename: "PullRequest" }
-    | { __typename: "PullRequestCommit" }
-    | { __typename: "PullRequestCommitCommentThread" }
-    | { __typename: "PullRequestReview" }
-    | { __typename: "PullRequestReviewComment" }
-    | { __typename: "PullRequestReviewThread" }
-    | { __typename: "PullRequestThread" }
-    | { __typename: "Push" }
-    | { __typename: "PushAllowance" }
-    | { __typename: "Query" }
-    | { __typename: "Reaction" }
-    | { __typename: "ReadyForReviewEvent" }
-    | { __typename: "Ref" }
-    | { __typename: "ReferencedEvent" }
-    | { __typename: "Release" }
-    | { __typename: "ReleaseAsset" }
-    | { __typename: "RemovedFromMergeQueueEvent" }
-    | { __typename: "RemovedFromProjectEvent" }
-    | { __typename: "RenamedTitleEvent" }
-    | { __typename: "ReopenedEvent" }
-    | { __typename: "RepoAccessAuditEntry" }
-    | { __typename: "RepoAddMemberAuditEntry" }
-    | { __typename: "RepoAddTopicAuditEntry" }
-    | { __typename: "RepoArchivedAuditEntry" }
-    | { __typename: "RepoChangeMergeSettingAuditEntry" }
-    | { __typename: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigLockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoCreateAuditEntry" }
-    | { __typename: "RepoDestroyAuditEntry" }
-    | { __typename: "RepoRemoveMemberAuditEntry" }
-    | { __typename: "RepoRemoveTopicAuditEntry" }
-    | { __typename: "Repository" }
-    | { __typename: "RepositoryInvitation" }
-    | { __typename: "RepositoryMigration" }
-    | { __typename: "RepositoryRule" }
-    | { __typename: "RepositoryRuleset" }
-    | { __typename: "RepositoryRulesetBypassActor" }
-    | { __typename: "RepositoryTopic" }
-    | { __typename: "RepositoryVisibilityChangeDisableAuditEntry" }
-    | { __typename: "RepositoryVisibilityChangeEnableAuditEntry" }
-    | { __typename: "RepositoryVulnerabilityAlert" }
-    | { __typename: "ReviewDismissalAllowance" }
-    | { __typename: "ReviewDismissedEvent" }
-    | { __typename: "ReviewRequest" }
-    | { __typename: "ReviewRequestRemovedEvent" }
-    | { __typename: "ReviewRequestedEvent" }
-    | { __typename: "SavedReply" }
-    | { __typename: "SecurityAdvisory" }
-    | { __typename: "SponsorsActivity" }
-    | { __typename: "SponsorsListing" }
-    | { __typename: "SponsorsListingFeaturedItem" }
-    | { __typename: "SponsorsTier" }
-    | { __typename: "Sponsorship" }
-    | { __typename: "SponsorshipNewsletter" }
-    | { __typename: "Status" }
-    | { __typename: "StatusCheckRollup" }
-    | { __typename: "StatusContext" }
-    | { __typename: "SubIssueAddedEvent" }
-    | { __typename: "SubIssueRemovedEvent" }
-    | { __typename: "SubscribedEvent" }
-    | { __typename: "Tag" }
-    | { __typename: "Team" }
-    | { __typename: "TeamAddMemberAuditEntry" }
-    | { __typename: "TeamAddRepositoryAuditEntry" }
-    | { __typename: "TeamChangeParentTeamAuditEntry" }
-    | { __typename: "TeamDiscussion" }
-    | { __typename: "TeamDiscussionComment" }
-    | { __typename: "TeamRemoveMemberAuditEntry" }
-    | { __typename: "TeamRemoveRepositoryAuditEntry" }
-    | { __typename: "Topic" }
-    | { __typename: "TransferredEvent" }
-    | { __typename: "Tree" }
-    | { __typename: "UnassignedEvent" }
-    | { __typename: "UnlabeledEvent" }
-    | { __typename: "UnlockedEvent" }
-    | { __typename: "UnmarkedAsDuplicateEvent" }
-    | { __typename: "UnpinnedEvent" }
-    | { __typename: "UnsubscribedEvent" }
-    | { __typename: "User" }
-    | { __typename: "UserBlockedEvent" }
-    | { __typename: "UserContentEdit" }
-    | { __typename: "UserList" }
-    | { __typename: "UserNamespaceRepository" }
-    | { __typename: "UserStatus" }
-    | { __typename: "VerifiableDomain" }
-    | { __typename: "Workflow" }
-    | { __typename: "WorkflowRun" }
-    | { __typename: "WorkflowRunFile" }
-    | null;
-};
-
 export type IssueFieldsFragment = {
   __typename?: "Issue";
   id: string;
   title: string;
   body: string;
   number: number;
-  state: IssueState;
   createdAt: any;
   updatedAt: any;
-  url: any;
   labels?: {
     __typename?: "LabelConnection";
     nodes?: Array<{
@@ -32391,14 +32362,22 @@ export type IssueFieldsFragment = {
       description?: string | null;
     } | null> | null;
   } | null;
-  author?:
-    | { __typename?: "Bot"; login: string; avatarUrl: any }
-    | { __typename?: "EnterpriseUserAccount"; login: string; avatarUrl: any }
-    | { __typename?: "Mannequin"; login: string; avatarUrl: any }
-    | { __typename?: "Organization"; login: string; avatarUrl: any }
-    | { __typename?: "User"; login: string; avatarUrl: any }
-    | null;
 } & { " $fragmentName"?: "IssueFieldsFragment" };
+
+export type ProjectFieldsFragment = {
+  __typename?: "ProjectV2";
+  id: string;
+  title: string;
+  shortDescription?: string | null;
+  url: any;
+  createdAt: any;
+  updatedAt: any;
+  owner:
+    | { __typename: "Issue" }
+    | { __typename: "Organization"; login: string; avatarUrl: any }
+    | { __typename: "PullRequest" }
+    | { __typename: "User"; login: string; avatarUrl: any };
+} & { " $fragmentName"?: "ProjectFieldsFragment" };
 
 export type CreateDraftIssueMutationVariables = Exact<{
   projectId: Scalars["ID"];
@@ -32413,20 +32392,332 @@ export type CreateDraftIssueMutation = {
     projectItem?: {
       __typename?: "ProjectV2Item";
       id: string;
+      project: { __typename?: "ProjectV2"; id: string };
       content?:
-        | {
-            __typename?: "DraftIssue";
-            id: string;
-            title: string;
-            body: string;
-            createdAt: any;
-            updatedAt: any;
-          }
+        | { __typename?: "DraftIssue"; id: string; title: string; body: string }
         | { __typename?: "Issue" }
         | { __typename?: "PullRequest" }
         | null;
     } | null;
   } | null;
+};
+
+export type GetProjectIssuesQueryVariables = Exact<{
+  projectId: Scalars["ID"];
+  first: Scalars["Int"];
+}>;
+
+export type GetProjectIssuesQuery = {
+  __typename?: "Query";
+  node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
+    | { __typename?: "AddedToProjectEvent" }
+    | { __typename?: "App" }
+    | { __typename?: "AssignedEvent" }
+    | { __typename?: "AutoMergeDisabledEvent" }
+    | { __typename?: "AutoMergeEnabledEvent" }
+    | { __typename?: "AutoRebaseEnabledEvent" }
+    | { __typename?: "AutoSquashEnabledEvent" }
+    | { __typename?: "AutomaticBaseChangeFailedEvent" }
+    | { __typename?: "AutomaticBaseChangeSucceededEvent" }
+    | { __typename?: "BaseRefChangedEvent" }
+    | { __typename?: "BaseRefDeletedEvent" }
+    | { __typename?: "BaseRefForcePushedEvent" }
+    | { __typename?: "Blob" }
+    | { __typename?: "Bot" }
+    | { __typename?: "BranchProtectionRule" }
+    | { __typename?: "BypassForcePushAllowance" }
+    | { __typename?: "BypassPullRequestAllowance" }
+    | { __typename?: "CWE" }
+    | { __typename?: "CheckRun" }
+    | { __typename?: "CheckSuite" }
+    | { __typename?: "ClosedEvent" }
+    | { __typename?: "CodeOfConduct" }
+    | { __typename?: "CommentDeletedEvent" }
+    | { __typename?: "Commit" }
+    | { __typename?: "CommitComment" }
+    | { __typename?: "CommitCommentThread" }
+    | { __typename?: "Comparison" }
+    | { __typename?: "ConnectedEvent" }
+    | { __typename?: "ConvertToDraftEvent" }
+    | { __typename?: "ConvertedNoteToIssueEvent" }
+    | { __typename?: "ConvertedToDiscussionEvent" }
+    | { __typename?: "CrossReferencedEvent" }
+    | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
+    | { __typename?: "DeployKey" }
+    | { __typename?: "DeployedEvent" }
+    | { __typename?: "Deployment" }
+    | { __typename?: "DeploymentEnvironmentChangedEvent" }
+    | { __typename?: "DeploymentReview" }
+    | { __typename?: "DeploymentStatus" }
+    | { __typename?: "DisconnectedEvent" }
+    | { __typename?: "Discussion" }
+    | { __typename?: "DiscussionCategory" }
+    | { __typename?: "DiscussionComment" }
+    | { __typename?: "DiscussionPoll" }
+    | { __typename?: "DiscussionPollOption" }
+    | { __typename?: "DraftIssue" }
+    | { __typename?: "Enterprise" }
+    | { __typename?: "EnterpriseAdministratorInvitation" }
+    | { __typename?: "EnterpriseIdentityProvider" }
+    | { __typename?: "EnterpriseMemberInvitation" }
+    | { __typename?: "EnterpriseRepositoryInfo" }
+    | { __typename?: "EnterpriseServerInstallation" }
+    | { __typename?: "EnterpriseServerUserAccount" }
+    | { __typename?: "EnterpriseServerUserAccountEmail" }
+    | { __typename?: "EnterpriseServerUserAccountsUpload" }
+    | { __typename?: "EnterpriseUserAccount" }
+    | { __typename?: "Environment" }
+    | { __typename?: "ExternalIdentity" }
+    | { __typename?: "Gist" }
+    | { __typename?: "GistComment" }
+    | { __typename?: "HeadRefDeletedEvent" }
+    | { __typename?: "HeadRefForcePushedEvent" }
+    | { __typename?: "HeadRefRestoredEvent" }
+    | { __typename?: "IpAllowListEntry" }
+    | { __typename?: "Issue" }
+    | { __typename?: "IssueComment" }
+    | { __typename?: "IssueType" }
+    | { __typename?: "IssueTypeAddedEvent" }
+    | { __typename?: "IssueTypeChangedEvent" }
+    | { __typename?: "IssueTypeRemovedEvent" }
+    | { __typename?: "Label" }
+    | { __typename?: "LabeledEvent" }
+    | { __typename?: "Language" }
+    | { __typename?: "License" }
+    | { __typename?: "LinkedBranch" }
+    | { __typename?: "LockedEvent" }
+    | { __typename?: "Mannequin" }
+    | { __typename?: "MarkedAsDuplicateEvent" }
+    | { __typename?: "MarketplaceCategory" }
+    | { __typename?: "MarketplaceListing" }
+    | { __typename?: "MemberFeatureRequestNotification" }
+    | { __typename?: "MembersCanDeleteReposClearAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
+    | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
+    | { __typename?: "MergedEvent" }
+    | { __typename?: "MigrationSource" }
+    | { __typename?: "Milestone" }
+    | { __typename?: "MilestonedEvent" }
+    | { __typename?: "MovedColumnsInProjectEvent" }
+    | { __typename?: "OIDCProvider" }
+    | { __typename?: "OauthApplicationCreateAuditEntry" }
+    | { __typename?: "OrgAddBillingManagerAuditEntry" }
+    | { __typename?: "OrgAddMemberAuditEntry" }
+    | { __typename?: "OrgBlockUserAuditEntry" }
+    | { __typename?: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgCreateAuditEntry" }
+    | { __typename?: "OrgDisableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgDisableSamlAuditEntry" }
+    | { __typename?: "OrgDisableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgEnableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgEnableSamlAuditEntry" }
+    | { __typename?: "OrgEnableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgInviteMemberAuditEntry" }
+    | { __typename?: "OrgInviteToBusinessAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessApprovedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessBlockedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessDeniedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessRequestedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessUnblockedAuditEntry" }
+    | { __typename?: "OrgRemoveBillingManagerAuditEntry" }
+    | { __typename?: "OrgRemoveMemberAuditEntry" }
+    | { __typename?: "OrgRemoveOutsideCollaboratorAuditEntry" }
+    | { __typename?: "OrgRestoreMemberAuditEntry" }
+    | { __typename?: "OrgUnblockUserAuditEntry" }
+    | { __typename?: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
+    | { __typename?: "Organization" }
+    | { __typename?: "OrganizationIdentityProvider" }
+    | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
+    | { __typename?: "Package" }
+    | { __typename?: "PackageFile" }
+    | { __typename?: "PackageTag" }
+    | { __typename?: "PackageVersion" }
+    | { __typename?: "ParentIssueAddedEvent" }
+    | { __typename?: "ParentIssueRemovedEvent" }
+    | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
+    | { __typename?: "PinnedEvent" }
+    | { __typename?: "PinnedIssue" }
+    | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
+    | { __typename?: "PrivateRepositoryForkingEnableAuditEntry" }
+    | { __typename?: "Project" }
+    | { __typename?: "ProjectCard" }
+    | { __typename?: "ProjectColumn" }
+    | {
+        __typename?: "ProjectV2";
+        items: {
+          __typename?: "ProjectV2ItemConnection";
+          nodes?: Array<{
+            __typename?: "ProjectV2Item";
+            id: string;
+            fieldValues: {
+              __typename?: "ProjectV2ItemFieldValueConnection";
+              nodes?: Array<
+                | { __typename?: "ProjectV2ItemFieldDateValue" }
+                | { __typename?: "ProjectV2ItemFieldIterationValue" }
+                | { __typename?: "ProjectV2ItemFieldLabelValue" }
+                | { __typename?: "ProjectV2ItemFieldMilestoneValue" }
+                | { __typename?: "ProjectV2ItemFieldNumberValue" }
+                | { __typename?: "ProjectV2ItemFieldPullRequestValue" }
+                | { __typename?: "ProjectV2ItemFieldRepositoryValue" }
+                | { __typename?: "ProjectV2ItemFieldReviewerValue" }
+                | {
+                    __typename?: "ProjectV2ItemFieldSingleSelectValue";
+                    name?: string | null;
+                    field:
+                      | { __typename?: "ProjectV2Field" }
+                      | { __typename?: "ProjectV2IterationField" }
+                      | { __typename?: "ProjectV2SingleSelectField"; name: string };
+                  }
+                | { __typename?: "ProjectV2ItemFieldTextValue" }
+                | { __typename?: "ProjectV2ItemFieldUserValue" }
+                | null
+              > | null;
+            };
+            content?:
+              | { __typename?: "DraftIssue"; id: string; title: string; body: string }
+              | {
+                  __typename?: "Issue";
+                  id: string;
+                  title: string;
+                  body: string;
+                  number: number;
+                  labels?: {
+                    __typename?: "LabelConnection";
+                    nodes?: Array<{
+                      __typename?: "Label";
+                      id: string;
+                      name: string;
+                      color: string;
+                      description?: string | null;
+                    } | null> | null;
+                  } | null;
+                }
+              | { __typename?: "PullRequest" }
+              | null;
+          } | null> | null;
+        };
+      }
+    | { __typename?: "ProjectV2Field" }
+    | { __typename?: "ProjectV2Item" }
+    | { __typename?: "ProjectV2ItemFieldDateValue" }
+    | { __typename?: "ProjectV2ItemFieldIterationValue" }
+    | { __typename?: "ProjectV2ItemFieldNumberValue" }
+    | { __typename?: "ProjectV2ItemFieldSingleSelectValue" }
+    | { __typename?: "ProjectV2ItemFieldTextValue" }
+    | { __typename?: "ProjectV2IterationField" }
+    | { __typename?: "ProjectV2SingleSelectField" }
+    | { __typename?: "ProjectV2StatusUpdate" }
+    | { __typename?: "ProjectV2View" }
+    | { __typename?: "ProjectV2Workflow" }
+    | { __typename?: "PublicKey" }
+    | { __typename?: "PullRequest" }
+    | { __typename?: "PullRequestCommit" }
+    | { __typename?: "PullRequestCommitCommentThread" }
+    | { __typename?: "PullRequestReview" }
+    | { __typename?: "PullRequestReviewComment" }
+    | { __typename?: "PullRequestReviewThread" }
+    | { __typename?: "PullRequestThread" }
+    | { __typename?: "Push" }
+    | { __typename?: "PushAllowance" }
+    | { __typename?: "Query" }
+    | { __typename?: "Reaction" }
+    | { __typename?: "ReadyForReviewEvent" }
+    | { __typename?: "Ref" }
+    | { __typename?: "ReferencedEvent" }
+    | { __typename?: "Release" }
+    | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
+    | { __typename?: "RemovedFromProjectEvent" }
+    | { __typename?: "RenamedTitleEvent" }
+    | { __typename?: "ReopenedEvent" }
+    | { __typename?: "RepoAccessAuditEntry" }
+    | { __typename?: "RepoAddMemberAuditEntry" }
+    | { __typename?: "RepoAddTopicAuditEntry" }
+    | { __typename?: "RepoArchivedAuditEntry" }
+    | { __typename?: "RepoChangeMergeSettingAuditEntry" }
+    | { __typename?: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigLockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoCreateAuditEntry" }
+    | { __typename?: "RepoDestroyAuditEntry" }
+    | { __typename?: "RepoRemoveMemberAuditEntry" }
+    | { __typename?: "RepoRemoveTopicAuditEntry" }
+    | { __typename?: "Repository" }
+    | { __typename?: "RepositoryInvitation" }
+    | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
+    | { __typename?: "RepositoryTopic" }
+    | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
+    | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
+    | { __typename?: "RepositoryVulnerabilityAlert" }
+    | { __typename?: "ReviewDismissalAllowance" }
+    | { __typename?: "ReviewDismissedEvent" }
+    | { __typename?: "ReviewRequest" }
+    | { __typename?: "ReviewRequestRemovedEvent" }
+    | { __typename?: "ReviewRequestedEvent" }
+    | { __typename?: "SavedReply" }
+    | { __typename?: "SecurityAdvisory" }
+    | { __typename?: "SponsorsActivity" }
+    | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
+    | { __typename?: "SponsorsTier" }
+    | { __typename?: "Sponsorship" }
+    | { __typename?: "SponsorshipNewsletter" }
+    | { __typename?: "Status" }
+    | { __typename?: "StatusCheckRollup" }
+    | { __typename?: "StatusContext" }
+    | { __typename?: "SubIssueAddedEvent" }
+    | { __typename?: "SubIssueRemovedEvent" }
+    | { __typename?: "SubscribedEvent" }
+    | { __typename?: "Tag" }
+    | { __typename?: "Team" }
+    | { __typename?: "TeamAddMemberAuditEntry" }
+    | { __typename?: "TeamAddRepositoryAuditEntry" }
+    | { __typename?: "TeamChangeParentTeamAuditEntry" }
+    | { __typename?: "TeamDiscussion" }
+    | { __typename?: "TeamDiscussionComment" }
+    | { __typename?: "TeamRemoveMemberAuditEntry" }
+    | { __typename?: "TeamRemoveRepositoryAuditEntry" }
+    | { __typename?: "Topic" }
+    | { __typename?: "TransferredEvent" }
+    | { __typename?: "Tree" }
+    | { __typename?: "UnassignedEvent" }
+    | { __typename?: "UnlabeledEvent" }
+    | { __typename?: "UnlockedEvent" }
+    | { __typename?: "UnmarkedAsDuplicateEvent" }
+    | { __typename?: "UnpinnedEvent" }
+    | { __typename?: "UnsubscribedEvent" }
+    | { __typename?: "User" }
+    | { __typename?: "UserBlockedEvent" }
+    | { __typename?: "UserContentEdit" }
+    | { __typename?: "UserList" }
+    | { __typename?: "UserNamespaceRepository" }
+    | { __typename?: "UserStatus" }
+    | { __typename?: "VerifiableDomain" }
+    | { __typename?: "Workflow" }
+    | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
+    | null;
 };
 
 export type UpdateIssueStatusMutationVariables = Exact<{
@@ -32444,382 +32735,6 @@ export type UpdateIssueStatusMutation = {
   } | null;
 };
 
-export type GetProjectIssuesQueryVariables = Exact<{
-  projectId: Scalars["ID"];
-  first: Scalars["Int"];
-}>;
-
-export type GetProjectIssuesQuery = {
-  __typename?: "Query";
-  node?:
-    | { __typename: "AddedToMergeQueueEvent" }
-    | { __typename: "AddedToProjectEvent" }
-    | { __typename: "App" }
-    | { __typename: "AssignedEvent" }
-    | { __typename: "AutoMergeDisabledEvent" }
-    | { __typename: "AutoMergeEnabledEvent" }
-    | { __typename: "AutoRebaseEnabledEvent" }
-    | { __typename: "AutoSquashEnabledEvent" }
-    | { __typename: "AutomaticBaseChangeFailedEvent" }
-    | { __typename: "AutomaticBaseChangeSucceededEvent" }
-    | { __typename: "BaseRefChangedEvent" }
-    | { __typename: "BaseRefDeletedEvent" }
-    | { __typename: "BaseRefForcePushedEvent" }
-    | { __typename: "Blob" }
-    | { __typename: "Bot" }
-    | { __typename: "BranchProtectionRule" }
-    | { __typename: "BypassForcePushAllowance" }
-    | { __typename: "BypassPullRequestAllowance" }
-    | { __typename: "CWE" }
-    | { __typename: "CheckRun" }
-    | { __typename: "CheckSuite" }
-    | { __typename: "ClosedEvent" }
-    | { __typename: "CodeOfConduct" }
-    | { __typename: "CommentDeletedEvent" }
-    | { __typename: "Commit" }
-    | { __typename: "CommitComment" }
-    | { __typename: "CommitCommentThread" }
-    | { __typename: "Comparison" }
-    | { __typename: "ConnectedEvent" }
-    | { __typename: "ConvertToDraftEvent" }
-    | { __typename: "ConvertedNoteToIssueEvent" }
-    | { __typename: "ConvertedToDiscussionEvent" }
-    | { __typename: "CrossReferencedEvent" }
-    | { __typename: "DemilestonedEvent" }
-    | { __typename: "DependencyGraphManifest" }
-    | { __typename: "DeployKey" }
-    | { __typename: "DeployedEvent" }
-    | { __typename: "Deployment" }
-    | { __typename: "DeploymentEnvironmentChangedEvent" }
-    | { __typename: "DeploymentReview" }
-    | { __typename: "DeploymentStatus" }
-    | { __typename: "DisconnectedEvent" }
-    | { __typename: "Discussion" }
-    | { __typename: "DiscussionCategory" }
-    | { __typename: "DiscussionComment" }
-    | { __typename: "DiscussionPoll" }
-    | { __typename: "DiscussionPollOption" }
-    | { __typename: "DraftIssue" }
-    | { __typename: "Enterprise" }
-    | { __typename: "EnterpriseAdministratorInvitation" }
-    | { __typename: "EnterpriseIdentityProvider" }
-    | { __typename: "EnterpriseMemberInvitation" }
-    | { __typename: "EnterpriseRepositoryInfo" }
-    | { __typename: "EnterpriseServerInstallation" }
-    | { __typename: "EnterpriseServerUserAccount" }
-    | { __typename: "EnterpriseServerUserAccountEmail" }
-    | { __typename: "EnterpriseServerUserAccountsUpload" }
-    | { __typename: "EnterpriseUserAccount" }
-    | { __typename: "Environment" }
-    | { __typename: "ExternalIdentity" }
-    | { __typename: "Gist" }
-    | { __typename: "GistComment" }
-    | { __typename: "HeadRefDeletedEvent" }
-    | { __typename: "HeadRefForcePushedEvent" }
-    | { __typename: "HeadRefRestoredEvent" }
-    | { __typename: "IpAllowListEntry" }
-    | { __typename: "Issue" }
-    | { __typename: "IssueComment" }
-    | { __typename: "IssueType" }
-    | { __typename: "IssueTypeAddedEvent" }
-    | { __typename: "IssueTypeChangedEvent" }
-    | { __typename: "IssueTypeRemovedEvent" }
-    | { __typename: "Label" }
-    | { __typename: "LabeledEvent" }
-    | { __typename: "Language" }
-    | { __typename: "License" }
-    | { __typename: "LinkedBranch" }
-    | { __typename: "LockedEvent" }
-    | { __typename: "Mannequin" }
-    | { __typename: "MarkedAsDuplicateEvent" }
-    | { __typename: "MarketplaceCategory" }
-    | { __typename: "MarketplaceListing" }
-    | { __typename: "MemberFeatureRequestNotification" }
-    | { __typename: "MembersCanDeleteReposClearAuditEntry" }
-    | { __typename: "MembersCanDeleteReposDisableAuditEntry" }
-    | { __typename: "MembersCanDeleteReposEnableAuditEntry" }
-    | { __typename: "MentionedEvent" }
-    | { __typename: "MergeQueue" }
-    | { __typename: "MergeQueueEntry" }
-    | { __typename: "MergedEvent" }
-    | { __typename: "MigrationSource" }
-    | { __typename: "Milestone" }
-    | { __typename: "MilestonedEvent" }
-    | { __typename: "MovedColumnsInProjectEvent" }
-    | { __typename: "OIDCProvider" }
-    | { __typename: "OauthApplicationCreateAuditEntry" }
-    | { __typename: "OrgAddBillingManagerAuditEntry" }
-    | { __typename: "OrgAddMemberAuditEntry" }
-    | { __typename: "OrgBlockUserAuditEntry" }
-    | { __typename: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgCreateAuditEntry" }
-    | { __typename: "OrgDisableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgDisableSamlAuditEntry" }
-    | { __typename: "OrgDisableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgEnableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgEnableSamlAuditEntry" }
-    | { __typename: "OrgEnableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgInviteMemberAuditEntry" }
-    | { __typename: "OrgInviteToBusinessAuditEntry" }
-    | { __typename: "OrgOauthAppAccessApprovedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessBlockedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessDeniedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessRequestedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessUnblockedAuditEntry" }
-    | { __typename: "OrgRemoveBillingManagerAuditEntry" }
-    | { __typename: "OrgRemoveMemberAuditEntry" }
-    | { __typename: "OrgRemoveOutsideCollaboratorAuditEntry" }
-    | { __typename: "OrgRestoreMemberAuditEntry" }
-    | { __typename: "OrgUnblockUserAuditEntry" }
-    | { __typename: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
-    | { __typename: "Organization" }
-    | { __typename: "OrganizationIdentityProvider" }
-    | { __typename: "OrganizationInvitation" }
-    | { __typename: "OrganizationMigration" }
-    | { __typename: "Package" }
-    | { __typename: "PackageFile" }
-    | { __typename: "PackageTag" }
-    | { __typename: "PackageVersion" }
-    | { __typename: "ParentIssueAddedEvent" }
-    | { __typename: "ParentIssueRemovedEvent" }
-    | { __typename: "PinnedDiscussion" }
-    | { __typename: "PinnedEnvironment" }
-    | { __typename: "PinnedEvent" }
-    | { __typename: "PinnedIssue" }
-    | { __typename: "PrivateRepositoryForkingDisableAuditEntry" }
-    | { __typename: "PrivateRepositoryForkingEnableAuditEntry" }
-    | { __typename: "Project" }
-    | { __typename: "ProjectCard" }
-    | { __typename: "ProjectColumn" }
-    | {
-        __typename: "ProjectV2";
-        id: string;
-        items: {
-          __typename?: "ProjectV2ItemConnection";
-          nodes?: Array<{
-            __typename?: "ProjectV2Item";
-            id: string;
-            fieldValues: {
-              __typename?: "ProjectV2ItemFieldValueConnection";
-              nodes?: Array<
-                | { __typename: "ProjectV2ItemFieldDateValue" }
-                | { __typename: "ProjectV2ItemFieldIterationValue" }
-                | { __typename: "ProjectV2ItemFieldLabelValue" }
-                | { __typename: "ProjectV2ItemFieldMilestoneValue" }
-                | { __typename: "ProjectV2ItemFieldNumberValue" }
-                | { __typename: "ProjectV2ItemFieldPullRequestValue" }
-                | { __typename: "ProjectV2ItemFieldRepositoryValue" }
-                | { __typename: "ProjectV2ItemFieldReviewerValue" }
-                | {
-                    __typename: "ProjectV2ItemFieldSingleSelectValue";
-                    name?: string | null;
-                    field:
-                      | { __typename?: "ProjectV2Field" }
-                      | { __typename?: "ProjectV2IterationField" }
-                      | { __typename?: "ProjectV2SingleSelectField"; id: string; name: string };
-                  }
-                | { __typename: "ProjectV2ItemFieldTextValue" }
-                | { __typename: "ProjectV2ItemFieldUserValue" }
-                | null
-              > | null;
-            };
-            content?:
-              | {
-                  __typename: "DraftIssue";
-                  id: string;
-                  title: string;
-                  body: string;
-                  createdAt: any;
-                  updatedAt: any;
-                }
-              | ({ __typename: "Issue" } & {
-                  " $fragmentRefs"?: { IssueFieldsFragment: IssueFieldsFragment };
-                })
-              | { __typename: "PullRequest" }
-              | null;
-          } | null> | null;
-        };
-      }
-    | { __typename: "ProjectV2Field" }
-    | { __typename: "ProjectV2Item" }
-    | { __typename: "ProjectV2ItemFieldDateValue" }
-    | { __typename: "ProjectV2ItemFieldIterationValue" }
-    | { __typename: "ProjectV2ItemFieldNumberValue" }
-    | { __typename: "ProjectV2ItemFieldSingleSelectValue" }
-    | { __typename: "ProjectV2ItemFieldTextValue" }
-    | { __typename: "ProjectV2IterationField" }
-    | { __typename: "ProjectV2SingleSelectField" }
-    | { __typename: "ProjectV2StatusUpdate" }
-    | { __typename: "ProjectV2View" }
-    | { __typename: "ProjectV2Workflow" }
-    | { __typename: "PublicKey" }
-    | { __typename: "PullRequest" }
-    | { __typename: "PullRequestCommit" }
-    | { __typename: "PullRequestCommitCommentThread" }
-    | { __typename: "PullRequestReview" }
-    | { __typename: "PullRequestReviewComment" }
-    | { __typename: "PullRequestReviewThread" }
-    | { __typename: "PullRequestThread" }
-    | { __typename: "Push" }
-    | { __typename: "PushAllowance" }
-    | { __typename: "Query" }
-    | { __typename: "Reaction" }
-    | { __typename: "ReadyForReviewEvent" }
-    | { __typename: "Ref" }
-    | { __typename: "ReferencedEvent" }
-    | { __typename: "Release" }
-    | { __typename: "ReleaseAsset" }
-    | { __typename: "RemovedFromMergeQueueEvent" }
-    | { __typename: "RemovedFromProjectEvent" }
-    | { __typename: "RenamedTitleEvent" }
-    | { __typename: "ReopenedEvent" }
-    | { __typename: "RepoAccessAuditEntry" }
-    | { __typename: "RepoAddMemberAuditEntry" }
-    | { __typename: "RepoAddTopicAuditEntry" }
-    | { __typename: "RepoArchivedAuditEntry" }
-    | { __typename: "RepoChangeMergeSettingAuditEntry" }
-    | { __typename: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigLockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoCreateAuditEntry" }
-    | { __typename: "RepoDestroyAuditEntry" }
-    | { __typename: "RepoRemoveMemberAuditEntry" }
-    | { __typename: "RepoRemoveTopicAuditEntry" }
-    | { __typename: "Repository" }
-    | { __typename: "RepositoryInvitation" }
-    | { __typename: "RepositoryMigration" }
-    | { __typename: "RepositoryRule" }
-    | { __typename: "RepositoryRuleset" }
-    | { __typename: "RepositoryRulesetBypassActor" }
-    | { __typename: "RepositoryTopic" }
-    | { __typename: "RepositoryVisibilityChangeDisableAuditEntry" }
-    | { __typename: "RepositoryVisibilityChangeEnableAuditEntry" }
-    | { __typename: "RepositoryVulnerabilityAlert" }
-    | { __typename: "ReviewDismissalAllowance" }
-    | { __typename: "ReviewDismissedEvent" }
-    | { __typename: "ReviewRequest" }
-    | { __typename: "ReviewRequestRemovedEvent" }
-    | { __typename: "ReviewRequestedEvent" }
-    | { __typename: "SavedReply" }
-    | { __typename: "SecurityAdvisory" }
-    | { __typename: "SponsorsActivity" }
-    | { __typename: "SponsorsListing" }
-    | { __typename: "SponsorsListingFeaturedItem" }
-    | { __typename: "SponsorsTier" }
-    | { __typename: "Sponsorship" }
-    | { __typename: "SponsorshipNewsletter" }
-    | { __typename: "Status" }
-    | { __typename: "StatusCheckRollup" }
-    | { __typename: "StatusContext" }
-    | { __typename: "SubIssueAddedEvent" }
-    | { __typename: "SubIssueRemovedEvent" }
-    | { __typename: "SubscribedEvent" }
-    | { __typename: "Tag" }
-    | { __typename: "Team" }
-    | { __typename: "TeamAddMemberAuditEntry" }
-    | { __typename: "TeamAddRepositoryAuditEntry" }
-    | { __typename: "TeamChangeParentTeamAuditEntry" }
-    | { __typename: "TeamDiscussion" }
-    | { __typename: "TeamDiscussionComment" }
-    | { __typename: "TeamRemoveMemberAuditEntry" }
-    | { __typename: "TeamRemoveRepositoryAuditEntry" }
-    | { __typename: "Topic" }
-    | { __typename: "TransferredEvent" }
-    | { __typename: "Tree" }
-    | { __typename: "UnassignedEvent" }
-    | { __typename: "UnlabeledEvent" }
-    | { __typename: "UnlockedEvent" }
-    | { __typename: "UnmarkedAsDuplicateEvent" }
-    | { __typename: "UnpinnedEvent" }
-    | { __typename: "UnsubscribedEvent" }
-    | { __typename: "User" }
-    | { __typename: "UserBlockedEvent" }
-    | { __typename: "UserContentEdit" }
-    | { __typename: "UserList" }
-    | { __typename: "UserNamespaceRepository" }
-    | { __typename: "UserStatus" }
-    | { __typename: "VerifiableDomain" }
-    | { __typename: "Workflow" }
-    | { __typename: "WorkflowRun" }
-    | { __typename: "WorkflowRunFile" }
-    | null;
-};
-
-export type LabelFieldsFragment = {
-  __typename?: "Label";
-  id: string;
-  name: string;
-  color: string;
-  description?: string | null;
-} & { " $fragmentName"?: "LabelFieldsFragment" };
-
-export type CreateLabelMutationVariables = Exact<{
-  repositoryId: Scalars["ID"];
-  name: Scalars["String"];
-  color: Scalars["String"];
-  description?: InputMaybe<Scalars["String"]>;
-}>;
-
-export type CreateLabelMutation = {
-  __typename?: "Mutation";
-  createLabel?: {
-    __typename?: "CreateLabelPayload";
-    label?:
-      | ({ __typename?: "Label" } & {
-          " $fragmentRefs"?: { LabelFieldsFragment: LabelFieldsFragment };
-        })
-      | null;
-  } | null;
-};
-
-export type GetLabelsQueryVariables = Exact<{
-  owner: Scalars["String"];
-  name: Scalars["String"];
-}>;
-
-export type GetLabelsQuery = {
-  __typename?: "Query";
-  repository?: {
-    __typename?: "Repository";
-    id: string;
-    labels?: {
-      __typename?: "LabelConnection";
-      nodes?: Array<
-        | ({ __typename?: "Label" } & {
-            " $fragmentRefs"?: { LabelFieldsFragment: LabelFieldsFragment };
-          })
-        | null
-      > | null;
-    } | null;
-  } | null;
-};
-
-export type ProjectFieldsFragment = {
-  __typename?: "ProjectV2";
-  id: string;
-  title: string;
-  shortDescription?: string | null;
-  url: any;
-  createdAt: any;
-  updatedAt: any;
-  owner:
-    | { __typename: "Issue" }
-    | { __typename: "Organization"; login: string; avatarUrl: any }
-    | { __typename: "PullRequest" }
-    | { __typename: "User"; login: string; avatarUrl: any };
-} & { " $fragmentName"?: "ProjectFieldsFragment" };
-
 export type CreateProjectMutationVariables = Exact<{
   input: CreateProjectV2Input;
 }>;
@@ -32828,11 +32743,15 @@ export type CreateProjectMutation = {
   __typename?: "Mutation";
   createProjectV2?: {
     __typename?: "CreateProjectV2Payload";
-    projectV2?:
-      | ({ __typename?: "ProjectV2" } & {
-          " $fragmentRefs"?: { ProjectFieldsFragment: ProjectFieldsFragment };
-        })
-      | null;
+    projectV2?: {
+      __typename?: "ProjectV2";
+      id: string;
+      title: string;
+      number: number;
+      url: any;
+      createdAt: any;
+      updatedAt: any;
+    } | null;
   } | null;
 };
 
@@ -32844,7 +32763,314 @@ export type DeleteProjectMutation = {
   __typename?: "Mutation";
   deleteProjectV2?: {
     __typename?: "DeleteProjectV2Payload";
-    projectV2?: { __typename?: "ProjectV2"; id: string } | null;
+    clientMutationId?: string | null;
+  } | null;
+};
+
+export type GetProjectQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type GetProjectQuery = {
+  __typename?: "Query";
+  node?:
+    | { __typename?: "AddedToMergeQueueEvent" }
+    | { __typename?: "AddedToProjectEvent" }
+    | { __typename?: "App" }
+    | { __typename?: "AssignedEvent" }
+    | { __typename?: "AutoMergeDisabledEvent" }
+    | { __typename?: "AutoMergeEnabledEvent" }
+    | { __typename?: "AutoRebaseEnabledEvent" }
+    | { __typename?: "AutoSquashEnabledEvent" }
+    | { __typename?: "AutomaticBaseChangeFailedEvent" }
+    | { __typename?: "AutomaticBaseChangeSucceededEvent" }
+    | { __typename?: "BaseRefChangedEvent" }
+    | { __typename?: "BaseRefDeletedEvent" }
+    | { __typename?: "BaseRefForcePushedEvent" }
+    | { __typename?: "Blob" }
+    | { __typename?: "Bot" }
+    | { __typename?: "BranchProtectionRule" }
+    | { __typename?: "BypassForcePushAllowance" }
+    | { __typename?: "BypassPullRequestAllowance" }
+    | { __typename?: "CWE" }
+    | { __typename?: "CheckRun" }
+    | { __typename?: "CheckSuite" }
+    | { __typename?: "ClosedEvent" }
+    | { __typename?: "CodeOfConduct" }
+    | { __typename?: "CommentDeletedEvent" }
+    | { __typename?: "Commit" }
+    | { __typename?: "CommitComment" }
+    | { __typename?: "CommitCommentThread" }
+    | { __typename?: "Comparison" }
+    | { __typename?: "ConnectedEvent" }
+    | { __typename?: "ConvertToDraftEvent" }
+    | { __typename?: "ConvertedNoteToIssueEvent" }
+    | { __typename?: "ConvertedToDiscussionEvent" }
+    | { __typename?: "CrossReferencedEvent" }
+    | { __typename?: "DemilestonedEvent" }
+    | { __typename?: "DependencyGraphManifest" }
+    | { __typename?: "DeployKey" }
+    | { __typename?: "DeployedEvent" }
+    | { __typename?: "Deployment" }
+    | { __typename?: "DeploymentEnvironmentChangedEvent" }
+    | { __typename?: "DeploymentReview" }
+    | { __typename?: "DeploymentStatus" }
+    | { __typename?: "DisconnectedEvent" }
+    | { __typename?: "Discussion" }
+    | { __typename?: "DiscussionCategory" }
+    | { __typename?: "DiscussionComment" }
+    | { __typename?: "DiscussionPoll" }
+    | { __typename?: "DiscussionPollOption" }
+    | { __typename?: "DraftIssue" }
+    | { __typename?: "Enterprise" }
+    | { __typename?: "EnterpriseAdministratorInvitation" }
+    | { __typename?: "EnterpriseIdentityProvider" }
+    | { __typename?: "EnterpriseMemberInvitation" }
+    | { __typename?: "EnterpriseRepositoryInfo" }
+    | { __typename?: "EnterpriseServerInstallation" }
+    | { __typename?: "EnterpriseServerUserAccount" }
+    | { __typename?: "EnterpriseServerUserAccountEmail" }
+    | { __typename?: "EnterpriseServerUserAccountsUpload" }
+    | { __typename?: "EnterpriseUserAccount" }
+    | { __typename?: "Environment" }
+    | { __typename?: "ExternalIdentity" }
+    | { __typename?: "Gist" }
+    | { __typename?: "GistComment" }
+    | { __typename?: "HeadRefDeletedEvent" }
+    | { __typename?: "HeadRefForcePushedEvent" }
+    | { __typename?: "HeadRefRestoredEvent" }
+    | { __typename?: "IpAllowListEntry" }
+    | { __typename?: "Issue" }
+    | { __typename?: "IssueComment" }
+    | { __typename?: "IssueType" }
+    | { __typename?: "IssueTypeAddedEvent" }
+    | { __typename?: "IssueTypeChangedEvent" }
+    | { __typename?: "IssueTypeRemovedEvent" }
+    | { __typename?: "Label" }
+    | { __typename?: "LabeledEvent" }
+    | { __typename?: "Language" }
+    | { __typename?: "License" }
+    | { __typename?: "LinkedBranch" }
+    | { __typename?: "LockedEvent" }
+    | { __typename?: "Mannequin" }
+    | { __typename?: "MarkedAsDuplicateEvent" }
+    | { __typename?: "MarketplaceCategory" }
+    | { __typename?: "MarketplaceListing" }
+    | { __typename?: "MemberFeatureRequestNotification" }
+    | { __typename?: "MembersCanDeleteReposClearAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposDisableAuditEntry" }
+    | { __typename?: "MembersCanDeleteReposEnableAuditEntry" }
+    | { __typename?: "MentionedEvent" }
+    | { __typename?: "MergeQueue" }
+    | { __typename?: "MergeQueueEntry" }
+    | { __typename?: "MergedEvent" }
+    | { __typename?: "MigrationSource" }
+    | { __typename?: "Milestone" }
+    | { __typename?: "MilestonedEvent" }
+    | { __typename?: "MovedColumnsInProjectEvent" }
+    | { __typename?: "OIDCProvider" }
+    | { __typename?: "OauthApplicationCreateAuditEntry" }
+    | { __typename?: "OrgAddBillingManagerAuditEntry" }
+    | { __typename?: "OrgAddMemberAuditEntry" }
+    | { __typename?: "OrgBlockUserAuditEntry" }
+    | { __typename?: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "OrgCreateAuditEntry" }
+    | { __typename?: "OrgDisableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgDisableSamlAuditEntry" }
+    | { __typename?: "OrgDisableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgEnableOauthAppRestrictionsAuditEntry" }
+    | { __typename?: "OrgEnableSamlAuditEntry" }
+    | { __typename?: "OrgEnableTwoFactorRequirementAuditEntry" }
+    | { __typename?: "OrgInviteMemberAuditEntry" }
+    | { __typename?: "OrgInviteToBusinessAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessApprovedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessBlockedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessDeniedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessRequestedAuditEntry" }
+    | { __typename?: "OrgOauthAppAccessUnblockedAuditEntry" }
+    | { __typename?: "OrgRemoveBillingManagerAuditEntry" }
+    | { __typename?: "OrgRemoveMemberAuditEntry" }
+    | { __typename?: "OrgRemoveOutsideCollaboratorAuditEntry" }
+    | { __typename?: "OrgRestoreMemberAuditEntry" }
+    | { __typename?: "OrgUnblockUserAuditEntry" }
+    | { __typename?: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
+    | { __typename?: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
+    | { __typename?: "Organization" }
+    | { __typename?: "OrganizationIdentityProvider" }
+    | { __typename?: "OrganizationInvitation" }
+    | { __typename?: "OrganizationMigration" }
+    | { __typename?: "Package" }
+    | { __typename?: "PackageFile" }
+    | { __typename?: "PackageTag" }
+    | { __typename?: "PackageVersion" }
+    | { __typename?: "ParentIssueAddedEvent" }
+    | { __typename?: "ParentIssueRemovedEvent" }
+    | { __typename?: "PinnedDiscussion" }
+    | { __typename?: "PinnedEnvironment" }
+    | { __typename?: "PinnedEvent" }
+    | { __typename?: "PinnedIssue" }
+    | { __typename?: "PrivateRepositoryForkingDisableAuditEntry" }
+    | { __typename?: "PrivateRepositoryForkingEnableAuditEntry" }
+    | { __typename?: "Project" }
+    | { __typename?: "ProjectCard" }
+    | { __typename?: "ProjectColumn" }
+    | {
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        number: number;
+        closed: boolean;
+        url: any;
+        createdAt: any;
+        updatedAt: any;
+      }
+    | { __typename?: "ProjectV2Field" }
+    | { __typename?: "ProjectV2Item" }
+    | { __typename?: "ProjectV2ItemFieldDateValue" }
+    | { __typename?: "ProjectV2ItemFieldIterationValue" }
+    | { __typename?: "ProjectV2ItemFieldNumberValue" }
+    | { __typename?: "ProjectV2ItemFieldSingleSelectValue" }
+    | { __typename?: "ProjectV2ItemFieldTextValue" }
+    | { __typename?: "ProjectV2IterationField" }
+    | { __typename?: "ProjectV2SingleSelectField" }
+    | { __typename?: "ProjectV2StatusUpdate" }
+    | { __typename?: "ProjectV2View" }
+    | { __typename?: "ProjectV2Workflow" }
+    | { __typename?: "PublicKey" }
+    | { __typename?: "PullRequest" }
+    | { __typename?: "PullRequestCommit" }
+    | { __typename?: "PullRequestCommitCommentThread" }
+    | { __typename?: "PullRequestReview" }
+    | { __typename?: "PullRequestReviewComment" }
+    | { __typename?: "PullRequestReviewThread" }
+    | { __typename?: "PullRequestThread" }
+    | { __typename?: "Push" }
+    | { __typename?: "PushAllowance" }
+    | { __typename?: "Query" }
+    | { __typename?: "Reaction" }
+    | { __typename?: "ReadyForReviewEvent" }
+    | { __typename?: "Ref" }
+    | { __typename?: "ReferencedEvent" }
+    | { __typename?: "Release" }
+    | { __typename?: "ReleaseAsset" }
+    | { __typename?: "RemovedFromMergeQueueEvent" }
+    | { __typename?: "RemovedFromProjectEvent" }
+    | { __typename?: "RenamedTitleEvent" }
+    | { __typename?: "ReopenedEvent" }
+    | { __typename?: "RepoAccessAuditEntry" }
+    | { __typename?: "RepoAddMemberAuditEntry" }
+    | { __typename?: "RepoAddTopicAuditEntry" }
+    | { __typename?: "RepoArchivedAuditEntry" }
+    | { __typename?: "RepoChangeMergeSettingAuditEntry" }
+    | { __typename?: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableContributorsOnlyAuditEntry" }
+    | { __typename?: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
+    | { __typename?: "RepoConfigLockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
+    | { __typename?: "RepoCreateAuditEntry" }
+    | { __typename?: "RepoDestroyAuditEntry" }
+    | { __typename?: "RepoRemoveMemberAuditEntry" }
+    | { __typename?: "RepoRemoveTopicAuditEntry" }
+    | { __typename?: "Repository" }
+    | { __typename?: "RepositoryInvitation" }
+    | { __typename?: "RepositoryMigration" }
+    | { __typename?: "RepositoryRule" }
+    | { __typename?: "RepositoryRuleset" }
+    | { __typename?: "RepositoryRulesetBypassActor" }
+    | { __typename?: "RepositoryTopic" }
+    | { __typename?: "RepositoryVisibilityChangeDisableAuditEntry" }
+    | { __typename?: "RepositoryVisibilityChangeEnableAuditEntry" }
+    | { __typename?: "RepositoryVulnerabilityAlert" }
+    | { __typename?: "ReviewDismissalAllowance" }
+    | { __typename?: "ReviewDismissedEvent" }
+    | { __typename?: "ReviewRequest" }
+    | { __typename?: "ReviewRequestRemovedEvent" }
+    | { __typename?: "ReviewRequestedEvent" }
+    | { __typename?: "SavedReply" }
+    | { __typename?: "SecurityAdvisory" }
+    | { __typename?: "SponsorsActivity" }
+    | { __typename?: "SponsorsListing" }
+    | { __typename?: "SponsorsListingFeaturedItem" }
+    | { __typename?: "SponsorsTier" }
+    | { __typename?: "Sponsorship" }
+    | { __typename?: "SponsorshipNewsletter" }
+    | { __typename?: "Status" }
+    | { __typename?: "StatusCheckRollup" }
+    | { __typename?: "StatusContext" }
+    | { __typename?: "SubIssueAddedEvent" }
+    | { __typename?: "SubIssueRemovedEvent" }
+    | { __typename?: "SubscribedEvent" }
+    | { __typename?: "Tag" }
+    | { __typename?: "Team" }
+    | { __typename?: "TeamAddMemberAuditEntry" }
+    | { __typename?: "TeamAddRepositoryAuditEntry" }
+    | { __typename?: "TeamChangeParentTeamAuditEntry" }
+    | { __typename?: "TeamDiscussion" }
+    | { __typename?: "TeamDiscussionComment" }
+    | { __typename?: "TeamRemoveMemberAuditEntry" }
+    | { __typename?: "TeamRemoveRepositoryAuditEntry" }
+    | { __typename?: "Topic" }
+    | { __typename?: "TransferredEvent" }
+    | { __typename?: "Tree" }
+    | { __typename?: "UnassignedEvent" }
+    | { __typename?: "UnlabeledEvent" }
+    | { __typename?: "UnlockedEvent" }
+    | { __typename?: "UnmarkedAsDuplicateEvent" }
+    | { __typename?: "UnpinnedEvent" }
+    | { __typename?: "UnsubscribedEvent" }
+    | { __typename?: "User" }
+    | { __typename?: "UserBlockedEvent" }
+    | { __typename?: "UserContentEdit" }
+    | { __typename?: "UserList" }
+    | { __typename?: "UserNamespaceRepository" }
+    | { __typename?: "UserStatus" }
+    | { __typename?: "VerifiableDomain" }
+    | { __typename?: "Workflow" }
+    | { __typename?: "WorkflowRun" }
+    | { __typename?: "WorkflowRunFile" }
+    | null;
+};
+
+export type GetProjectsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetProjectsQuery = {
+  __typename?: "Query";
+  viewer: {
+    __typename?: "User";
+    projectsV2: {
+      __typename?: "ProjectV2Connection";
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        number: number;
+        closed: boolean;
+        url: any;
+        createdAt: any;
+        updatedAt: any;
+      } | null> | null;
+    };
+  };
+};
+
+export type LinkRepositoryToProjectMutationVariables = Exact<{
+  input: LinkProjectV2ToRepositoryInput;
+}>;
+
+export type LinkRepositoryToProjectMutation = {
+  __typename?: "Mutation";
+  linkProjectV2ToRepository?: {
+    __typename?: "LinkProjectV2ToRepositoryPayload";
+    clientMutationId?: string | null;
+    repository?: { __typename?: "Repository"; id: string; name: string; url: any } | null;
   } | null;
 };
 
@@ -32856,351 +33082,52 @@ export type UpdateProjectMutation = {
   __typename?: "Mutation";
   updateProjectV2?: {
     __typename?: "UpdateProjectV2Payload";
-    projectV2?:
-      | ({ __typename?: "ProjectV2" } & {
-          " $fragmentRefs"?: { ProjectFieldsFragment: ProjectFieldsFragment };
-        })
-      | null;
+    projectV2?: {
+      __typename?: "ProjectV2";
+      id: string;
+      title: string;
+      number: number;
+      url: any;
+      closed: boolean;
+      updatedAt: any;
+    } | null;
   } | null;
 };
 
-export type GetProjectQueryVariables = Exact<{
-  id: Scalars["ID"];
+export type AddRepositoryCollaboratorMutationVariables = Exact<{
+  repositoryId: Scalars["ID"];
+  userLogin: Scalars["String"];
+  permission: RepositoryPermission;
 }>;
 
-export type GetProjectQuery = {
-  __typename?: "Query";
-  node?:
-    | { __typename: "AddedToMergeQueueEvent" }
-    | { __typename: "AddedToProjectEvent" }
-    | { __typename: "App" }
-    | { __typename: "AssignedEvent" }
-    | { __typename: "AutoMergeDisabledEvent" }
-    | { __typename: "AutoMergeEnabledEvent" }
-    | { __typename: "AutoRebaseEnabledEvent" }
-    | { __typename: "AutoSquashEnabledEvent" }
-    | { __typename: "AutomaticBaseChangeFailedEvent" }
-    | { __typename: "AutomaticBaseChangeSucceededEvent" }
-    | { __typename: "BaseRefChangedEvent" }
-    | { __typename: "BaseRefDeletedEvent" }
-    | { __typename: "BaseRefForcePushedEvent" }
-    | { __typename: "Blob" }
-    | { __typename: "Bot" }
-    | { __typename: "BranchProtectionRule" }
-    | { __typename: "BypassForcePushAllowance" }
-    | { __typename: "BypassPullRequestAllowance" }
-    | { __typename: "CWE" }
-    | { __typename: "CheckRun" }
-    | { __typename: "CheckSuite" }
-    | { __typename: "ClosedEvent" }
-    | { __typename: "CodeOfConduct" }
-    | { __typename: "CommentDeletedEvent" }
-    | { __typename: "Commit" }
-    | { __typename: "CommitComment" }
-    | { __typename: "CommitCommentThread" }
-    | { __typename: "Comparison" }
-    | { __typename: "ConnectedEvent" }
-    | { __typename: "ConvertToDraftEvent" }
-    | { __typename: "ConvertedNoteToIssueEvent" }
-    | { __typename: "ConvertedToDiscussionEvent" }
-    | { __typename: "CrossReferencedEvent" }
-    | { __typename: "DemilestonedEvent" }
-    | { __typename: "DependencyGraphManifest" }
-    | { __typename: "DeployKey" }
-    | { __typename: "DeployedEvent" }
-    | { __typename: "Deployment" }
-    | { __typename: "DeploymentEnvironmentChangedEvent" }
-    | { __typename: "DeploymentReview" }
-    | { __typename: "DeploymentStatus" }
-    | { __typename: "DisconnectedEvent" }
-    | { __typename: "Discussion" }
-    | { __typename: "DiscussionCategory" }
-    | { __typename: "DiscussionComment" }
-    | { __typename: "DiscussionPoll" }
-    | { __typename: "DiscussionPollOption" }
-    | { __typename: "DraftIssue" }
-    | { __typename: "Enterprise" }
-    | { __typename: "EnterpriseAdministratorInvitation" }
-    | { __typename: "EnterpriseIdentityProvider" }
-    | { __typename: "EnterpriseMemberInvitation" }
-    | { __typename: "EnterpriseRepositoryInfo" }
-    | { __typename: "EnterpriseServerInstallation" }
-    | { __typename: "EnterpriseServerUserAccount" }
-    | { __typename: "EnterpriseServerUserAccountEmail" }
-    | { __typename: "EnterpriseServerUserAccountsUpload" }
-    | { __typename: "EnterpriseUserAccount" }
-    | { __typename: "Environment" }
-    | { __typename: "ExternalIdentity" }
-    | { __typename: "Gist" }
-    | { __typename: "GistComment" }
-    | { __typename: "HeadRefDeletedEvent" }
-    | { __typename: "HeadRefForcePushedEvent" }
-    | { __typename: "HeadRefRestoredEvent" }
-    | { __typename: "IpAllowListEntry" }
-    | { __typename: "Issue" }
-    | { __typename: "IssueComment" }
-    | { __typename: "IssueType" }
-    | { __typename: "IssueTypeAddedEvent" }
-    | { __typename: "IssueTypeChangedEvent" }
-    | { __typename: "IssueTypeRemovedEvent" }
-    | { __typename: "Label" }
-    | { __typename: "LabeledEvent" }
-    | { __typename: "Language" }
-    | { __typename: "License" }
-    | { __typename: "LinkedBranch" }
-    | { __typename: "LockedEvent" }
-    | { __typename: "Mannequin" }
-    | { __typename: "MarkedAsDuplicateEvent" }
-    | { __typename: "MarketplaceCategory" }
-    | { __typename: "MarketplaceListing" }
-    | { __typename: "MemberFeatureRequestNotification" }
-    | { __typename: "MembersCanDeleteReposClearAuditEntry" }
-    | { __typename: "MembersCanDeleteReposDisableAuditEntry" }
-    | { __typename: "MembersCanDeleteReposEnableAuditEntry" }
-    | { __typename: "MentionedEvent" }
-    | { __typename: "MergeQueue" }
-    | { __typename: "MergeQueueEntry" }
-    | { __typename: "MergedEvent" }
-    | { __typename: "MigrationSource" }
-    | { __typename: "Milestone" }
-    | { __typename: "MilestonedEvent" }
-    | { __typename: "MovedColumnsInProjectEvent" }
-    | { __typename: "OIDCProvider" }
-    | { __typename: "OauthApplicationCreateAuditEntry" }
-    | { __typename: "OrgAddBillingManagerAuditEntry" }
-    | { __typename: "OrgAddMemberAuditEntry" }
-    | { __typename: "OrgBlockUserAuditEntry" }
-    | { __typename: "OrgConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "OrgCreateAuditEntry" }
-    | { __typename: "OrgDisableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgDisableSamlAuditEntry" }
-    | { __typename: "OrgDisableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgEnableOauthAppRestrictionsAuditEntry" }
-    | { __typename: "OrgEnableSamlAuditEntry" }
-    | { __typename: "OrgEnableTwoFactorRequirementAuditEntry" }
-    | { __typename: "OrgInviteMemberAuditEntry" }
-    | { __typename: "OrgInviteToBusinessAuditEntry" }
-    | { __typename: "OrgOauthAppAccessApprovedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessBlockedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessDeniedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessRequestedAuditEntry" }
-    | { __typename: "OrgOauthAppAccessUnblockedAuditEntry" }
-    | { __typename: "OrgRemoveBillingManagerAuditEntry" }
-    | { __typename: "OrgRemoveMemberAuditEntry" }
-    | { __typename: "OrgRemoveOutsideCollaboratorAuditEntry" }
-    | { __typename: "OrgRestoreMemberAuditEntry" }
-    | { __typename: "OrgUnblockUserAuditEntry" }
-    | { __typename: "OrgUpdateDefaultRepositoryPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryCreationPermissionAuditEntry" }
-    | { __typename: "OrgUpdateMemberRepositoryInvitationPermissionAuditEntry" }
-    | { __typename: "Organization" }
-    | { __typename: "OrganizationIdentityProvider" }
-    | { __typename: "OrganizationInvitation" }
-    | { __typename: "OrganizationMigration" }
-    | { __typename: "Package" }
-    | { __typename: "PackageFile" }
-    | { __typename: "PackageTag" }
-    | { __typename: "PackageVersion" }
-    | { __typename: "ParentIssueAddedEvent" }
-    | { __typename: "ParentIssueRemovedEvent" }
-    | { __typename: "PinnedDiscussion" }
-    | { __typename: "PinnedEnvironment" }
-    | { __typename: "PinnedEvent" }
-    | { __typename: "PinnedIssue" }
-    | { __typename: "PrivateRepositoryForkingDisableAuditEntry" }
-    | { __typename: "PrivateRepositoryForkingEnableAuditEntry" }
-    | { __typename: "Project" }
-    | { __typename: "ProjectCard" }
-    | { __typename: "ProjectColumn" }
-    | ({ __typename: "ProjectV2" } & {
-        " $fragmentRefs"?: { ProjectFieldsFragment: ProjectFieldsFragment };
-      })
-    | { __typename: "ProjectV2Field" }
-    | { __typename: "ProjectV2Item" }
-    | { __typename: "ProjectV2ItemFieldDateValue" }
-    | { __typename: "ProjectV2ItemFieldIterationValue" }
-    | { __typename: "ProjectV2ItemFieldNumberValue" }
-    | { __typename: "ProjectV2ItemFieldSingleSelectValue" }
-    | { __typename: "ProjectV2ItemFieldTextValue" }
-    | { __typename: "ProjectV2IterationField" }
-    | { __typename: "ProjectV2SingleSelectField" }
-    | { __typename: "ProjectV2StatusUpdate" }
-    | { __typename: "ProjectV2View" }
-    | { __typename: "ProjectV2Workflow" }
-    | { __typename: "PublicKey" }
-    | { __typename: "PullRequest" }
-    | { __typename: "PullRequestCommit" }
-    | { __typename: "PullRequestCommitCommentThread" }
-    | { __typename: "PullRequestReview" }
-    | { __typename: "PullRequestReviewComment" }
-    | { __typename: "PullRequestReviewThread" }
-    | { __typename: "PullRequestThread" }
-    | { __typename: "Push" }
-    | { __typename: "PushAllowance" }
-    | { __typename: "Query" }
-    | { __typename: "Reaction" }
-    | { __typename: "ReadyForReviewEvent" }
-    | { __typename: "Ref" }
-    | { __typename: "ReferencedEvent" }
-    | { __typename: "Release" }
-    | { __typename: "ReleaseAsset" }
-    | { __typename: "RemovedFromMergeQueueEvent" }
-    | { __typename: "RemovedFromProjectEvent" }
-    | { __typename: "RenamedTitleEvent" }
-    | { __typename: "ReopenedEvent" }
-    | { __typename: "RepoAccessAuditEntry" }
-    | { __typename: "RepoAddMemberAuditEntry" }
-    | { __typename: "RepoAddTopicAuditEntry" }
-    | { __typename: "RepoArchivedAuditEntry" }
-    | { __typename: "RepoChangeMergeSettingAuditEntry" }
-    | { __typename: "RepoConfigDisableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigDisableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigDisableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigEnableAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigEnableCollaboratorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableContributorsOnlyAuditEntry" }
-    | { __typename: "RepoConfigEnableSockpuppetDisallowedAuditEntry" }
-    | { __typename: "RepoConfigLockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoConfigUnlockAnonymousGitAccessAuditEntry" }
-    | { __typename: "RepoCreateAuditEntry" }
-    | { __typename: "RepoDestroyAuditEntry" }
-    | { __typename: "RepoRemoveMemberAuditEntry" }
-    | { __typename: "RepoRemoveTopicAuditEntry" }
-    | { __typename: "Repository" }
-    | { __typename: "RepositoryInvitation" }
-    | { __typename: "RepositoryMigration" }
-    | { __typename: "RepositoryRule" }
-    | { __typename: "RepositoryRuleset" }
-    | { __typename: "RepositoryRulesetBypassActor" }
-    | { __typename: "RepositoryTopic" }
-    | { __typename: "RepositoryVisibilityChangeDisableAuditEntry" }
-    | { __typename: "RepositoryVisibilityChangeEnableAuditEntry" }
-    | { __typename: "RepositoryVulnerabilityAlert" }
-    | { __typename: "ReviewDismissalAllowance" }
-    | { __typename: "ReviewDismissedEvent" }
-    | { __typename: "ReviewRequest" }
-    | { __typename: "ReviewRequestRemovedEvent" }
-    | { __typename: "ReviewRequestedEvent" }
-    | { __typename: "SavedReply" }
-    | { __typename: "SecurityAdvisory" }
-    | { __typename: "SponsorsActivity" }
-    | { __typename: "SponsorsListing" }
-    | { __typename: "SponsorsListingFeaturedItem" }
-    | { __typename: "SponsorsTier" }
-    | { __typename: "Sponsorship" }
-    | { __typename: "SponsorshipNewsletter" }
-    | { __typename: "Status" }
-    | { __typename: "StatusCheckRollup" }
-    | { __typename: "StatusContext" }
-    | { __typename: "SubIssueAddedEvent" }
-    | { __typename: "SubIssueRemovedEvent" }
-    | { __typename: "SubscribedEvent" }
-    | { __typename: "Tag" }
-    | { __typename: "Team" }
-    | { __typename: "TeamAddMemberAuditEntry" }
-    | { __typename: "TeamAddRepositoryAuditEntry" }
-    | { __typename: "TeamChangeParentTeamAuditEntry" }
-    | { __typename: "TeamDiscussion" }
-    | { __typename: "TeamDiscussionComment" }
-    | { __typename: "TeamRemoveMemberAuditEntry" }
-    | { __typename: "TeamRemoveRepositoryAuditEntry" }
-    | { __typename: "Topic" }
-    | { __typename: "TransferredEvent" }
-    | { __typename: "Tree" }
-    | { __typename: "UnassignedEvent" }
-    | { __typename: "UnlabeledEvent" }
-    | { __typename: "UnlockedEvent" }
-    | { __typename: "UnmarkedAsDuplicateEvent" }
-    | { __typename: "UnpinnedEvent" }
-    | { __typename: "UnsubscribedEvent" }
-    | { __typename: "User" }
-    | { __typename: "UserBlockedEvent" }
-    | { __typename: "UserContentEdit" }
-    | { __typename: "UserList" }
-    | { __typename: "UserNamespaceRepository" }
-    | { __typename: "UserStatus" }
-    | { __typename: "VerifiableDomain" }
-    | { __typename: "Workflow" }
-    | { __typename: "WorkflowRun" }
-    | { __typename: "WorkflowRunFile" }
-    | null;
+export type AddRepositoryCollaboratorMutation = {
+  __typename?: "Mutation";
+  addAssignable?: {
+    __typename?: "AddAssigneesToAssignablePayload";
+    clientMutationId?: string | null;
+  } | null;
 };
 
-export type GetProjectsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type GetProjectsQuery = {
-  __typename?: "Query";
-  viewer: {
-    __typename?: "User";
-    id: string;
-    projectsV2: {
-      __typename?: "ProjectV2Connection";
-      nodes?: Array<
-        | ({ __typename?: "ProjectV2" } & {
-            " $fragmentRefs"?: { ProjectFieldsFragment: ProjectFieldsFragment };
-          })
-        | null
-      > | null;
-    };
-  };
-};
-
-export type GetViewerQueryVariables = Exact<{ [key: string]: never }>;
-
-export type GetViewerQuery = {
-  __typename?: "Query";
-  viewer: { __typename?: "User"; id: string; login: string; avatarUrl: any };
-};
-
-export type GetUserRepositoriesQueryVariables = Exact<{ [key: string]: never }>;
-
-export type GetUserRepositoriesQuery = {
-  __typename?: "Query";
-  viewer: {
-    __typename?: "User";
-    repositories: {
-      __typename?: "RepositoryConnection";
-      nodes?: Array<{
-        __typename?: "Repository";
-        id: string;
-        name: string;
-        description?: string | null;
-        url: any;
-        createdAt: any;
-        owner:
-          | { __typename?: "Organization"; login: string; avatarUrl: any }
-          | { __typename?: "User"; login: string; avatarUrl: any };
-      } | null> | null;
-    };
-  };
-};
-
-export type RepositoryFieldsFragment = {
-  __typename?: "Repository";
-  id: string;
-  name: string;
-  description?: string | null;
-  url: any;
-  owner:
-    | { __typename?: "Organization"; login: string; avatarUrl: any }
-    | { __typename?: "User"; login: string; avatarUrl: any };
-} & { " $fragmentName"?: "RepositoryFieldsFragment" };
-
-export type GetRepositoryQueryVariables = Exact<{
-  owner: Scalars["String"];
-  name: Scalars["String"];
+export type CreateRepositoryMutationVariables = Exact<{
+  input: CreateRepositoryInput;
 }>;
 
-export type GetRepositoryQuery = {
-  __typename?: "Query";
-  repository?:
-    | ({ __typename?: "Repository" } & {
-        " $fragmentRefs"?: { RepositoryFieldsFragment: RepositoryFieldsFragment };
-      })
-    | null;
+export type CreateRepositoryMutation = {
+  __typename?: "Mutation";
+  createRepository?: {
+    __typename?: "CreateRepositoryPayload";
+    repository?: {
+      __typename?: "Repository";
+      id: string;
+      name: string;
+      description?: string | null;
+      url: any;
+      createdAt: any;
+      owner:
+        | { __typename?: "Organization"; login: string; avatarUrl: any }
+        | { __typename?: "User"; login: string; avatarUrl: any };
+    } | null;
+  } | null;
 };
 
 export type GetRepoCollaboratorsQueryVariables = Exact<{
@@ -33212,7 +33139,6 @@ export type GetRepoCollaboratorsQuery = {
   __typename?: "Query";
   repository?: {
     __typename?: "Repository";
-    id: string;
     collaborators?: {
       __typename?: "RepositoryCollaboratorConnection";
       nodes?: Array<{
@@ -33229,34 +33155,100 @@ export type GetRepoCollaboratorsQuery = {
   } | null;
 };
 
+export type GetRepositoryQueryVariables = Exact<{
+  owner: Scalars["String"];
+  name: Scalars["String"];
+}>;
+
+export type GetRepositoryQuery = {
+  __typename?: "Query";
+  repository?: {
+    __typename?: "Repository";
+    id: string;
+    name: string;
+    description?: string | null;
+    url: any;
+    createdAt: any;
+    isPrivate: boolean;
+    owner:
+      | { __typename?: "Organization"; login: string; avatarUrl: any }
+      | { __typename?: "User"; login: string; avatarUrl: any };
+    collaborators?: {
+      __typename?: "RepositoryCollaboratorConnection";
+      nodes?: Array<{
+        __typename?: "User";
+        id: string;
+        login: string;
+        avatarUrl: any;
+      } | null> | null;
+      edges?: Array<{
+        __typename?: "RepositoryCollaboratorEdge";
+        permission: RepositoryPermission;
+      } | null> | null;
+    } | null;
+    projectsV2: {
+      __typename?: "ProjectV2Connection";
+      nodes?: Array<{
+        __typename?: "ProjectV2";
+        id: string;
+        title: string;
+        number: number;
+        url: any;
+      } | null> | null;
+    };
+  } | null;
+};
+
+export type GetUserRepositoriesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars["Int"]>;
+}>;
+
+export type GetUserRepositoriesQuery = {
+  __typename?: "Query";
+  viewer: {
+    __typename?: "User";
+    repositories: {
+      __typename?: "RepositoryConnection";
+      nodes?: Array<{
+        __typename?: "Repository";
+        id: string;
+        name: string;
+        description?: string | null;
+        url: any;
+        createdAt: any;
+        isPrivate: boolean;
+        owner:
+          | { __typename?: "Organization"; login: string; avatarUrl: any }
+          | { __typename?: "User"; login: string; avatarUrl: any };
+      } | null> | null;
+    };
+  };
+};
+
 export type GetUserQueryVariables = Exact<{
-  username: Scalars["String"];
+  login: Scalars["String"];
 }>;
 
 export type GetUserQuery = {
   __typename?: "Query";
-  user?: { __typename?: "User"; id: string; login: string; avatarUrl: any } | null;
+  user?: {
+    __typename?: "User";
+    id: string;
+    login: string;
+    name?: string | null;
+    avatarUrl: any;
+    url: any;
+    bio?: string | null;
+  } | null;
 };
 
-export const CollaboratorFieldsFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CollaboratorFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "login" } },
-          { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CollaboratorFieldsFragment, unknown>;
+export type GetViewerQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetViewerQuery = {
+  __typename?: "Query";
+  viewer: { __typename?: "User"; id: string; login: string; avatarUrl: any };
+};
+
 export const ColumnFieldsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33303,10 +33295,8 @@ export const IssueFieldsFragmentDoc = {
           { kind: "Field", name: { kind: "Name", value: "title" } },
           { kind: "Field", name: { kind: "Name", value: "body" } },
           { kind: "Field", name: { kind: "Name", value: "number" } },
-          { kind: "Field", name: { kind: "Name", value: "state" } },
           { kind: "Field", name: { kind: "Name", value: "createdAt" } },
           { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
           {
             kind: "Field",
             name: { kind: "Name", value: "labels" },
@@ -33336,41 +33326,11 @@ export const IssueFieldsFragmentDoc = {
               ],
             },
           },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "author" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "login" } },
-                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-              ],
-            },
-          },
         ],
       },
     },
   ],
 } as unknown as DocumentNode<IssueFieldsFragment, unknown>;
-export const LabelFieldsFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "LabelFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Label" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "color" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<LabelFieldsFragment, unknown>;
 export const ProjectFieldsFragmentDoc = {
   kind: "Document",
   definitions: [
@@ -33427,36 +33387,6 @@ export const ProjectFieldsFragmentDoc = {
     },
   ],
 } as unknown as DocumentNode<ProjectFieldsFragment, unknown>;
-export const RepositoryFieldsFragmentDoc = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "RepositoryFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Repository" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "login" } },
-                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<RepositoryFieldsFragment, unknown>;
 export const UpdateProjectCollaboratorsDocument = {
   kind: "Document",
   definitions: [
@@ -33528,122 +33458,6 @@ export const UpdateProjectCollaboratorsDocument = {
   UpdateProjectCollaboratorsMutation,
   UpdateProjectCollaboratorsMutationVariables
 >;
-export const GetRepositoryCollaboratorsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetRepositoryCollaborators" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "repository" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "owner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "name" },
-                value: { kind: "Variable", name: { kind: "Name", value: "name" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "collaborators" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "IntValue", value: "100" },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "affiliation" },
-                      value: { kind: "EnumValue", value: "ALL" },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "nodes" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "CollaboratorFields" },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "edges" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            { kind: "Field", name: { kind: "Name", value: "permission" } },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "CollaboratorFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "login" } },
-          { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<
-  GetRepositoryCollaboratorsQuery,
-  GetRepositoryCollaboratorsQueryVariables
->;
 export const GetColumnsDocument = {
   kind: "Document",
   definitions: [
@@ -33677,14 +33491,12 @@ export const GetColumnsDocument = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
                 {
                   kind: "InlineFragment",
                   typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
                       {
                         kind: "Field",
                         name: { kind: "Name", value: "fields" },
@@ -33704,7 +33516,6 @@ export const GetColumnsDocument = {
                               selectionSet: {
                                 kind: "SelectionSet",
                                 selections: [
-                                  { kind: "Field", name: { kind: "Name", value: "__typename" } },
                                   {
                                     kind: "InlineFragment",
                                     typeCondition: {
@@ -33714,9 +33525,28 @@ export const GetColumnsDocument = {
                                     selectionSet: {
                                       kind: "SelectionSet",
                                       selections: [
+                                        { kind: "Field", name: { kind: "Name", value: "id" } },
+                                        { kind: "Field", name: { kind: "Name", value: "name" } },
                                         {
-                                          kind: "FragmentSpread",
-                                          name: { kind: "Name", value: "ColumnFields" },
+                                          kind: "Field",
+                                          name: { kind: "Name", value: "options" },
+                                          selectionSet: {
+                                            kind: "SelectionSet",
+                                            selections: [
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "id" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "name" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "color" },
+                                              },
+                                            ],
+                                          },
                                         },
                                       ],
                                     },
@@ -33730,33 +33560,6 @@ export const GetColumnsDocument = {
                     ],
                   },
                 },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ColumnFields" },
-      typeCondition: {
-        kind: "NamedType",
-        name: { kind: "Name", value: "ProjectV2SingleSelectField" },
-      },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "options" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                { kind: "Field", name: { kind: "Name", value: "name" } },
-                { kind: "Field", name: { kind: "Name", value: "color" } },
               ],
             },
           },
@@ -33839,6 +33642,14 @@ export const CreateDraftIssueDocument = {
                       { kind: "Field", name: { kind: "Name", value: "id" } },
                       {
                         kind: "Field",
+                        name: { kind: "Name", value: "project" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+                        },
+                      },
+                      {
+                        kind: "Field",
                         name: { kind: "Name", value: "content" },
                         selectionSet: {
                           kind: "SelectionSet",
@@ -33855,8 +33666,6 @@ export const CreateDraftIssueDocument = {
                                   { kind: "Field", name: { kind: "Name", value: "id" } },
                                   { kind: "Field", name: { kind: "Name", value: "title" } },
                                   { kind: "Field", name: { kind: "Name", value: "body" } },
-                                  { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-                                  { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
                                 ],
                               },
                             },
@@ -33874,6 +33683,270 @@ export const CreateDraftIssueDocument = {
     },
   ],
 } as unknown as DocumentNode<CreateDraftIssueMutation, CreateDraftIssueMutationVariables>;
+export const GetProjectIssuesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetProjectIssues" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "node" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "items" },
+                        arguments: [
+                          {
+                            kind: "Argument",
+                            name: { kind: "Name", value: "first" },
+                            value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                          },
+                        ],
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "nodes" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  { kind: "Field", name: { kind: "Name", value: "id" } },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "fieldValues" },
+                                    arguments: [
+                                      {
+                                        kind: "Argument",
+                                        name: { kind: "Name", value: "first" },
+                                        value: { kind: "IntValue", value: "20" },
+                                      },
+                                    ],
+                                    selectionSet: {
+                                      kind: "SelectionSet",
+                                      selections: [
+                                        {
+                                          kind: "Field",
+                                          name: { kind: "Name", value: "nodes" },
+                                          selectionSet: {
+                                            kind: "SelectionSet",
+                                            selections: [
+                                              {
+                                                kind: "InlineFragment",
+                                                typeCondition: {
+                                                  kind: "NamedType",
+                                                  name: {
+                                                    kind: "Name",
+                                                    value: "ProjectV2ItemFieldSingleSelectValue",
+                                                  },
+                                                },
+                                                selectionSet: {
+                                                  kind: "SelectionSet",
+                                                  selections: [
+                                                    {
+                                                      kind: "Field",
+                                                      name: { kind: "Name", value: "name" },
+                                                    },
+                                                    {
+                                                      kind: "Field",
+                                                      name: { kind: "Name", value: "field" },
+                                                      selectionSet: {
+                                                        kind: "SelectionSet",
+                                                        selections: [
+                                                          {
+                                                            kind: "InlineFragment",
+                                                            typeCondition: {
+                                                              kind: "NamedType",
+                                                              name: {
+                                                                kind: "Name",
+                                                                value: "ProjectV2SingleSelectField",
+                                                              },
+                                                            },
+                                                            selectionSet: {
+                                                              kind: "SelectionSet",
+                                                              selections: [
+                                                                {
+                                                                  kind: "Field",
+                                                                  name: {
+                                                                    kind: "Name",
+                                                                    value: "name",
+                                                                  },
+                                                                },
+                                                              ],
+                                                            },
+                                                          },
+                                                        ],
+                                                      },
+                                                    },
+                                                  ],
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                  {
+                                    kind: "Field",
+                                    name: { kind: "Name", value: "content" },
+                                    selectionSet: {
+                                      kind: "SelectionSet",
+                                      selections: [
+                                        {
+                                          kind: "InlineFragment",
+                                          typeCondition: {
+                                            kind: "NamedType",
+                                            name: { kind: "Name", value: "Issue" },
+                                          },
+                                          selectionSet: {
+                                            kind: "SelectionSet",
+                                            selections: [
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "id" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "title" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "body" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "number" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "labels" },
+                                                arguments: [
+                                                  {
+                                                    kind: "Argument",
+                                                    name: { kind: "Name", value: "first" },
+                                                    value: { kind: "IntValue", value: "10" },
+                                                  },
+                                                ],
+                                                selectionSet: {
+                                                  kind: "SelectionSet",
+                                                  selections: [
+                                                    {
+                                                      kind: "Field",
+                                                      name: { kind: "Name", value: "nodes" },
+                                                      selectionSet: {
+                                                        kind: "SelectionSet",
+                                                        selections: [
+                                                          {
+                                                            kind: "Field",
+                                                            name: { kind: "Name", value: "id" },
+                                                          },
+                                                          {
+                                                            kind: "Field",
+                                                            name: { kind: "Name", value: "name" },
+                                                          },
+                                                          {
+                                                            kind: "Field",
+                                                            name: { kind: "Name", value: "color" },
+                                                          },
+                                                          {
+                                                            kind: "Field",
+                                                            name: {
+                                                              kind: "Name",
+                                                              value: "description",
+                                                            },
+                                                          },
+                                                        ],
+                                                      },
+                                                    },
+                                                  ],
+                                                },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                        {
+                                          kind: "InlineFragment",
+                                          typeCondition: {
+                                            kind: "NamedType",
+                                            name: { kind: "Name", value: "DraftIssue" },
+                                          },
+                                          selectionSet: {
+                                            kind: "SelectionSet",
+                                            selections: [
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "id" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "title" },
+                                              },
+                                              {
+                                                kind: "Field",
+                                                name: { kind: "Name", value: "body" },
+                                              },
+                                            ],
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetProjectIssuesQuery, GetProjectIssuesQueryVariables>;
 export const UpdateIssueStatusDocument = {
   kind: "Document",
   definitions: [
@@ -33980,505 +34053,6 @@ export const UpdateIssueStatusDocument = {
     },
   ],
 } as unknown as DocumentNode<UpdateIssueStatusMutation, UpdateIssueStatusMutationVariables>;
-export const GetProjectIssuesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetProjectIssues" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "node" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "items" },
-                        arguments: [
-                          {
-                            kind: "Argument",
-                            name: { kind: "Name", value: "first" },
-                            value: { kind: "Variable", name: { kind: "Name", value: "first" } },
-                          },
-                        ],
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "Field",
-                              name: { kind: "Name", value: "nodes" },
-                              selectionSet: {
-                                kind: "SelectionSet",
-                                selections: [
-                                  { kind: "Field", name: { kind: "Name", value: "id" } },
-                                  {
-                                    kind: "Field",
-                                    name: { kind: "Name", value: "fieldValues" },
-                                    arguments: [
-                                      {
-                                        kind: "Argument",
-                                        name: { kind: "Name", value: "first" },
-                                        value: { kind: "IntValue", value: "20" },
-                                      },
-                                    ],
-                                    selectionSet: {
-                                      kind: "SelectionSet",
-                                      selections: [
-                                        {
-                                          kind: "Field",
-                                          name: { kind: "Name", value: "nodes" },
-                                          selectionSet: {
-                                            kind: "SelectionSet",
-                                            selections: [
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "__typename" },
-                                              },
-                                              {
-                                                kind: "InlineFragment",
-                                                typeCondition: {
-                                                  kind: "NamedType",
-                                                  name: {
-                                                    kind: "Name",
-                                                    value: "ProjectV2ItemFieldSingleSelectValue",
-                                                  },
-                                                },
-                                                selectionSet: {
-                                                  kind: "SelectionSet",
-                                                  selections: [
-                                                    {
-                                                      kind: "Field",
-                                                      name: { kind: "Name", value: "name" },
-                                                    },
-                                                    {
-                                                      kind: "Field",
-                                                      name: { kind: "Name", value: "field" },
-                                                      selectionSet: {
-                                                        kind: "SelectionSet",
-                                                        selections: [
-                                                          {
-                                                            kind: "InlineFragment",
-                                                            typeCondition: {
-                                                              kind: "NamedType",
-                                                              name: {
-                                                                kind: "Name",
-                                                                value: "ProjectV2SingleSelectField",
-                                                              },
-                                                            },
-                                                            selectionSet: {
-                                                              kind: "SelectionSet",
-                                                              selections: [
-                                                                {
-                                                                  kind: "Field",
-                                                                  name: {
-                                                                    kind: "Name",
-                                                                    value: "id",
-                                                                  },
-                                                                },
-                                                                {
-                                                                  kind: "Field",
-                                                                  name: {
-                                                                    kind: "Name",
-                                                                    value: "name",
-                                                                  },
-                                                                },
-                                                              ],
-                                                            },
-                                                          },
-                                                        ],
-                                                      },
-                                                    },
-                                                  ],
-                                                },
-                                              },
-                                            ],
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    kind: "Field",
-                                    name: { kind: "Name", value: "content" },
-                                    selectionSet: {
-                                      kind: "SelectionSet",
-                                      selections: [
-                                        {
-                                          kind: "Field",
-                                          name: { kind: "Name", value: "__typename" },
-                                        },
-                                        {
-                                          kind: "InlineFragment",
-                                          typeCondition: {
-                                            kind: "NamedType",
-                                            name: { kind: "Name", value: "Issue" },
-                                          },
-                                          selectionSet: {
-                                            kind: "SelectionSet",
-                                            selections: [
-                                              {
-                                                kind: "FragmentSpread",
-                                                name: { kind: "Name", value: "IssueFields" },
-                                              },
-                                            ],
-                                          },
-                                        },
-                                        {
-                                          kind: "InlineFragment",
-                                          typeCondition: {
-                                            kind: "NamedType",
-                                            name: { kind: "Name", value: "DraftIssue" },
-                                          },
-                                          selectionSet: {
-                                            kind: "SelectionSet",
-                                            selections: [
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "id" },
-                                              },
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "title" },
-                                              },
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "body" },
-                                              },
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "createdAt" },
-                                              },
-                                              {
-                                                kind: "Field",
-                                                name: { kind: "Name", value: "updatedAt" },
-                                              },
-                                            ],
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "IssueFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Issue" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "body" } },
-          { kind: "Field", name: { kind: "Name", value: "number" } },
-          { kind: "Field", name: { kind: "Name", value: "state" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "labels" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "first" },
-                value: { kind: "IntValue", value: "10" },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "nodes" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
-                      { kind: "Field", name: { kind: "Name", value: "name" } },
-                      { kind: "Field", name: { kind: "Name", value: "color" } },
-                      { kind: "Field", name: { kind: "Name", value: "description" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "author" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "login" } },
-                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetProjectIssuesQuery, GetProjectIssuesQueryVariables>;
-export const CreateLabelDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "mutation",
-      name: { kind: "Name", value: "CreateLabel" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "color" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "description" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "createLabel" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "input" },
-                value: {
-                  kind: "ObjectValue",
-                  fields: [
-                    {
-                      kind: "ObjectField",
-                      name: { kind: "Name", value: "repositoryId" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
-                    },
-                    {
-                      kind: "ObjectField",
-                      name: { kind: "Name", value: "name" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "name" } },
-                    },
-                    {
-                      kind: "ObjectField",
-                      name: { kind: "Name", value: "color" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "color" } },
-                    },
-                    {
-                      kind: "ObjectField",
-                      name: { kind: "Name", value: "description" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "description" } },
-                    },
-                  ],
-                },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "label" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "LabelFields" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "LabelFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Label" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "color" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CreateLabelMutation, CreateLabelMutationVariables>;
-export const GetLabelsDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetLabels" },
-      variableDefinitions: [
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "repository" },
-            arguments: [
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "owner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "name" },
-                value: { kind: "Variable", name: { kind: "Name", value: "name" } },
-              },
-            ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "labels" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "IntValue", value: "30" },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "nodes" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "LabelFields" },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "LabelFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Label" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "color" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetLabelsQuery, GetLabelsQueryVariables>;
 export const CreateProjectDocument = {
   kind: "Document",
   definitions: [
@@ -34518,58 +34092,12 @@ export const CreateProjectDocument = {
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectFields" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "shortDescription" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: {
-                    kind: "NamedType",
-                    name: { kind: "Name", value: "Organization" },
-                  },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "title" } },
+                      { kind: "Field", name: { kind: "Name", value: "number" } },
+                      { kind: "Field", name: { kind: "Name", value: "url" } },
+                      { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                      { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
                     ],
                   },
                 },
@@ -34613,13 +34141,61 @@ export const DeleteProjectDocument = {
             ],
             selectionSet: {
               kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "clientMutationId" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const GetProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "node" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
               selections: [
                 {
-                  kind: "Field",
-                  name: { kind: "Name", value: "projectV2" },
+                  kind: "InlineFragment",
+                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
                   selectionSet: {
                     kind: "SelectionSet",
-                    selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "title" } },
+                      { kind: "Field", name: { kind: "Name", value: "number" } },
+                      { kind: "Field", name: { kind: "Name", value: "closed" } },
+                      { kind: "Field", name: { kind: "Name", value: "url" } },
+                      { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                      { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+                    ],
                   },
                 },
               ],
@@ -34629,7 +34205,142 @@ export const DeleteProjectDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<DeleteProjectMutation, DeleteProjectMutationVariables>;
+} as unknown as DocumentNode<GetProjectQuery, GetProjectQueryVariables>;
+export const GetProjectsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetProjects" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewer" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectsV2" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "IntValue", value: "20" },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: {
+                        kind: "ObjectValue",
+                        fields: [
+                          {
+                            kind: "ObjectField",
+                            name: { kind: "Name", value: "field" },
+                            value: { kind: "EnumValue", value: "UPDATED_AT" },
+                          },
+                          {
+                            kind: "ObjectField",
+                            name: { kind: "Name", value: "direction" },
+                            value: { kind: "EnumValue", value: "DESC" },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "nodes" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "title" } },
+                            { kind: "Field", name: { kind: "Name", value: "number" } },
+                            { kind: "Field", name: { kind: "Name", value: "closed" } },
+                            { kind: "Field", name: { kind: "Name", value: "url" } },
+                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                            { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetProjectsQuery, GetProjectsQueryVariables>;
+export const LinkRepositoryToProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "LinkRepositoryToProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "LinkProjectV2ToRepositoryInput" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "linkProjectV2ToRepository" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "clientMutationId" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "repository" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      { kind: "Field", name: { kind: "Name", value: "url" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<
+  LinkRepositoryToProjectMutation,
+  LinkRepositoryToProjectMutationVariables
+>;
 export const UpdateProjectDocument = {
   kind: "Document",
   definitions: [
@@ -34669,58 +34380,12 @@ export const UpdateProjectDocument = {
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectFields" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "shortDescription" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: {
-                    kind: "NamedType",
-                    name: { kind: "Name", value: "Organization" },
-                  },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "title" } },
+                      { kind: "Field", name: { kind: "Name", value: "number" } },
+                      { kind: "Field", name: { kind: "Name", value: "url" } },
+                      { kind: "Field", name: { kind: "Name", value: "closed" } },
+                      { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
                     ],
                   },
                 },
@@ -34732,366 +34397,94 @@ export const UpdateProjectDocument = {
     },
   ],
 } as unknown as DocumentNode<UpdateProjectMutation, UpdateProjectMutationVariables>;
-export const GetProjectDocument = {
+export const AddRepositoryCollaboratorDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetProject" },
+      operation: "mutation",
+      name: { kind: "Name", value: "AddRepositoryCollaborator" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
           type: {
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
           },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "userLogin" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "permission" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "RepositoryPermission" } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "node" },
+            alias: { kind: "Name", value: "addAssignable" },
+            name: { kind: "Name", value: "addAssigneesToAssignable" },
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+                name: { kind: "Name", value: "input" },
+                value: {
+                  kind: "ObjectValue",
+                  fields: [
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "assignableId" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
+                    },
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "assigneeIds" },
+                      value: { kind: "ListValue", values: [] },
+                    },
+                  ],
+                },
               },
             ],
             selectionSet: {
               kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "FragmentSpread", name: { kind: "Name", value: "ProjectFields" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "shortDescription" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: {
-                    kind: "NamedType",
-                    name: { kind: "Name", value: "Organization" },
-                  },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-              ],
+              selections: [{ kind: "Field", name: { kind: "Name", value: "clientMutationId" } }],
             },
           },
         ],
       },
     },
   ],
-} as unknown as DocumentNode<GetProjectQuery, GetProjectQueryVariables>;
-export const GetProjectsDocument = {
+} as unknown as DocumentNode<
+  AddRepositoryCollaboratorMutation,
+  AddRepositoryCollaboratorMutationVariables
+>;
+export const CreateRepositoryDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetProjects" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewer" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "projectsV2" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "IntValue", value: "20" },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: {
-                        kind: "ObjectValue",
-                        fields: [
-                          {
-                            kind: "ObjectField",
-                            name: { kind: "Name", value: "field" },
-                            value: { kind: "EnumValue", value: "UPDATED_AT" },
-                          },
-                          {
-                            kind: "ObjectField",
-                            name: { kind: "Name", value: "direction" },
-                            value: { kind: "EnumValue", value: "DESC" },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "nodes" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "FragmentSpread",
-                              name: { kind: "Name", value: "ProjectFields" },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "ProjectFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "ProjectV2" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "title" } },
-          { kind: "Field", name: { kind: "Name", value: "shortDescription" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-          { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "__typename" } },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: { kind: "NamedType", name: { kind: "Name", value: "User" } },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-                {
-                  kind: "InlineFragment",
-                  typeCondition: {
-                    kind: "NamedType",
-                    name: { kind: "Name", value: "Organization" },
-                  },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "login" } },
-                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetProjectsQuery, GetProjectsQueryVariables>;
-export const GetViewerDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetViewer" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewer" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                { kind: "Field", name: { kind: "Name", value: "login" } },
-                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetViewerQuery, GetViewerQueryVariables>;
-export const GetUserRepositoriesDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetUserRepositories" },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "viewer" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "repositories" },
-                  arguments: [
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "first" },
-                      value: { kind: "IntValue", value: "50" },
-                    },
-                    {
-                      kind: "Argument",
-                      name: { kind: "Name", value: "orderBy" },
-                      value: {
-                        kind: "ObjectValue",
-                        fields: [
-                          {
-                            kind: "ObjectField",
-                            name: { kind: "Name", value: "field" },
-                            value: { kind: "EnumValue", value: "UPDATED_AT" },
-                          },
-                          {
-                            kind: "ObjectField",
-                            name: { kind: "Name", value: "direction" },
-                            value: { kind: "EnumValue", value: "DESC" },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "nodes" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            { kind: "Field", name: { kind: "Name", value: "id" } },
-                            { kind: "Field", name: { kind: "Name", value: "name" } },
-                            { kind: "Field", name: { kind: "Name", value: "description" } },
-                            { kind: "Field", name: { kind: "Name", value: "url" } },
-                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-                            {
-                              kind: "Field",
-                              name: { kind: "Name", value: "owner" },
-                              selectionSet: {
-                                kind: "SelectionSet",
-                                selections: [
-                                  { kind: "Field", name: { kind: "Name", value: "login" } },
-                                  { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetUserRepositoriesQuery, GetUserRepositoriesQueryVariables>;
-export const GetRepositoryDocument = {
-  kind: "Document",
-  definitions: [
-    {
-      kind: "OperationDefinition",
-      operation: "query",
-      name: { kind: "Name", value: "GetRepository" },
+      operation: "mutation",
+      name: { kind: "Name", value: "CreateRepository" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "owner" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "input" } },
           type: {
             kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
-          },
-        },
-        {
-          kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
-          type: {
-            kind: "NonNullType",
-            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+            type: { kind: "NamedType", name: { kind: "Name", value: "CreateRepositoryInput" } },
           },
         },
       ],
@@ -35100,48 +34493,42 @@ export const GetRepositoryDocument = {
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "repository" },
+            name: { kind: "Name", value: "createRepository" },
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "owner" },
-                value: { kind: "Variable", name: { kind: "Name", value: "owner" } },
-              },
-              {
-                kind: "Argument",
-                name: { kind: "Name", value: "name" },
-                value: { kind: "Variable", name: { kind: "Name", value: "name" } },
+                name: { kind: "Name", value: "input" },
+                value: { kind: "Variable", name: { kind: "Name", value: "input" } },
               },
             ],
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "FragmentSpread", name: { kind: "Name", value: "RepositoryFields" } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: "FragmentDefinition",
-      name: { kind: "Name", value: "RepositoryFields" },
-      typeCondition: { kind: "NamedType", name: { kind: "Name", value: "Repository" } },
-      selectionSet: {
-        kind: "SelectionSet",
-        selections: [
-          { kind: "Field", name: { kind: "Name", value: "id" } },
-          { kind: "Field", name: { kind: "Name", value: "name" } },
-          { kind: "Field", name: { kind: "Name", value: "description" } },
-          { kind: "Field", name: { kind: "Name", value: "url" } },
-          {
-            kind: "Field",
-            name: { kind: "Name", value: "owner" },
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "login" } },
-                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "repository" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "owner" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "login" } },
+                            { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                          ],
+                        },
+                      },
+                      { kind: "Field", name: { kind: "Name", value: "description" } },
+                      { kind: "Field", name: { kind: "Name", value: "url" } },
+                      { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -35149,7 +34536,7 @@ export const GetRepositoryDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<GetRepositoryQuery, GetRepositoryQueryVariables>;
+} as unknown as DocumentNode<CreateRepositoryMutation, CreateRepositoryMutationVariables>;
 export const GetRepoCollaboratorsDocument = {
   kind: "Document",
   definitions: [
@@ -35196,7 +34583,6 @@ export const GetRepoCollaboratorsDocument = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "collaborators" },
@@ -35243,6 +34629,237 @@ export const GetRepoCollaboratorsDocument = {
     },
   ],
 } as unknown as DocumentNode<GetRepoCollaboratorsQuery, GetRepoCollaboratorsQueryVariables>;
+export const GetRepositoryDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetRepository" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "owner" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "repository" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "owner" },
+                value: { kind: "Variable", name: { kind: "Name", value: "owner" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "name" },
+                value: { kind: "Variable", name: { kind: "Name", value: "name" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "description" } },
+                { kind: "Field", name: { kind: "Name", value: "url" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "owner" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "login" } },
+                      { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                    ],
+                  },
+                },
+                { kind: "Field", name: { kind: "Name", value: "isPrivate" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "collaborators" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "IntValue", value: "100" },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "nodes" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "login" } },
+                            { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                          ],
+                        },
+                      },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "edges" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "permission" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectsV2" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "IntValue", value: "10" },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "nodes" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "title" } },
+                            { kind: "Field", name: { kind: "Name", value: "number" } },
+                            { kind: "Field", name: { kind: "Name", value: "url" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetRepositoryQuery, GetRepositoryQueryVariables>;
+export const GetUserRepositoriesDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetUserRepositories" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          defaultValue: { kind: "IntValue", value: "100" },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewer" },
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "repositories" },
+                  arguments: [
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "first" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+                    },
+                    {
+                      kind: "Argument",
+                      name: { kind: "Name", value: "orderBy" },
+                      value: {
+                        kind: "ObjectValue",
+                        fields: [
+                          {
+                            kind: "ObjectField",
+                            name: { kind: "Name", value: "field" },
+                            value: { kind: "EnumValue", value: "UPDATED_AT" },
+                          },
+                          {
+                            kind: "ObjectField",
+                            name: { kind: "Name", value: "direction" },
+                            value: { kind: "EnumValue", value: "DESC" },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "nodes" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "name" } },
+                            { kind: "Field", name: { kind: "Name", value: "description" } },
+                            { kind: "Field", name: { kind: "Name", value: "url" } },
+                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                            { kind: "Field", name: { kind: "Name", value: "isPrivate" } },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "owner" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  { kind: "Field", name: { kind: "Name", value: "login" } },
+                                  { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetUserRepositoriesQuery, GetUserRepositoriesQueryVariables>;
 export const GetUserDocument = {
   kind: "Document",
   definitions: [
@@ -35253,7 +34870,7 @@ export const GetUserDocument = {
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "username" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "login" } },
           type: {
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
@@ -35270,9 +34887,39 @@ export const GetUserDocument = {
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "login" },
-                value: { kind: "Variable", name: { kind: "Name", value: "username" } },
+                value: { kind: "Variable", name: { kind: "Name", value: "login" } },
               },
             ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "login" } },
+                { kind: "Field", name: { kind: "Name", value: "name" } },
+                { kind: "Field", name: { kind: "Name", value: "avatarUrl" } },
+                { kind: "Field", name: { kind: "Name", value: "url" } },
+                { kind: "Field", name: { kind: "Name", value: "bio" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
+export const GetViewerDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "GetViewer" },
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "viewer" },
             selectionSet: {
               kind: "SelectionSet",
               selections: [
@@ -35286,4 +34933,4 @@ export const GetUserDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<GetUserQuery, GetUserQueryVariables>;
+} as unknown as DocumentNode<GetViewerQuery, GetViewerQueryVariables>;

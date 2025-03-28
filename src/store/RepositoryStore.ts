@@ -104,6 +104,36 @@ export class RepositoryStore {
     }
   }
 
+  /**
+   * Delete a repository
+   */
+  async deleteRepository(owner: string, name: string): Promise<boolean> {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const success = await repositoryService.deleteRepository(owner, name);
+
+      if (success) {
+        runInAction(() => {
+          this.repositories = this.repositories.filter(
+            (repo) => !(repo.owner.login === owner && repo.name === name)
+          );
+          this.loading = false;
+        });
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
   async fetchRepositoryCollaborators(owner: string, name: string) {
     // Create a cache key for this specific repo
     const cacheKey = `${owner}/${name}`;
@@ -113,26 +143,23 @@ export class RepositoryStore {
       return this.pendingCollaboratorFetches[cacheKey];
     }
 
-    this.loading = true;
+    // Don't set loading state here to avoid duplicate state changes
     this.error = null;
 
     // Create the promise for this fetch
     const fetchPromise = (async () => {
       try {
-        // Make sure the repository exists in our store
-        let repository: Repository | undefined = this.repositories.find(
+        // Find the repository in our store - avoids another fetch
+        const repository = this.repositories.find(
           (r) => r.owner.login === owner && r.name === name
         );
 
         if (!repository) {
-          // If not, fetch it first
-          repository = await this.fetchRepository(owner, name);
-          if (!repository) {
-            throw new Error(`Repository ${owner}/${name} not found`);
-          }
+          throw new Error(`Repository ${owner}/${name} not found in store`);
         }
 
         // Skip if collaborators are already fetched
+        // This prevents duplicate collaborator fetches
         if (repository.collaborators && repository.collaborators.length > 0) {
           return repository.collaborators;
         }
@@ -142,21 +169,27 @@ export class RepositoryStore {
 
         // Update the store
         runInAction(() => {
-          const index = this.repositories.findIndex((r) => r.id === repository!.id);
+          // Find the repository again to ensure we have the latest reference
+          const index = this.repositories.findIndex(
+            (r) => r.owner.login === owner && r.name === name
+          );
+
           if (index !== -1) {
             this.repositories[index].collaborators = collaborators;
           }
-          if (this.selectedRepository?.id === repository!.id) {
+
+          if (
+            this.selectedRepository?.owner.login === owner &&
+            this.selectedRepository.name === name
+          ) {
             this.selectedRepository.collaborators = collaborators;
           }
-          this.loading = false;
         });
 
         return collaborators;
       } catch (error) {
         runInAction(() => {
           this.error = (error as Error).message;
-          this.loading = false;
         });
         return [];
       } finally {
@@ -194,25 +227,54 @@ export class RepositoryStore {
       );
 
       if (success) {
-        // Create a temporary collaborator for the UI
-        // In a real app, you'd refetch the collaborators to get the actual data
-        const mockCollaborator: RepositoryCollaborator = {
-          id: `temp-${Date.now()}`,
-          login: collaboratorData.username,
-          avatarUrl: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
-          permission: collaboratorData.permission,
-        };
-
-        // Update the UI
+        // After successfully adding a collaborator, refresh the collaborator list
+        // This ensures we have the latest data from the server
         runInAction(() => {
-          if (!repository.collaborators) {
-            repository.collaborators = [];
-          }
-          repository.collaborators.push(mockCollaborator);
-          this.loading = false;
+          this.loading = true;
         });
 
-        return mockCollaborator;
+        // Fetch updated collaborators
+        try {
+          const collaborators = await repositoryService.getRepositoryCollaborators(owner, repoName);
+
+          // Update the repository with the fresh collaborator list
+          runInAction(() => {
+            const index = this.repositories.findIndex(
+              (r) => r.owner.login === owner && r.name === repoName
+            );
+            if (index !== -1) {
+              this.repositories[index].collaborators = collaborators;
+            }
+            if (
+              this.selectedRepository?.owner.login === owner &&
+              this.selectedRepository.name === repoName
+            ) {
+              this.selectedRepository.collaborators = collaborators;
+            }
+            this.loading = false;
+          });
+        } catch (error) {
+          // If fetching fails, create a temporary collaborator for UI only
+          // This will be updated next time the page is loaded
+          console.error("Error fetching collaborators:", error);
+          const mockCollaborator: RepositoryCollaborator = {
+            id: `temp-${Date.now()}`,
+            login: collaboratorData.username,
+            avatarUrl: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
+            permission: collaboratorData.permission,
+          };
+
+          // Update the UI with temporary data
+          runInAction(() => {
+            if (!repository.collaborators) {
+              repository.collaborators = [];
+            }
+            repository.collaborators.push(mockCollaborator);
+            this.loading = false;
+          });
+        }
+
+        return true;
       } else {
         throw new Error("Failed to add collaborator via API");
       }

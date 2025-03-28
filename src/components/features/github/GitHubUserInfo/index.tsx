@@ -5,7 +5,7 @@ import { FiGithub, FiUser } from "react-icons/fi";
 import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
 import Tooltip from "@/components/ui/Tooltip";
-import { useGitHubUser } from "@/hooks/useGitHubUser";
+import { userStore } from "@/store";
 
 import styles from "./GitHubUserInfo.module.scss";
 
@@ -14,7 +14,9 @@ import styles from "./GitHubUserInfo.module.scss";
  * when a valid token is present
  */
 const GitHubUserInfo: React.FC = observer(() => {
-  const { isLoading, isAuthenticated, user } = useGitHubUser();
+  const isLoading = userStore.loading;
+  const user = userStore.userProfile;
+  const isAuthenticated = !!user;
 
   // Content to show inside tooltip - no avatar since it's already visible
   const tooltipContent = (

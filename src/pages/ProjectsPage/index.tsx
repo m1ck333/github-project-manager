@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import ProjectCard from "../../components/features/project/ProjectCard";
 import ProjectForm from "../../components/features/project/ProjectForm";
 import Container from "../../components/layout/Container";
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog";
 import GridCardAdd from "../../components/ui/GridCardAdd";
 import GridContainer from "../../components/ui/GridContainer";
 import Modal from "../../components/ui/Modal";
@@ -58,11 +59,15 @@ const Projects: React.FC = observer(() => {
     if (deleteProject) {
       try {
         setIsDeleting(true);
-        await projectStore.deleteProject(deleteProject.id);
+        const success = await projectStore.deleteProject(deleteProject.id);
         setDeleteProject(null);
-        toast.showToast(`Project "${deleteProject.name}" deleted successfully`, "success");
-      } catch {
-        toast.showToast("Failed to delete project", "error");
+        if (success) {
+          toast.showToast(`Project "${deleteProject.name}" deleted successfully`, "success");
+        } else {
+          toast.showToast("Failed to delete project", "error");
+        }
+      } catch (error) {
+        toast.showToast(`Error deleting project: ${(error as Error).message}`, "error");
       } finally {
         setIsDeleting(false);
       }
@@ -144,22 +149,16 @@ const Projects: React.FC = observer(() => {
           onClose={() => !isDeleting && setDeleteProject(null)}
           title="Delete Project"
         >
-          <div className={styles.deleteConfirmation}>
-            <p>Are you sure you want to delete project "{deleteProject.name}"?</p>
-            <p className={styles.warning}>This action cannot be undone.</p>
-            <div className={styles.actions}>
-              <button
-                className={styles.cancelButton}
-                onClick={() => setDeleteProject(null)}
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button className={styles.deleteButton} onClick={confirmDelete} disabled={isDeleting}>
-                {isDeleting ? "Deleting..." : "Delete Project"}
-              </button>
-            </div>
-          </div>
+          <ConfirmationDialog
+            title="Delete Project Confirmation"
+            message={`Are you sure you want to delete project "${deleteProject.name}"?`}
+            warningMessage="This action cannot be undone."
+            confirmLabel={isDeleting ? "Deleting..." : "Delete Project"}
+            isSubmitting={isDeleting}
+            onConfirm={confirmDelete}
+            onCancel={() => setDeleteProject(null)}
+            confirmVariant="danger"
+          />
         </Modal>
       )}
     </Container>

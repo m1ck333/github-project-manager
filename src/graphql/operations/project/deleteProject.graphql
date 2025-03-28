@@ -1,0 +1,6 @@
+# Mutation to delete a GitHub Project (v2)
+mutation DeleteProject($input: DeleteProjectV2Input!) {
+  deleteProjectV2(input: $input) {
+    clientMutationId
+  }
+}

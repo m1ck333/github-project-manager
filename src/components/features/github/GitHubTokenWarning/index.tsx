@@ -1,15 +1,19 @@
+import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
 
-import { useGitHubUser } from "@/hooks/useGitHubUser";
+import { userStore } from "@/store";
 
 import InfoBox from "../../../ui/InfoBox";
 import Loading from "../../../ui/Loading";
 
 import styles from "./GitHubTokenWarning.module.scss";
 
-const GitHubTokenWarning: React.FC = () => {
+const GitHubTokenWarning: React.FC = observer(() => {
   const [dismissed, setDismissed] = useState(false);
-  const { isLoading, isAuthenticated, hasToken, errorMessage } = useGitHubUser();
+  const isLoading = userStore.loading;
+  const hasToken = userStore.hasToken();
+  const isAuthenticated = !!userStore.userProfile;
+  const errorMessage = userStore.error;
 
   if (isLoading) {
     return <Loading size="small" text="Checking GitHub configuration..." fixedHeight />;
@@ -62,6 +66,6 @@ const GitHubTokenWarning: React.FC = () => {
       )}
     </InfoBox>
   );
-};
+});
 
 export default GitHubTokenWarning;

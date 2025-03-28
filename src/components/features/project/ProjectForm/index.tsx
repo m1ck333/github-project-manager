@@ -6,7 +6,8 @@ import { projectStore } from "../../../../store";
 import { Project, ProjectFormData } from "../../../../types";
 import Button from "../../../ui/Button";
 import { useToast } from "../../../ui/Toast";
-import styles from "../ProjectList/ProjectList.module.scss";
+
+import styles from "./ProjectForm.module.scss";
 
 interface ProjectFormProps {
   project?: Project; // Optional - if provided, component is in edit mode

@@ -1,0 +1,19 @@
+# Query to get repositories for the current user
+query GetUserRepositories($first: Int = 100) {
+  viewer {
+    repositories(first: $first, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        name
+        description
+        url
+        createdAt
+        isPrivate
+        owner {
+          login
+          avatarUrl
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { userService } from "../graphql/services";
-import { projectStore, repositoryStore } from "../store";
+import { projectStore, repositoryStore, userStore } from "../store";
 
 // Track initialization globally to avoid duplicate initialization in strict mode
 let globalInitialized = false;
@@ -32,8 +31,8 @@ export function useAppInitialization() {
       setError(null);
 
       try {
-        // 1. Fetch user information first (only if not already loaded)
-        await userService.getUserProfile(false);
+        // 1. Fetch user information first
+        await userStore.fetchUserProfile(false);
 
         // 2. Fetch repositories if none are loaded
         if (repositoryStore.repositories.length === 0) {

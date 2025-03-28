@@ -1,0 +1,45 @@
+# Query to get issues from a project
+query GetProjectIssues($projectId: ID!, $first: Int!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      items(first: $first) {
+        nodes {
+          id
+          fieldValues(first: 20) {
+            nodes {
+              ... on ProjectV2ItemFieldSingleSelectValue {
+                name
+                field {
+                  ... on ProjectV2SingleSelectField {
+                    name
+                  }
+                }
+              }
+            }
+          }
+          content {
+            ... on Issue {
+              id
+              title
+              body
+              number
+              labels(first: 10) {
+                nodes {
+                  id
+                  name
+                  color
+                  description
+                }
+              }
+            }
+            ... on DraftIssue {
+              id
+              title
+              body
+            }
+          }
+        }
+      }
+    }
+  }
+}

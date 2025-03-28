@@ -13,54 +13,48 @@ import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-  "fragment CollaboratorFields on User {\n  id\n  login\n  avatarUrl\n  name\n}":
-    types.CollaboratorFieldsFragmentDoc,
   "mutation UpdateProjectCollaborators($projectId: ID!, $collaborators: [ProjectV2Collaborator!]!) {\n  updateProjectV2Collaborators(\n    input: {projectId: $projectId, collaborators: $collaborators}\n  ) {\n    clientMutationId\n  }\n}":
     types.UpdateProjectCollaboratorsDocument,
-  "query GetRepositoryCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100, affiliation: ALL) {\n      nodes {\n        ...CollaboratorFields\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}":
-    types.GetRepositoryCollaboratorsDocument,
+  "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}":
+    types.GetColumnsDocument,
   "fragment ColumnFields on ProjectV2SingleSelectField {\n  id\n  name\n  options {\n    id\n    name\n    color\n  }\n}":
     types.ColumnFieldsFragmentDoc,
-  "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      fields(first: 20) {\n        nodes {\n          __typename\n          ... on ProjectV2SingleSelectField {\n            ...ColumnFields\n          }\n        }\n      }\n    }\n  }\n}":
-    types.GetColumnsDocument,
-  "fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  state\n  createdAt\n  updatedAt\n  url\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n  author {\n    login\n    avatarUrl\n  }\n}":
+  "fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  createdAt\n  updatedAt\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n}":
     types.IssueFieldsFragmentDoc,
-  "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n          createdAt\n          updatedAt\n        }\n      }\n    }\n  }\n}":
-    types.CreateDraftIssueDocument,
-  "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}":
-    types.UpdateIssueStatusDocument,
-  "query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              __typename\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    id\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            __typename\n            ... on Issue {\n              ...IssueFields\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n              createdAt\n              updatedAt\n            }\n          }\n        }\n      }\n    }\n  }\n}":
-    types.GetProjectIssuesDocument,
-  "fragment LabelFields on Label {\n  id\n  name\n  color\n  description\n}":
-    types.LabelFieldsFragmentDoc,
-  "mutation CreateLabel($repositoryId: ID!, $name: String!, $color: String!, $description: String) {\n  createLabel(\n    input: {repositoryId: $repositoryId, name: $name, color: $color, description: $description}\n  ) {\n    label {\n      ...LabelFields\n    }\n  }\n}":
-    types.CreateLabelDocument,
-  "query GetLabels($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    labels(first: 30) {\n      nodes {\n        ...LabelFields\n      }\n    }\n  }\n}":
-    types.GetLabelsDocument,
   "fragment ProjectFields on ProjectV2 {\n  id\n  title\n  shortDescription\n  url\n  createdAt\n  updatedAt\n  owner {\n    __typename\n    ... on User {\n      login\n      avatarUrl\n    }\n    ... on Organization {\n      login\n      avatarUrl\n    }\n  }\n}":
     types.ProjectFieldsFragmentDoc,
-  "mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}":
+  "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}":
+    types.CreateDraftIssueDocument,
+  "query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            ... on Issue {\n              id\n              title\n              body\n              number\n              labels(first: 10) {\n                nodes {\n                  id\n                  name\n                  color\n                  description\n                }\n              }\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n            }\n          }\n        }\n      }\n    }\n  }\n}":
+    types.GetProjectIssuesDocument,
+  "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}":
+    types.UpdateIssueStatusDocument,
+  "mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}":
     types.CreateProjectDocument,
-  "mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    projectV2 {\n      id\n    }\n  }\n}":
+  "mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    clientMutationId\n  }\n}":
     types.DeleteProjectDocument,
-  "mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}":
-    types.UpdateProjectDocument,
-  "query GetProject($id: ID!) {\n  node(id: $id) {\n    __typename\n    ... on ProjectV2 {\n      ...ProjectFields\n    }\n  }\n}":
+  "query GetProject($id: ID!) {\n  node(id: $id) {\n    ... on ProjectV2 {\n      id\n      title\n      number\n      closed\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}":
     types.GetProjectDocument,
-  "query GetProjects {\n  viewer {\n    id\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        ...ProjectFields\n      }\n    }\n  }\n}":
+  "query GetProjects {\n  viewer {\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        title\n        number\n        closed\n        url\n        createdAt\n        updatedAt\n      }\n    }\n  }\n}":
     types.GetProjectsDocument,
+  "mutation LinkRepositoryToProject($input: LinkProjectV2ToRepositoryInput!) {\n  linkProjectV2ToRepository(input: $input) {\n    clientMutationId\n    repository {\n      id\n      name\n      url\n    }\n  }\n}":
+    types.LinkRepositoryToProjectDocument,
+  "mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      closed\n      updatedAt\n    }\n  }\n}":
+    types.UpdateProjectDocument,
+  "mutation AddRepositoryCollaborator($repositoryId: ID!, $userLogin: String!, $permission: RepositoryPermission!) {\n  addAssignable: addAssigneesToAssignable(\n    input: {assignableId: $repositoryId, assigneeIds: []}\n  ) {\n    clientMutationId\n  }\n}":
+    types.AddRepositoryCollaboratorDocument,
+  "mutation CreateRepository($input: CreateRepositoryInput!) {\n  createRepository(input: $input) {\n    repository {\n      id\n      name\n      owner {\n        login\n        avatarUrl\n      }\n      description\n      url\n      createdAt\n    }\n  }\n}":
+    types.CreateRepositoryDocument,
+  "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}":
+    types.GetRepoCollaboratorsDocument,
+  "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    name\n    description\n    url\n    createdAt\n    owner {\n      login\n      avatarUrl\n    }\n    isPrivate\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n    projectsV2(first: 10) {\n      nodes {\n        id\n        title\n        number\n        url\n      }\n    }\n  }\n}":
+    types.GetRepositoryDocument,
+  "query GetUserRepositories($first: Int = 100) {\n  viewer {\n    repositories(first: $first, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        isPrivate\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}":
+    types.GetUserRepositoriesDocument,
+  "query GetUser($login: String!) {\n  user(login: $login) {\n    id\n    login\n    name\n    avatarUrl\n    url\n    bio\n  }\n}":
+    types.GetUserDocument,
   "query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}":
     types.GetViewerDocument,
-  "query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}":
-    types.GetUserRepositoriesDocument,
-  "fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}":
-    types.RepositoryFieldsFragmentDoc,
-  "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}":
-    types.GetRepositoryDocument,
-  "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}":
-    types.GetRepoCollaboratorsDocument,
-  "query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}":
-    types.GetUserDocument,
 };
 
 /**
@@ -81,20 +75,14 @@ export function gql(source: string): unknown;
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "fragment CollaboratorFields on User {\n  id\n  login\n  avatarUrl\n  name\n}"
-): (typeof documents)["fragment CollaboratorFields on User {\n  id\n  login\n  avatarUrl\n  name\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
   source: "mutation UpdateProjectCollaborators($projectId: ID!, $collaborators: [ProjectV2Collaborator!]!) {\n  updateProjectV2Collaborators(\n    input: {projectId: $projectId, collaborators: $collaborators}\n  ) {\n    clientMutationId\n  }\n}"
 ): (typeof documents)["mutation UpdateProjectCollaborators($projectId: ID!, $collaborators: [ProjectV2Collaborator!]!) {\n  updateProjectV2Collaborators(\n    input: {projectId: $projectId, collaborators: $collaborators}\n  ) {\n    clientMutationId\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "query GetRepositoryCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100, affiliation: ALL) {\n      nodes {\n        ...CollaboratorFields\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetRepositoryCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100, affiliation: ALL) {\n      nodes {\n        ...CollaboratorFields\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"];
+  source: "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -105,50 +93,8 @@ export function gql(
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      fields(first: 20) {\n        nodes {\n          __typename\n          ... on ProjectV2SingleSelectField {\n            ...ColumnFields\n          }\n        }\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      fields(first: 20) {\n        nodes {\n          __typename\n          ... on ProjectV2SingleSelectField {\n            ...ColumnFields\n          }\n        }\n      }\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  state\n  createdAt\n  updatedAt\n  url\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n  author {\n    login\n    avatarUrl\n  }\n}"
-): (typeof documents)["fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  state\n  createdAt\n  updatedAt\n  url\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n  author {\n    login\n    avatarUrl\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n          createdAt\n          updatedAt\n        }\n      }\n    }\n  }\n}"
-): (typeof documents)["mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n          createdAt\n          updatedAt\n        }\n      }\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"
-): (typeof documents)["mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              __typename\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    id\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            __typename\n            ... on Issue {\n              ...IssueFields\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n              createdAt\n              updatedAt\n            }\n          }\n        }\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    __typename\n    ... on ProjectV2 {\n      id\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              __typename\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    id\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            __typename\n            ... on Issue {\n              ...IssueFields\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n              createdAt\n              updatedAt\n            }\n          }\n        }\n      }\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "fragment LabelFields on Label {\n  id\n  name\n  color\n  description\n}"
-): (typeof documents)["fragment LabelFields on Label {\n  id\n  name\n  color\n  description\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "mutation CreateLabel($repositoryId: ID!, $name: String!, $color: String!, $description: String) {\n  createLabel(\n    input: {repositoryId: $repositoryId, name: $name, color: $color, description: $description}\n  ) {\n    label {\n      ...LabelFields\n    }\n  }\n}"
-): (typeof documents)["mutation CreateLabel($repositoryId: ID!, $name: String!, $color: String!, $description: String) {\n  createLabel(\n    input: {repositoryId: $repositoryId, name: $name, color: $color, description: $description}\n  ) {\n    label {\n      ...LabelFields\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetLabels($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    labels(first: 30) {\n      nodes {\n        ...LabelFields\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetLabels($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    labels(first: 30) {\n      nodes {\n        ...LabelFields\n      }\n    }\n  }\n}"];
+  source: "fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  createdAt\n  updatedAt\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n}"
+): (typeof documents)["fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  createdAt\n  updatedAt\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -159,68 +105,98 @@ export function gql(
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}"
-): (typeof documents)["mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}"];
+  source: "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    projectV2 {\n      id\n    }\n  }\n}"
-): (typeof documents)["mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    projectV2 {\n      id\n    }\n  }\n}"];
+  source: "query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            ... on Issue {\n              id\n              title\n              body\n              number\n              labels(first: 10) {\n                nodes {\n                  id\n                  name\n                  color\n                  description\n                }\n              }\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            ... on Issue {\n              id\n              title\n              body\n              number\n              labels(first: 10) {\n                nodes {\n                  id\n                  name\n                  color\n                  description\n                }\n              }\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n            }\n          }\n        }\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}"
-): (typeof documents)["mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      ...ProjectFields\n    }\n  }\n}"];
+  source: "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"
+): (typeof documents)["mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "query GetProject($id: ID!) {\n  node(id: $id) {\n    __typename\n    ... on ProjectV2 {\n      ...ProjectFields\n    }\n  }\n}"
-): (typeof documents)["query GetProject($id: ID!) {\n  node(id: $id) {\n    __typename\n    ... on ProjectV2 {\n      ...ProjectFields\n    }\n  }\n}"];
+  source: "mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}"
+): (typeof documents)["mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "query GetProjects {\n  viewer {\n    id\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        ...ProjectFields\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetProjects {\n  viewer {\n    id\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        ...ProjectFields\n      }\n    }\n  }\n}"];
+  source: "mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    clientMutationId\n  }\n}"
+): (typeof documents)["mutation DeleteProject($input: DeleteProjectV2Input!) {\n  deleteProjectV2(input: $input) {\n    clientMutationId\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetProject($id: ID!) {\n  node(id: $id) {\n    ... on ProjectV2 {\n      id\n      title\n      number\n      closed\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}"
+): (typeof documents)["query GetProject($id: ID!) {\n  node(id: $id) {\n    ... on ProjectV2 {\n      id\n      title\n      number\n      closed\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetProjects {\n  viewer {\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        title\n        number\n        closed\n        url\n        createdAt\n        updatedAt\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetProjects {\n  viewer {\n    projectsV2(first: 20, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        title\n        number\n        closed\n        url\n        createdAt\n        updatedAt\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation LinkRepositoryToProject($input: LinkProjectV2ToRepositoryInput!) {\n  linkProjectV2ToRepository(input: $input) {\n    clientMutationId\n    repository {\n      id\n      name\n      url\n    }\n  }\n}"
+): (typeof documents)["mutation LinkRepositoryToProject($input: LinkProjectV2ToRepositoryInput!) {\n  linkProjectV2ToRepository(input: $input) {\n    clientMutationId\n    repository {\n      id\n      name\n      url\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      closed\n      updatedAt\n    }\n  }\n}"
+): (typeof documents)["mutation UpdateProject($input: UpdateProjectV2Input!) {\n  updateProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      closed\n      updatedAt\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation AddRepositoryCollaborator($repositoryId: ID!, $userLogin: String!, $permission: RepositoryPermission!) {\n  addAssignable: addAssigneesToAssignable(\n    input: {assignableId: $repositoryId, assigneeIds: []}\n  ) {\n    clientMutationId\n  }\n}"
+): (typeof documents)["mutation AddRepositoryCollaborator($repositoryId: ID!, $userLogin: String!, $permission: RepositoryPermission!) {\n  addAssignable: addAssigneesToAssignable(\n    input: {assignableId: $repositoryId, assigneeIds: []}\n  ) {\n    clientMutationId\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation CreateRepository($input: CreateRepositoryInput!) {\n  createRepository(input: $input) {\n    repository {\n      id\n      name\n      owner {\n        login\n        avatarUrl\n      }\n      description\n      url\n      createdAt\n    }\n  }\n}"
+): (typeof documents)["mutation CreateRepository($input: CreateRepositoryInput!) {\n  createRepository(input: $input) {\n    repository {\n      id\n      name\n      owner {\n        login\n        avatarUrl\n      }\n      description\n      url\n      createdAt\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    name\n    description\n    url\n    createdAt\n    owner {\n      login\n      avatarUrl\n    }\n    isPrivate\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n    projectsV2(first: 10) {\n      nodes {\n        id\n        title\n        number\n        url\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    name\n    description\n    url\n    createdAt\n    owner {\n      login\n      avatarUrl\n    }\n    isPrivate\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n    projectsV2(first: 10) {\n      nodes {\n        id\n        title\n        number\n        url\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetUserRepositories($first: Int = 100) {\n  viewer {\n    repositories(first: $first, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        isPrivate\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["query GetUserRepositories($first: Int = 100) {\n  viewer {\n    repositories(first: $first, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        isPrivate\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "query GetUser($login: String!) {\n  user(login: $login) {\n    id\n    login\n    name\n    avatarUrl\n    url\n    bio\n  }\n}"
+): (typeof documents)["query GetUser($login: String!) {\n  user(login: $login) {\n    id\n    login\n    name\n    avatarUrl\n    url\n    bio\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
   source: "query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}"
 ): (typeof documents)["query GetViewer {\n  viewer {\n    id\n    login\n    avatarUrl\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetUserRepositories {\n  viewer {\n    repositories(first: 50, orderBy: {field: UPDATED_AT, direction: DESC}) {\n      nodes {\n        id\n        name\n        description\n        url\n        createdAt\n        owner {\n          login\n          avatarUrl\n        }\n      }\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}"
-): (typeof documents)["fragment RepositoryFields on Repository {\n  id\n  name\n  description\n  url\n  owner {\n    login\n    avatarUrl\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}"
-): (typeof documents)["query GetRepository($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    ...RepositoryFields\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"
-): (typeof documents)["query GetRepoCollaborators($owner: String!, $name: String!) {\n  repository(owner: $owner, name: $name) {\n    id\n    collaborators(first: 100) {\n      nodes {\n        id\n        login\n        avatarUrl\n      }\n      edges {\n        permission\n      }\n    }\n  }\n}"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(
-  source: "query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}"
-): (typeof documents)["query GetUser($username: String!) {\n  user(login: $username) {\n    id\n    login\n    avatarUrl\n  }\n}"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

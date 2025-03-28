@@ -5,7 +5,6 @@ import {
   columnService,
   issueService,
   collaboratorService,
-  repositoryService,
 } from "../graphql/services";
 import {
   ColumnFormData,
@@ -121,25 +120,33 @@ export class ProjectStore {
     this.error = null;
 
     try {
-      const success = await projectService.deleteProject(projectId);
+      const response = await projectService.deleteProject(projectId);
 
-      if (success) {
-        runInAction(() => {
+      // The GraphQL mutation returns {data: {deleteProjectV2: {clientMutationId: null}}}
+      // which indicates a successful deletion even with null clientMutationId
+      const success = typeof response === "boolean" ? response : true;
+
+      runInAction(() => {
+        if (success) {
           this.projects = this.projects.filter((project) => project.id !== projectId);
 
           // Clear selected project if it was deleted
           if (this.selectedProject && this.selectedProject.id === projectId) {
             this.selectedProject = null;
           }
+        } else {
+          this.error = "Failed to delete project";
+        }
+        this.loading = false;
+      });
 
-          this.loading = false;
-        });
-      }
+      return success;
     } catch (error) {
       runInAction(() => {
         this.error = (error as Error).message;
         this.loading = false;
       });
+      return false;
     }
   }
 
@@ -531,29 +538,48 @@ export class ProjectStore {
 
       // If not found, fetch it
       if (!repository) {
-        repository = await repositoryService.getRepository(repositoryOwner, repositoryName);
+        repository = await repositoryStore.fetchRepository(repositoryOwner, repositoryName);
       }
 
       if (!repository) {
         throw new Error("Repository not found");
       }
 
-      // Link the repository
+      // Link the repository using the updated ProjectService
+      const success = await projectService.linkRepositoryToProject(
+        projectId,
+        repositoryOwner,
+        repositoryName
+      );
+
+      if (success) {
+        // Update local state
+        runInAction(() => {
+          if (!project.repositories) {
+            project.repositories = [];
+          }
+
+          // Check if already linked
+          const alreadyLinked = project.repositories.some(
+            (r) =>
+              r.id === repository?.id ||
+              (r.owner?.login === repositoryOwner && r.name === repositoryName)
+          );
+
+          if (!alreadyLinked && repository) {
+            project.repositories.push(repository);
+          }
+        });
+
+        // Force a refresh of projects to ensure consistency with server
+        await this.fetchProjects();
+      }
+
       runInAction(() => {
-        if (!project.repositories) {
-          project.repositories = [];
-        }
-
-        // Check if already linked
-        const alreadyLinked = project.repositories.some((r) => r.id === repository?.id);
-        if (!alreadyLinked && repository) {
-          project.repositories.push(repository);
-        }
-
         this.loading = false;
       });
 
-      return true;
+      return success;
     } catch (error) {
       runInAction(() => {
         this.error = (error as Error).message;
