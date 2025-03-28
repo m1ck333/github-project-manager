@@ -6,76 +6,46 @@ import { useNavigate } from "react-router-dom";
 import GitHubTokenWarning from "../../components/features/github/GitHubTokenWarning";
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
-import { projectStore, repositoryStore } from "../../store";
+import { userService } from "../../graphql/services";
+import { useAppInitialization } from "../../hooks/useAppInitialization";
 
 import styles from "./HomePage.module.scss";
 
 const Home: React.FC = observer(() => {
   const navigate = useNavigate();
+  useAppInitialization();
 
   useEffect(() => {
     // Set document title
     document.title = "GitHub Project Manager";
-
-    // Load initial data when the home page loads
-    const loadInitialData = async () => {
-      try {
-        // Load projects if they're not already loaded
-        if (projectStore.projects.length === 0) {
-          await projectStore.fetchProjects();
-        }
-
-        // Load repositories if they're not already loaded
-        if (repositoryStore.repositories.length === 0) {
-          await repositoryStore.fetchUserRepositories();
-        }
-      } catch (error) {
-        console.error("Error loading initial data:", error);
-      }
-    };
-
-    loadInitialData();
   }, []);
 
+  const hasToken = userService.hasToken();
+
   return (
-    <Container size="small" withPadding title="Welcome to GitHub Project Manager">
-      <div className={styles.content}>
-        <GitHubTokenWarning />
+    <Container className={styles.homePage}>
+      <div className={styles.hero}>
+        <h1 className={styles.title}>GitHub Project Manager</h1>
+        <p className={styles.subtitle}>Manage your GitHub repositories and projects in one place</p>
 
-        <p>
-          This application helps you manage your GitHub projects and repositories efficiently. You
-          can create and manage projects, track work through different status columns, and manage
-          repository collaborators.
-        </p>
+        {!hasToken && <GitHubTokenWarning />}
 
-        <div className={styles.stats}>
-          <div className={styles.statCard} onClick={() => navigate("/projects")}>
-            <div className={styles.statIcon}>
-              <FiFolder size={24} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{projectStore.projects.length}</h3>
-              <p>Projects</p>
-            </div>
-          </div>
-
-          <div className={styles.statCard} onClick={() => navigate("/repositories")}>
-            <div className={styles.statIcon}>
-              <FiGithub size={24} />
-            </div>
-            <div className={styles.statInfo}>
-              <h3>{repositoryStore.repositories.length}</h3>
-              <p>Repositories</p>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={() => navigate("/projects")} size="large">
-            View My Projects
+        <div className={styles.buttonGrid}>
+          <Button
+            variant="primary"
+            size="large"
+            onClick={() => navigate("/projects")}
+            className={styles.button}
+          >
+            <FiFolder className={styles.buttonIcon} /> View Projects
           </Button>
-          <Button variant="primary" onClick={() => navigate("/repositories")} size="large">
-            Manage Repositories
+          <Button
+            variant="secondary"
+            size="large"
+            onClick={() => navigate("/repositories")}
+            className={styles.button}
+          >
+            <FiGithub className={styles.buttonIcon} /> View Repositories
           </Button>
         </div>
       </div>

@@ -1,7 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Layout from "./components/layout/Layout";
+import Button from "./components/ui/Button";
+import InfoBox from "./components/ui/InfoBox";
+import Loading from "./components/ui/Loading";
+import { ToastProvider } from "./components/ui/Toast";
+import { useAppInitialization } from "./hooks/useAppInitialization";
 import CollaboratorsPage from "./pages/CollaboratorsPage";
 import Home from "./pages/HomePage";
 import ProjectPage from "./pages/ProjectPage";
@@ -26,12 +31,37 @@ const AppRoutes = () => {
 };
 
 const App: React.FC = () => {
+  const { isInitializing, error, retryInitialization } = useAppInitialization();
+
+  if (isInitializing) {
+    return (
+      <div className="initializingContainer">
+        <Loading text="Initializing application..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="initializingContainer">
+        <InfoBox variant="error" title="Initialization Error">
+          <p>{error}</p>
+          <Button variant="secondary" size="small" onClick={retryInitialization}>
+            Retry
+          </Button>
+        </InfoBox>
+      </div>
+    );
+  }
+
   return (
-    <Router>
-      <Layout>
-        <AppRoutes />
-      </Layout>
-    </Router>
+    <BrowserRouter>
+      <ToastProvider>
+        <Layout>
+          <AppRoutes />
+        </Layout>
+      </ToastProvider>
+    </BrowserRouter>
   );
 };
 

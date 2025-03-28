@@ -114,6 +114,10 @@
   transition: opacity 0.3s ease;
 }
 
+.appName {
+  color: $white;
+}
+
 // Mobile styles
 @media (max-width: $breakpoint-md) {
   .appName {

@@ -11,46 +11,9 @@ export class RepositoryStore {
 
   // Track in-progress collaborator fetches to avoid duplicate requests
   private pendingCollaboratorFetches: Record<string, Promise<RepositoryCollaborator[]>> = {};
-  private initialized = false;
 
   constructor() {
     makeAutoObservable(this);
-
-    // Try to load cached repositories from localStorage
-    this.loadFromCache();
-  }
-
-  // Load data from localStorage cache if available
-  private loadFromCache() {
-    try {
-      const cachedData = localStorage.getItem("repositoryData");
-      if (cachedData) {
-        const data = JSON.parse(cachedData);
-        // Only use cache if it's from the current day
-        if (data.timestamp && new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
-          this.repositories = data.repositories;
-          this.initialized = true;
-          console.log("Loaded repositories from cache");
-        }
-      }
-    } catch (error) {
-      console.warn("Error loading from cache:", error);
-      // Clear potentially corrupted cache
-      localStorage.removeItem("repositoryData");
-    }
-  }
-
-  // Save current data to localStorage
-  private saveToCache() {
-    try {
-      const data = {
-        repositories: this.repositories,
-        timestamp: new Date().getTime(),
-      };
-      localStorage.setItem("repositoryData", JSON.stringify(data));
-    } catch (error) {
-      console.warn("Error saving to cache:", error);
-    }
   }
 
   async fetchUserRepositories() {
@@ -128,9 +91,6 @@ export class RepositoryStore {
           // Add to repositories list
           this.repositories.push(repository);
           this.loading = false;
-
-          // Update cache
-          this.saveToCache();
         });
       }
 
@@ -198,16 +158,15 @@ export class RepositoryStore {
           this.error = (error as Error).message;
           this.loading = false;
         });
-        throw error;
+        return [];
       } finally {
-        // Remove from pending fetches when done
+        // Clean up the pending request when done
         delete this.pendingCollaboratorFetches[cacheKey];
       }
     })();
 
-    // Store the promise in our pending fetches map
+    // Store the promise so we can return it for duplicate requests
     this.pendingCollaboratorFetches[cacheKey] = fetchPromise;
-
     return fetchPromise;
   }
 
@@ -313,8 +272,8 @@ export class RepositoryStore {
     }
   }
 
-  selectRepository(repositoryId: string) {
-    this.selectedRepository = this.repositories.find((r) => r.id === repositoryId) || null;
+  selectRepository(repository: Repository) {
+    this.selectedRepository = repository;
   }
 
   clearSelectedRepository() {
@@ -323,57 +282,5 @@ export class RepositoryStore {
 
   clearError() {
     this.error = null;
-  }
-
-  async initializeData() {
-    // If already initialized, don't reload
-    if (this.initialized) return this.repositories;
-
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // First fetch all repositories
-      const repositories = await repositoryService.getUserRepositories();
-
-      runInAction(() => {
-        this.repositories = repositories;
-      });
-
-      // Then fetch collaborators in batches of 5
-      for (let i = 0; i < repositories.length; i += 5) {
-        const batch = repositories.slice(i, i + 5);
-        const promises = batch.map((repo) =>
-          this.fetchRepositoryCollaborators(repo.owner.login, repo.name).catch((err) => {
-            console.warn(`Error fetching collaborators for ${repo.owner.login}/${repo.name}:`, err);
-            return [];
-          })
-        );
-
-        // Wait for this batch to complete before starting the next
-        await Promise.all(promises);
-      }
-
-      runInAction(() => {
-        this.loading = false;
-        this.initialized = true;
-
-        // Save to cache after successful initialization
-        this.saveToCache();
-      });
-
-      return this.repositories;
-    } catch (error) {
-      runInAction(() => {
-        this.error = (error as Error).message;
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  // Method to reset initialization status to force a refresh
-  resetInitialization() {
-    this.initialized = false;
   }
 }

@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { FiGithub, FiUser } from "react-icons/fi";
 
+import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
 import Tooltip from "@/components/ui/Tooltip";
 import { useGitHubUser } from "@/hooks/useGitHubUser";
@@ -13,7 +14,7 @@ import styles from "./GitHubUserInfo.module.scss";
  * when a valid token is present
  */
 const GitHubUserInfo: React.FC = observer(() => {
-  const { isLoading, isAuthenticated, hasToken, user } = useGitHubUser();
+  const { isLoading, isAuthenticated, user } = useGitHubUser();
 
   // Content to show inside tooltip - no avatar since it's already visible
   const tooltipContent = (
@@ -22,13 +23,14 @@ const GitHubUserInfo: React.FC = observer(() => {
         {isAuthenticated && user ? (
           <>
             <div className={styles.userName}>{user.login}</div>
-            <button
-              className={styles.profileButton}
+            <Button
               onClick={() => window.open(user.url, "_blank")}
+              variant="secondary"
+              size="small"
             >
               <FiGithub className={styles.icon} />
               View GitHub Profile
-            </button>
+            </Button>
           </>
         ) : (
           <div className={styles.userName}>Not logged in</div>
