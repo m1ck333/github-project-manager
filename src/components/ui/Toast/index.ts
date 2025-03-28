@@ -1,9 +1,9 @@
 import { ToastType } from "./Toast";
 import ToastContainer from "./ToastContainer";
 import { ToastProvider } from "./ToastContext";
-import { useToast } from "./useToast";
-import { ToastContextValue, ToastData } from "./types";
 import { toast } from "./toastHelpers.ts";
+import { ToastContextValue, ToastData } from "./types";
+import { useToast } from "./useToast";
 
 export { ToastContainer, ToastProvider, useToast, toast };
 

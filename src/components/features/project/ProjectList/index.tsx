@@ -1,26 +1,21 @@
-import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
+import React, { useState } from "react";
+import { FiEdit, FiTrash2, FiCalendar, FiArrowRight, FiUsers, FiGithub } from "react-icons/fi";
+import { useNavigate, Link } from "react-router-dom";
+
+import { projectStore } from "../../../../store";
 import { Project, ColumnType, ColumnFormData } from "../../../../types";
 import Button from "../../../ui/Button";
+import GridCard from "../../../ui/GridCard";
+import GridCardAdd from "../../../ui/GridCardAdd";
+import GridContainer from "../../../ui/GridContainer";
 import Input from "../../../ui/Input";
 import Modal from "../../../ui/Modal";
-import ProjectForm from "../ProjectForm";
-import EditProjectForm from "./EditProjectForm";
-import { projectStore, repositoryStore } from "../../../../store";
 import { useToast } from "../../../ui/Toast";
-import {
-  FiEdit,
-  FiTrash2,
-  FiPlus,
-  FiCalendar,
-  FiArrowRight,
-  FiColumns,
-  FiUsers,
-  FiGithub,
-} from "react-icons/fi";
-import styles from "./ProjectList.module.scss";
 import ProjectBoard from "../ProjectBoard";
-import { useNavigate, Link } from "react-router-dom";
+import ProjectForm from "../ProjectForm";
+
+import styles from "./ProjectList.module.scss";
 
 interface ProjectListProps {
   projects: Project[];
@@ -96,8 +91,8 @@ const AddColumnForm: React.FC<{
 });
 
 const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
-  const [expandedProject, setExpandedProject] = useState<string | null>(null);
-  const [showProjectForm, setShowProjectForm] = useState(false);
+  // State for modals and selected items
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProject, setDeleteProject] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -106,24 +101,12 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
-  const toggleProject = (projectId: string) => {
-    setExpandedProject(expandedProject === projectId ? null : projectId);
-  };
-
   const handleEdit = (project: Project) => {
     setEditProject(project);
   };
 
   const handleDelete = (project: Project) => {
     setDeleteProject(project);
-  };
-
-  const handleAddColumn = (project: Project) => {
-    setAddColumnProject(project);
-  };
-
-  const handleViewBoard = (project: Project) => {
-    setViewBoardProject(project);
   };
 
   const confirmDelete = async () => {
@@ -147,14 +130,13 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
 
   return (
     <>
-      <div className={styles.projectGrid}>
-        {/* Create Project Card */}
-        <div className={styles.createProjectCard} onClick={() => setShowProjectForm(true)}>
-          <div className={styles.createProjectIcon}>
-            <FiPlus size={24} />
-          </div>
-          <p>Create Project</p>
-        </div>
+      <GridContainer>
+        {/* Replace with GridCardAdd component */}
+        <GridCardAdd
+          label="Create Project"
+          onClick={() => setShowAddForm(true)}
+          className={styles.createProjectCard}
+        />
 
         {/* Project Cards */}
         {projects.map((project, index) => {
@@ -162,94 +144,83 @@ const ProjectList: React.FC<ProjectListProps> = observer(({ projects }) => {
           const projectKey = `project-${index}-${project.id || ""}-${project.name}`;
 
           return (
-            <div
+            <GridCard
               key={projectKey}
-              className={styles.projectCard}
+              title={project.name}
+              description={project.description || "No description provided"}
+              stats={[
+                {
+                  icon: <FiGithub size={14} />,
+                  text: `${project.repositories?.length || 0} Repositories`,
+                },
+                {
+                  icon: <FiUsers size={14} />,
+                  text: `${project.collaborators?.length || 0} Collaborators`,
+                },
+              ]}
+              actions={[
+                {
+                  icon: <FiEdit size={16} />,
+                  label: "Edit",
+                  ariaLabel: "Edit project",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    handleEdit(project);
+                  },
+                },
+                {
+                  icon: <FiTrash2 size={16} />,
+                  label: "Delete",
+                  ariaLabel: "Delete project",
+                  onClick: (e) => {
+                    e.stopPropagation();
+                    handleDelete(project);
+                  },
+                },
+              ]}
+              footer={
+                <div className={styles.projectCardFooter}>
+                  <span className={styles.projectDate}>
+                    <FiCalendar size={14} />
+                    <i>Created on {new Date(project.createdAt).toLocaleDateString()}</i>
+                  </span>
+                  <Link
+                    to={`/projects/${project.id}`}
+                    className={styles.viewButton}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <FiArrowRight size={14} /> View Project
+                  </Link>
+                </div>
+              }
               onClick={() => navigateToProject(project.id)}
-            >
-              <div className={styles.projectHeader}>
-                <h3 className={styles.projectTitle}>{project.name}</h3>
-                <div className={styles.projectActions}>
-                  <button
-                    className={styles.editButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(project);
-                    }}
-                    aria-label="Edit project"
-                  >
-                    <FiEdit size={16} />
-                  </button>
-                  <button
-                    className={styles.deleteButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(project);
-                    }}
-                    aria-label="Delete project"
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className={styles.projectDescription}>
-                {project.description ? (
-                  <p>{project.description}</p>
-                ) : (
-                  <p className={styles.emptyDescription}>No description provided</p>
-                )}
-              </div>
-
-              <div className={styles.projectStats}>
-                <div className={styles.stat}>
-                  <FiGithub size={14} />
-                  <span>{project.repositories?.length || 0} Repositories</span>
-                </div>
-                <div className={styles.stat}>
-                  <FiUsers size={14} />
-                  <span>{project.collaborators?.length || 0} Collaborators</span>
-                </div>
-              </div>
-
-              <div className={styles.projectExtraInfo}>
-                <span className={styles.projectExtraInfoDate}>
-                  <FiCalendar size={14} />
-                  <i>Created on {new Date(project.createdAt).toLocaleDateString()}</i>
-                </span>
-                <Link
-                  to={`/projects/${project.id}`}
-                  className={styles.viewButton}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <FiArrowRight size={14} /> View Project
-                </Link>
-              </div>
-            </div>
+              className={styles.projectCard}
+            />
           );
         })}
-      </div>
+      </GridContainer>
 
       {/* Project Creation Modal */}
-      <Modal
-        isOpen={showProjectForm}
-        onClose={() => setShowProjectForm(false)}
-        title="Create New Project"
-      >
+      <Modal isOpen={showAddForm} onClose={() => setShowAddForm(false)} title="Create New Project">
         <ProjectForm
-          onSuccess={() => setShowProjectForm(false)}
-          onCancel={() => setShowProjectForm(false)}
+          onSuccess={() => setShowAddForm(false)}
+          onCancel={() => setShowAddForm(false)}
         />
       </Modal>
 
       {/* Project Edit Modal */}
       {editProject && (
         <Modal isOpen={!!editProject} onClose={() => setEditProject(null)} title="Edit Project">
-          <EditProjectForm
-            project={editProject}
-            onSuccess={() => setEditProject(null)}
-            onCancel={() => setEditProject(null)}
-          />
+          {editProject && (
+            <ProjectForm
+              project={editProject}
+              onSuccess={() => {
+                setEditProject(null);
+                // Any other success logic
+              }}
+              onCancel={() => setEditProject(null)}
+            />
+          )}
         </Modal>
       )}
 

@@ -1,9 +1,10 @@
 import React, { useState, useCallback, ReactNode } from "react";
 import { v4 as uuidv4 } from "uuid";
-import ToastContainer from "./ToastContainer";
-import { ToastType } from "./Toast";
-import { ToastData } from "./types";
+
 import { ToastContext } from "./context";
+import { ToastType } from "./Toast";
+import ToastContainer from "./ToastContainer";
+import { ToastData } from "./types";
 
 // Provider component
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

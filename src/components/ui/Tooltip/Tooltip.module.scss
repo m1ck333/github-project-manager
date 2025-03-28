@@ -2,69 +2,76 @@
 
 .tooltip {
   position: fixed;
-  transform: translate(-50%, -50%);
-  background-color: $text-primary;
-  color: $white;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $border-radius-sm;
-  font-size: $font-size-small;
-  max-width: 250px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  pointer-events: none; // Allows clicking through
-  opacity: 0.95;
-  word-wrap: break-word;
-  animation: fade-in 0.2s ease-in;
   left: var(--x);
   top: var(--y);
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  pointer-events: auto; /* Important for allowing tooltip content to be clicked */
+  max-width: 300px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 
-  &::before {
-    content: "";
-    position: absolute;
-    border: 8px solid transparent;
-  }
-
+  // Position modifiers
   &.top {
-    transform: translate(-50%, calc(-100% - 8px));
+    transform: translate(-50%, calc(-100% - 16px));
 
-    &::before {
-      bottom: -15px;
+    &:after {
+      content: "";
+      position: absolute;
+      top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border-top-color: $text-primary;
-    }
-  }
-
-  &.bottom {
-    transform: translate(-50%, calc(8px));
-
-    &::before {
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-bottom-color: $text-primary;
-    }
-  }
-
-  &.left {
-    transform: translate(calc(-100% - 8px), -50%);
-
-    &::before {
-      right: -15px;
-      top: 50%;
-      transform: translateY(-50%);
-      border-left-color: $text-primary;
+      border-width: 6px;
+      border-style: solid;
+      border-color: white transparent transparent transparent;
     }
   }
 
   &.right {
-    transform: translate(8px, -50%);
+    transform: translate(16px, -50%);
 
-    &::before {
-      left: -15px;
+    &:after {
+      content: "";
+      position: absolute;
       top: 50%;
+      left: -6px;
       transform: translateY(-50%);
-      border-right-color: $text-primary;
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent white transparent transparent;
+    }
+  }
+
+  &.bottom {
+    transform: translate(-50%, 16px);
+
+    &:after {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent white transparent;
+    }
+  }
+
+  &.left {
+    transform: translate(calc(-100% - 16px), -50%);
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      transform: translateY(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: transparent transparent transparent white;
     }
   }
 }

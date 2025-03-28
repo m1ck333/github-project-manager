@@ -1,11 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
 import { observer } from "mobx-react-lite";
-import { Repository } from "../../../../types";
+import React, { useState, useEffect, useCallback } from "react";
+import { FiGithub, FiTrash2, FiPlus } from "react-icons/fi";
+
 import { projectStore } from "../../../../store";
+import { Repository } from "../../../../types";
 import Button from "../../../ui/Button";
 import Input from "../../../ui/Input";
+import Loading from "../../../ui/Loading";
 import Modal from "../../../ui/Modal";
-import { FiGithub, FiTrash2, FiPlus } from "react-icons/fi";
+
 import styles from "./ProjectRepositories.module.scss";
 
 interface ProjectRepositoriesProps {
@@ -79,7 +82,10 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
         </Button>
       </div>
 
-      {loading && <div className={styles.loading}>Loading repositories...</div>}
+      {repositories.length === 0 && !loading && !error && (
+        <div className={styles.noRepositories}>No repositories linked to this project.</div>
+      )}
+      {loading && <Loading size="medium" text="Loading repositories..." />}
       {error && <div className={styles.error}>{error}</div>}
 
       <div className={styles.repositoriesList}>

@@ -109,6 +109,30 @@ src/
 - Zod is used for form validation
 - SCSS Modules are used for styling
 
+## Code Style
+
+This project follows a consistent code style with ESLint and Prettier.
+
+### Import Organization
+
+Imports are automatically organized in the following order:
+
+1. Built-in Node.js modules
+2. External dependencies (with React first)
+3. Internal modules (starting with @/)
+4. Parent directory imports (../)
+5. Current directory imports (./)
+6. Object imports
+7. Type imports
+
+Each group is separated by a blank line, and imports within each group are alphabetically sorted.
+
+To automatically fix imports across the project, run:
+
+```bash
+npm run lint:fix
+```
+
 ## Contributing
 
 1. Fork the repository

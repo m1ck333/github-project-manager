@@ -4,11 +4,12 @@
  * Service class to handle all column-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
-import { client } from "../client";
-import { Column, ColumnFormData, ColumnType } from "../../types";
-import { GetColumnsDocument, ColumnFieldsFragmentDoc } from "../generated/graphql";
-import { getFragmentData } from "../generated/fragment-masking";
 import { gql } from "urql";
+
+import { Column, ColumnFormData, ColumnType } from "../../types";
+import { client } from "../client";
+import { getFragmentData } from "../generated/fragment-masking";
+import { GetColumnsDocument, ColumnFieldsFragmentDoc } from "../generated/graphql";
 
 /**
  * Service for managing project columns (status fields)

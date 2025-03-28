@@ -4,9 +4,9 @@
  * Service class to handle all project-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
-import { client } from "../client";
-import { Project, ProjectFormData } from "../../types";
-import { transformProjectV2ToProject } from "../utils";
+import { OPERATIONS } from "@/constants/operations";
+import { client } from "@/graphql/client";
+import { getFragmentData } from "@/graphql/generated/fragment-masking";
 import {
   GetViewerDocument,
   GetProjectDocument,
@@ -15,8 +15,9 @@ import {
   UpdateProjectDocument,
   DeleteProjectDocument,
   ProjectFieldsFragmentDoc,
-} from "../generated/graphql";
-import { getFragmentData } from "../generated/fragment-masking";
+} from "@/graphql/generated/graphql";
+import { transformProjectV2ToProject } from "@/graphql/utils";
+import { Project, ProjectFormData } from "@/types";
 
 /**
  * Service for managing GitHub projects
@@ -28,7 +29,9 @@ export class ProjectService {
    * Get a project by its ID
    */
   async getProject(id: string): Promise<Project | null> {
-    const { data, error } = await this.client.query(GetProjectDocument, { id }).toPromise();
+    const { data, error } = await this.client
+      .query(GetProjectDocument, { id }, { name: OPERATIONS.GET_PROJECT(id) })
+      .toPromise();
 
     if (error || !data?.node) {
       console.error("Error fetching project:", error);
@@ -48,7 +51,9 @@ export class ProjectService {
    * Get all projects for the current user
    */
   async getProjects(): Promise<Project[]> {
-    const { data, error } = await this.client.query(GetProjectsDocument, {}).toPromise();
+    const { data, error } = await this.client
+      .query(GetProjectsDocument, {}, { name: OPERATIONS.GET_PROJECTS })
+      .toPromise();
 
     if (error || !data?.viewer?.projectsV2?.nodes) {
       console.error("Error fetching projects:", error);
@@ -69,7 +74,9 @@ export class ProjectService {
    */
   async createProject(projectData: ProjectFormData): Promise<Project | null> {
     // Get the current user ID
-    const { data: viewerData } = await this.client.query(GetViewerDocument, {}).toPromise();
+    const { data: viewerData } = await this.client
+      .query(GetViewerDocument, {}, { name: OPERATIONS.VALIDATE_TOKEN })
+      .toPromise();
 
     if (!viewerData?.viewer?.id) {
       console.error("Error: Could not get viewer ID");
@@ -83,7 +90,7 @@ export class ProjectService {
     };
 
     const { data, error } = await this.client
-      .mutation(CreateProjectDocument, { input })
+      .mutation(CreateProjectDocument, { input }, { name: OPERATIONS.CREATE_PROJECT })
       .toPromise();
 
     if (error || !data?.createProjectV2?.projectV2) {
@@ -108,7 +115,7 @@ export class ProjectService {
     };
 
     const { data, error } = await this.client
-      .mutation(UpdateProjectDocument, { input })
+      .mutation(UpdateProjectDocument, { input }, { name: OPERATIONS.UPDATE_PROJECT(id) })
       .toPromise();
 
     if (error || !data?.updateProjectV2?.projectV2) {
@@ -132,7 +139,7 @@ export class ProjectService {
     };
 
     const { data, error } = await this.client
-      .mutation(DeleteProjectDocument, { input })
+      .mutation(DeleteProjectDocument, { input }, { name: OPERATIONS.DELETE_PROJECT(id) })
       .toPromise();
 
     if (error) {

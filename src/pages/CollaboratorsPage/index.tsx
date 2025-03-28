@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { projectStore } from "../../store";
-import { Collaborator, CollaboratorRole, CollaboratorFormData } from "../../types";
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
+import { useParams, useNavigate } from "react-router-dom";
+
+import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import Loading from "../../components/ui/Loading";
 import Modal from "../../components/ui/Modal";
-import Container from "../../components/layout/Container";
 import { useToast } from "../../components/ui/Toast";
-import { FiArrowLeft, FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
+import { projectStore } from "../../store";
+import { Collaborator, CollaboratorRole, CollaboratorFormData } from "../../types";
+
 import styles from "./CollaboratorsPage.module.scss";
 
 const CollaboratorsPage: React.FC = observer(() => {
@@ -92,8 +95,8 @@ const CollaboratorsPage: React.FC = observer(() => {
 
   if (isLoading) {
     return (
-      <Container size="large" withPadding title="Loading">
-        <div className={styles.loading}>Loading collaborators...</div>
+      <Container size="large" withPadding title="Collaborators">
+        <Loading size="large" fullPage text="Loading collaborators..." />
       </Container>
     );
   }

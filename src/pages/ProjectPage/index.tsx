@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { projectStore } from "../../store";
-import ProjectBoard from "../../components/features/project/ProjectBoard";
-import ProjectRepositories from "../../components/features/project/ProjectRepositories";
-import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
-import Container from "../../components/layout/Container";
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiPlus, FiTag, FiColumns, FiUsers } from "react-icons/fi";
+import { useParams, useNavigate } from "react-router-dom";
+
 import IssueForm from "../../components/features/issue/IssueForm";
 import LabelForm from "../../components/features/label/LabelForm";
-import { FiArrowLeft, FiPlus, FiTag, FiColumns, FiUsers, FiGithub } from "react-icons/fi";
-import styles from "./ProjectPage.module.scss";
+import ProjectBoard from "../../components/features/project/ProjectBoard";
+import ProjectRepositories from "../../components/features/project/ProjectRepositories";
+import Container from "../../components/layout/Container";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import { projectStore } from "../../store";
 import { ColumnType } from "../../types";
+
+import styles from "./ProjectPage.module.scss";
 
 const ProjectPage: React.FC = observer(() => {
   const { projectId } = useParams<{ projectId: string }>();

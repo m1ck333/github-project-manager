@@ -1,4 +1,5 @@
 import React from "react";
+
 import Toast, { ToastProps } from "./Toast";
 import styles from "./Toast.module.scss";
 

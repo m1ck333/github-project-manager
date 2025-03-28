@@ -1,10 +1,12 @@
-import React, { useState } from "react";
 import { observer } from "mobx-react-lite";
-import { projectStore } from "@/store";
+import React, { useState } from "react";
+import { FiRefreshCw } from "react-icons/fi";
+
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
-import { FiRefreshCw } from "react-icons/fi";
+import { projectStore } from "@/store";
+
 import styles from "./LabelForm.module.scss";
 
 interface LabelFormProps {
@@ -53,7 +55,7 @@ const LabelForm: React.FC<LabelFormProps> = observer(({ projectId, onSuccess, on
     setIsLoading(true);
 
     try {
-      const label = await projectStore.createLabel(projectId, name, color, description);
+      await projectStore.createLabel(projectId, name, color, description);
 
       showToast(`Label "${name}" created successfully`, "success");
       onSuccess();

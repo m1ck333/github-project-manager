@@ -4,16 +4,17 @@
  * Service class to handle all issue-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
-import { client } from "../client";
+import { gql } from "urql";
+
 import { Issue } from "../../types";
+import { client } from "../client";
+import { getFragmentData } from "../generated/fragment-masking";
 import {
   GetProjectIssuesDocument,
   CreateDraftIssueDocument,
   UpdateIssueStatusDocument,
   IssueFieldsFragmentDoc,
 } from "../generated/graphql";
-import { getFragmentData } from "../generated/fragment-masking";
-import { gql } from "urql";
 
 /**
  * Service for managing project issues

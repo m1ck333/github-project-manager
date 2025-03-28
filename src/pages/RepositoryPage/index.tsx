@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import { repositoryStore } from "../../store";
-import { RepositoryCollaboratorFormData } from "../../types";
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiGithub, FiExternalLink } from "react-icons/fi";
+import { useParams, useNavigate } from "react-router-dom";
+
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiGithub, FiExternalLink } from "react-icons/fi";
-import styles from "./RepositoryDetailPage.module.scss";
+import { repositoryStore } from "../../store";
+
+import styles from "./RepositoryPage.module.scss";
 
 // Simple Select component since we don't have one in the project
 interface SelectOption {
@@ -34,7 +35,7 @@ const Select: React.FC<SelectProps> = ({ id, value, onChange, options }) => {
   );
 };
 
-const RepositoryDetailPage: React.FC = observer(() => {
+const RepositoryPage: React.FC = observer(() => {
   const { owner, name } = useParams<{ owner: string; name: string }>();
   const navigate = useNavigate();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -246,4 +247,4 @@ const RepositoryDetailPage: React.FC = observer(() => {
   );
 });
 
-export default RepositoryDetailPage;
+export default RepositoryPage;

@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { Project, Issue } from "@/types";
-import { projectStore } from "@/store";
-import Button from "@/components/ui/Button";
-import Modal from "@/components/ui/Modal";
-import Tooltip from "@/components/ui/Tooltip";
+import React, { useState, useEffect } from "react";
+import { FiPlus, FiTag, FiFileText, FiHelpCircle } from "react-icons/fi";
+
 import IssueForm from "@/components/features/issue/IssueForm";
 import LabelForm from "@/components/features/label/LabelForm";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
-import { FiPlus, FiTag, FiFileText, FiHelpCircle } from "react-icons/fi";
+import Tooltip from "@/components/ui/Tooltip";
+import { projectStore } from "@/store";
+import { Project, Issue } from "@/types";
+
 import styles from "./ProjectBoard.module.scss";
 
 interface ProjectBoardProps {

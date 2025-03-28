@@ -5,9 +5,9 @@
  * and transforming between API and application data structures.
  */
 
+import { ProjectFieldsFragment } from "../graphql/generated/graphql";
 import { Project } from "../types";
 // Since ProjectV2 is a GraphQL type from the GitHub schema, we need to import it from the generated schema
-import { ProjectFieldsFragment } from "../graphql/generated/graphql";
 
 /**
  * Transform a GitHub ProjectV2 object to our local Project type

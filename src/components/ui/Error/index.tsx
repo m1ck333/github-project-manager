@@ -1,5 +1,7 @@
 import React from "react";
+
 import Button from "../Button";
+
 import styles from "./Error.module.scss";
 
 interface ErrorProps {

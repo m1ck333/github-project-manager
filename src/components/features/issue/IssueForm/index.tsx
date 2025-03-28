@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
+import React, { useState, useEffect } from "react";
+
 import { projectStore } from "../../../../store";
 import { Label } from "../../../../types";
 import Button from "../../../ui/Button";
 import Input from "../../../ui/Input";
 import { useToast } from "../../../ui/Toast";
+
 import styles from "./IssueForm.module.scss";
 
 interface IssueFormProps {
@@ -54,7 +56,7 @@ const IssueForm: React.FC<IssueFormProps> = observer(({ projectId, onSuccess, on
     };
 
     fetchLabels();
-  }, [projectId]);
+  }, [projectId, showToast]);
 
   const toggleLabel = (labelId: string) => {
     setSelectedLabels((prev) =>
@@ -75,7 +77,7 @@ const IssueForm: React.FC<IssueFormProps> = observer(({ projectId, onSuccess, on
     setIsLoading(true);
 
     try {
-      const issue = await projectStore.createIssue(projectId, title, description, selectedLabels);
+      await projectStore.createIssue(projectId, title, description, selectedLabels);
 
       showToast(`Issue "${title}" created successfully`, "success");
       onSuccess();

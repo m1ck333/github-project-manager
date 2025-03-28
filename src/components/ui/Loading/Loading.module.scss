@@ -7,6 +7,22 @@
   justify-content: center;
   padding: $spacing-md;
 
+  &.fixedHeight {
+    min-height: 40px; // Default minimum height
+
+    &.small {
+      min-height: 30px;
+    }
+
+    &.medium {
+      min-height: 48px;
+    }
+
+    &.large {
+      min-height: 64px;
+    }
+  }
+
   &.fullPage {
     position: fixed;
     top: 0;

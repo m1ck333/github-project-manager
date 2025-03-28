@@ -1,0 +1,125 @@
+@use "@/styles/variables" as *;
+
+/* Main container */
+.userInfoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px; /* Fixed height to prevent layout shifts */
+}
+
+/* Fixes loading height issue in navbar */
+.loadingContainer {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Container for avatar to allow proper click handling */
+.avatarContainer {
+  height: 36px;
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* User avatar for logged in users */
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Placeholder for non-logged in users */
+.placeholderAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background-color: #e9eef2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8a9db0;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: #d8e1e9;
+  }
+}
+
+/* Tooltip content styling */
+.tooltipContent {
+  padding: 12px;
+  width: 180px;
+}
+
+.tooltipUserInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 14px;
+  color: #2e3440; /* Dark text color for better contrast */
+  margin-bottom: 12px;
+}
+
+.profileButton {
+  font-size: 13px;
+  color: #4c566a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background-color: #e9eef2;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-family: inherit;
+
+  .icon {
+    font-size: 14px;
+  }
+
+  &:hover {
+    background-color: #5e81ac;
+    color: white;
+  }
+
+  &:active {
+    background-color: #4c6f9a;
+    transform: translateY(1px);
+  }
+}
+
+/* Remove old unused styles */
+.userInfo,
+.tooltipHeader,
+.tooltipAvatar,
+.userDetails,
+.userLogin,
+.profileLink,
+.profileUrl {
+  display: none;
+}

@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
-import Button from "../../components/ui/Button";
-import Container from "../../components/layout/Container";
-import { projectStore, repositoryStore } from "../../store";
+import React, { useEffect } from "react";
 import { FiFolder, FiGithub } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+
+import GitHubTokenWarning from "../../components/features/github/GitHubTokenWarning";
+import Container from "../../components/layout/Container";
+import Button from "../../components/ui/Button";
+import { projectStore, repositoryStore } from "../../store";
+
 import styles from "./HomePage.module.scss";
 
 const Home: React.FC = observer(() => {
@@ -37,6 +40,8 @@ const Home: React.FC = observer(() => {
   return (
     <Container size="small" withPadding title="Welcome to GitHub Project Manager">
       <div className={styles.content}>
+        <GitHubTokenWarning />
+
         <p>
           This application helps you manage your GitHub projects and repositories efficiently. You
           can create and manage projects, track work through different status columns, and manage

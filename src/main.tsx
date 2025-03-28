@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom/client";
+
 import { AppWithProviders } from "./AppWithProviders.tsx";
 import "./styles/global.scss";
 

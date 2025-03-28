@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../types";
+
 import { repositoryService } from "../graphql/services";
+import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../types";
 
 export class RepositoryStore {
   repositories: Repository[] = [];
@@ -8,8 +9,48 @@ export class RepositoryStore {
   error: string | null = null;
   selectedRepository: Repository | null = null;
 
+  // Track in-progress collaborator fetches to avoid duplicate requests
+  private pendingCollaboratorFetches: Record<string, Promise<RepositoryCollaborator[]>> = {};
+  private initialized = false;
+
   constructor() {
     makeAutoObservable(this);
+
+    // Try to load cached repositories from localStorage
+    this.loadFromCache();
+  }
+
+  // Load data from localStorage cache if available
+  private loadFromCache() {
+    try {
+      const cachedData = localStorage.getItem("repositoryData");
+      if (cachedData) {
+        const data = JSON.parse(cachedData);
+        // Only use cache if it's from the current day
+        if (data.timestamp && new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
+          this.repositories = data.repositories;
+          this.initialized = true;
+          console.log("Loaded repositories from cache");
+        }
+      }
+    } catch (error) {
+      console.warn("Error loading from cache:", error);
+      // Clear potentially corrupted cache
+      localStorage.removeItem("repositoryData");
+    }
+  }
+
+  // Save current data to localStorage
+  private saveToCache() {
+    try {
+      const data = {
+        repositories: this.repositories,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem("repositoryData", JSON.stringify(data));
+    } catch (error) {
+      console.warn("Error saving to cache:", error);
+    }
   }
 
   async fetchUserRepositories() {
@@ -34,28 +75,64 @@ export class RepositoryStore {
     }
   }
 
-  async fetchRepository(owner: string, name: string) {
+  async fetchRepository(owner: string, name: string): Promise<Repository | undefined> {
     this.loading = true;
     this.error = null;
 
     try {
       const repository = await repositoryService.getRepository(owner, name);
 
-      // Update the repository in the store
-      runInAction(() => {
-        if (repository) {
-          // If the repository already exists in the store, update it
+      if (repository) {
+        runInAction(() => {
+          // Add to repositories list if not already there
           const existingIndex = this.repositories.findIndex((r) => r.id === repository.id);
-          if (existingIndex !== -1) {
+
+          if (existingIndex >= 0) {
+            // Update existing repository
             this.repositories[existingIndex] = repository;
           } else {
-            // Otherwise add it
+            // Add new repository
             this.repositories.push(repository);
           }
-          this.selectedRepository = repository;
-        }
+
+          this.loading = false;
+        });
+      }
+
+      return repository;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
         this.loading = false;
       });
+      return undefined;
+    }
+  }
+
+  /**
+   * Create a new repository
+   */
+  async createRepository(
+    name: string,
+    description: string = "",
+    visibility: "PUBLIC" | "PRIVATE" = "PRIVATE"
+  ): Promise<Repository | undefined> {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const repository = await repositoryService.createRepository(name, description, visibility);
+
+      if (repository) {
+        runInAction(() => {
+          // Add to repositories list
+          this.repositories.push(repository);
+          this.loading = false;
+
+          // Update cache
+          this.saveToCache();
+        });
+      }
 
       return repository;
     } catch (error) {
@@ -68,44 +145,70 @@ export class RepositoryStore {
   }
 
   async fetchRepositoryCollaborators(owner: string, name: string) {
+    // Create a cache key for this specific repo
+    const cacheKey = `${owner}/${name}`;
+
+    // If there's already a fetch in progress for this repo, return that promise
+    if (cacheKey in this.pendingCollaboratorFetches) {
+      return this.pendingCollaboratorFetches[cacheKey];
+    }
+
     this.loading = true;
     this.error = null;
 
-    try {
-      // Make sure the repository exists in our store
-      let repository = this.repositories.find((r) => r.owner.login === owner && r.name === name);
+    // Create the promise for this fetch
+    const fetchPromise = (async () => {
+      try {
+        // Make sure the repository exists in our store
+        let repository: Repository | undefined = this.repositories.find(
+          (r) => r.owner.login === owner && r.name === name
+        );
 
-      if (!repository) {
-        // If not, fetch it first
-        repository = await this.fetchRepository(owner, name);
         if (!repository) {
-          throw new Error(`Repository ${owner}/${name} not found`);
+          // If not, fetch it first
+          repository = await this.fetchRepository(owner, name);
+          if (!repository) {
+            throw new Error(`Repository ${owner}/${name} not found`);
+          }
         }
+
+        // Skip if collaborators are already fetched
+        if (repository.collaborators && repository.collaborators.length > 0) {
+          return repository.collaborators;
+        }
+
+        // Now fetch the collaborators
+        const collaborators = await repositoryService.getRepositoryCollaborators(owner, name);
+
+        // Update the store
+        runInAction(() => {
+          const index = this.repositories.findIndex((r) => r.id === repository!.id);
+          if (index !== -1) {
+            this.repositories[index].collaborators = collaborators;
+          }
+          if (this.selectedRepository?.id === repository!.id) {
+            this.selectedRepository.collaborators = collaborators;
+          }
+          this.loading = false;
+        });
+
+        return collaborators;
+      } catch (error) {
+        runInAction(() => {
+          this.error = (error as Error).message;
+          this.loading = false;
+        });
+        throw error;
+      } finally {
+        // Remove from pending fetches when done
+        delete this.pendingCollaboratorFetches[cacheKey];
       }
+    })();
 
-      // Now fetch the collaborators
-      const collaborators = await repositoryService.getRepositoryCollaborators(owner, name);
+    // Store the promise in our pending fetches map
+    this.pendingCollaboratorFetches[cacheKey] = fetchPromise;
 
-      // Update the store
-      runInAction(() => {
-        const index = this.repositories.findIndex((r) => r.id === repository!.id);
-        if (index !== -1) {
-          this.repositories[index].collaborators = collaborators;
-        }
-        if (this.selectedRepository?.id === repository!.id) {
-          this.selectedRepository.collaborators = collaborators;
-        }
-        this.loading = false;
-      });
-
-      return collaborators;
-    } catch (error) {
-      runInAction(() => {
-        this.error = (error as Error).message;
-        this.loading = false;
-      });
-      throw error;
-    }
+    return fetchPromise;
   }
 
   async addRepositoryCollaborator(
@@ -220,5 +323,57 @@ export class RepositoryStore {
 
   clearError() {
     this.error = null;
+  }
+
+  async initializeData() {
+    // If already initialized, don't reload
+    if (this.initialized) return this.repositories;
+
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // First fetch all repositories
+      const repositories = await repositoryService.getUserRepositories();
+
+      runInAction(() => {
+        this.repositories = repositories;
+      });
+
+      // Then fetch collaborators in batches of 5
+      for (let i = 0; i < repositories.length; i += 5) {
+        const batch = repositories.slice(i, i + 5);
+        const promises = batch.map((repo) =>
+          this.fetchRepositoryCollaborators(repo.owner.login, repo.name).catch((err) => {
+            console.warn(`Error fetching collaborators for ${repo.owner.login}/${repo.name}:`, err);
+            return [];
+          })
+        );
+
+        // Wait for this batch to complete before starting the next
+        await Promise.all(promises);
+      }
+
+      runInAction(() => {
+        this.loading = false;
+        this.initialized = true;
+
+        // Save to cache after successful initialization
+        this.saveToCache();
+      });
+
+      return this.repositories;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  // Method to reset initialization status to force a refresh
+  resetInitialization() {
+    this.initialized = false;
   }
 }

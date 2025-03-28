@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
-import styles from "./Header.module.scss";
-import { env } from "../../../config/env";
 import { FiMenu, FiX } from "react-icons/fi";
+import { Link, NavLink } from "react-router-dom";
+
+import { env } from "@/config/env";
+
+import GitHubUserInfo from "../../features/github/GitHubUserInfo";
+
+import styles from "./Header.module.scss";
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -43,17 +47,46 @@ const Header: React.FC = () => {
         </Link>
       </div>
 
-      <button
-        className={styles.menuToggle}
-        onClick={toggleMenu}
-        aria-label="Toggle navigation menu"
-      >
-        {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-      </button>
+      <nav className={`${styles.desktopNav}`}>
+        <ul>
+          <li>
+            <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : "")}>
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/projects" className={({ isActive }) => (isActive ? styles.active : "")}>
+              Projects
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/repositories"
+              className={({ isActive }) => (isActive ? styles.active : "")}
+            >
+              Repositories
+            </NavLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div className={styles.headerRight}>
+        <div className={styles.userProfile}>
+          <GitHubUserInfo />
+        </div>
+
+        <button
+          className={styles.menuToggle}
+          onClick={toggleMenu}
+          aria-label="Toggle navigation menu"
+        >
+          {menuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        </button>
+      </div>
 
       {menuOpen && <div className={styles.overlay} onClick={() => setMenuOpen(false)} />}
 
-      <nav className={`${styles.nav} ${menuOpen ? styles.open : ""}`}>
+      <nav className={`${styles.mobileNav} ${menuOpen ? styles.open : ""}`}>
         <ul>
           <li>
             <NavLink

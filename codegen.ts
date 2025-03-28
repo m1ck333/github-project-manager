@@ -1,9 +1,14 @@
+import * as path from "path";
+
 import { CodegenConfig } from "@graphql-codegen/cli";
-import { GITHUB_GRAPHQL_API_URL } from "./src/constants/api";
 import * as dotenv from "dotenv";
 
-// Load environment variables from .env file
-dotenv.config();
+import { GITHUB_GRAPHQL_API_URL } from "./src/constants/github";
+
+// Load environment variables from different env files
+// Try to load from .env.development first, then fall back to .env
+dotenv.config({ path: path.resolve(process.cwd(), ".env.development") });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 // Read the token from VITE_GITHUB_TOKEN
 const token = process.env.VITE_GITHUB_TOKEN;
@@ -12,6 +17,11 @@ if (!token) {
     "Warning: VITE_GITHUB_TOKEN environment variable is not set. Schema generation will likely fail."
   );
 }
+
+console.log(
+  "Using token:",
+  token ? `${token.substring(0, 4)}...${token.substring(token.length - 4)}` : "No token found"
+);
 
 const config: CodegenConfig = {
   schema: {

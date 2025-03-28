@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+
 import styles from "./Modal.module.scss";
 
 interface ModalProps {

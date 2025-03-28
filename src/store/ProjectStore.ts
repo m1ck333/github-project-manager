@@ -1,4 +1,12 @@
 import { makeAutoObservable, runInAction } from "mobx";
+
+import {
+  projectService,
+  columnService,
+  issueService,
+  collaboratorService,
+  repositoryService,
+} from "../graphql/services";
 import {
   ColumnFormData,
   Project,
@@ -7,13 +15,7 @@ import {
   Collaborator,
   Repository,
 } from "../types";
-import {
-  projectService,
-  columnService,
-  issueService,
-  collaboratorService,
-  repositoryService,
-} from "../graphql/services";
+
 import { repositoryStore } from "./index";
 
 export class ProjectStore {
@@ -363,7 +365,7 @@ export class ProjectStore {
     projectId: string,
     title: string,
     description: string,
-    labelIds: string[] = []
+    _labelIds: string[] = []
   ) {
     this.loading = true;
     this.error = null;
@@ -380,6 +382,35 @@ export class ProjectStore {
       });
 
       return issue;
+    } catch (error) {
+      runInAction(() => {
+        this.error = (error as Error).message;
+        this.loading = false;
+      });
+      throw error;
+    }
+  }
+
+  async createLabel(_projectId: string, name: string, color: string, description?: string) {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // Mock implementation - replace with actual API call when available
+      const label = {
+        id: `label-${Date.now()}`,
+        name,
+        color,
+        description: description || "",
+      };
+
+      runInAction(() => {
+        // In a real implementation, you would update the label list in the project
+        this.loading = false;
+      });
+
+      console.warn("Label creation is not fully implemented. Created label for UI only.");
+      return label;
     } catch (error) {
       runInAction(() => {
         this.error = (error as Error).message;
@@ -477,12 +508,12 @@ export class ProjectStore {
     }
   }
 
-  // Add methods for repository-project relationship
+  // Repository integration
   async linkRepositoryToProject(
     projectId: string,
     repositoryOwner: string,
     repositoryName: string
-  ) {
+  ): Promise<boolean> {
     this.loading = true;
     this.error = null;
 
@@ -490,36 +521,33 @@ export class ProjectStore {
       // Find the project
       const project = this.projects.find((p) => p.id === projectId);
       if (!project) {
-        throw new Error(`Project with ID ${projectId} not found`);
+        throw new Error("Project not found");
       }
 
-      // Make sure the repository exists or fetch it
-      let repository: Repository | null = null;
-
-      // Try to find it in the repository store first
-      const existingRepo = repositoryStore.repositories.find(
+      // Check if repository exists in repository store
+      let repository: Repository | undefined = repositoryStore.repositories.find(
         (r) => r.owner.login === repositoryOwner && r.name === repositoryName
       );
 
-      if (existingRepo) {
-        repository = existingRepo;
-      } else {
-        // Fetch it if not found
+      // If not found, fetch it
+      if (!repository) {
         repository = await repositoryService.getRepository(repositoryOwner, repositoryName);
-        if (!repository) {
-          throw new Error(`Repository ${repositoryOwner}/${repositoryName} not found`);
-        }
       }
 
-      // Update the project with the new repository
+      if (!repository) {
+        throw new Error("Repository not found");
+      }
+
+      // Link the repository
       runInAction(() => {
         if (!project.repositories) {
           project.repositories = [];
         }
 
-        // Check if repository is already linked
-        if (!project.repositories.some((r) => r.id === repository!.id)) {
-          project.repositories.push(repository!);
+        // Check if already linked
+        const alreadyLinked = project.repositories.some((r) => r.id === repository?.id);
+        if (!alreadyLinked && repository) {
+          project.repositories.push(repository);
         }
 
         this.loading = false;

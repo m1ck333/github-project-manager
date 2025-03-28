@@ -1,8 +1,9 @@
 import React from "react";
 import { Provider } from "urql";
-import { client } from "./graphql/client";
+
 import App from "./App";
 import { ToastProvider } from "./components/ui/Toast";
+import { client } from "./graphql/client";
 
 // AppWithProviders component in a separate file for Fast Refresh compatibility
 export const AppWithProviders: React.FC = () => (

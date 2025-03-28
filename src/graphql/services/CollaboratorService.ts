@@ -4,14 +4,12 @@
  * Service class to handle all collaborator-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
+import { CollaboratorFormData, CollaboratorRole } from "../../types";
 import { client } from "../client";
-import { Collaborator, CollaboratorFormData, CollaboratorRole } from "../../types";
 import {
   ProjectV2Roles,
   UpdateProjectCollaboratorsDocument,
   GetUserDocument,
-  GetUserQuery,
-  GetUserQueryVariables,
 } from "../generated/graphql";
 
 /**

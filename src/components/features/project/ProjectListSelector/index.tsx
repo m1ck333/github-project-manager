@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { Project } from "../../../../types";
+import React, { useEffect, useState } from "react";
+
 import { projectStore } from "../../../../store";
+import { Project } from "../../../../types";
 import Button from "../../../ui/Button";
+
 import styles from "./ProjectListSelector.module.scss";
 
 interface ProjectListSelectorProps {
-  repositoryId: string;
+  // Currently unused, but kept for future repository filtering implementation
+  _repositoryId: string;
   onSelect: (projectId: string) => void;
   onCancel: () => void;
 }
 
 const ProjectListSelector: React.FC<ProjectListSelectorProps> = observer(
-  ({ repositoryId, onSelect, onCancel }) => {
+  ({ _repositoryId, onSelect, onCancel }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);

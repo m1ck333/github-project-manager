@@ -6,7 +6,8 @@
  * adds authentication headers using the GitHub token from environment variables.
  */
 import { Client, fetchExchange } from "@urql/core";
-import { GITHUB_GRAPHQL_API_URL } from "../constants/api";
+
+import { GITHUB_GRAPHQL_API_URL } from "../constants/github";
 
 // Initialize urql client
 const token = import.meta.env.VITE_GITHUB_TOKEN;

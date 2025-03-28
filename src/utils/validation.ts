@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { CollaboratorRole } from "../types";
 
 export const projectSchema = z.object({

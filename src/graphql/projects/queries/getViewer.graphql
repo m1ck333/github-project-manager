@@ -1,4 +1,10 @@
 # Query to get the current viewer's information
+#
+# In the network tab, this operation will appear with the operation name
+# provided in the `name` option when using the client:
+# client.query(GetViewerDocument, {}, { name: 'OperationName' })
+#
+# When inspecting network traffic, look for 'OperationName' instead of generic 'graphql'
 query GetViewer {
   viewer {
     id
