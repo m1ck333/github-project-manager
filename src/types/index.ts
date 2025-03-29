@@ -30,6 +30,11 @@ export interface Column {
   id: string;
   name: string;
   type: ColumnType;
+  options?: Array<{
+    id: string;
+    name: string;
+    color?: string;
+  }>;
 }
 
 export enum CollaboratorRole {
@@ -58,6 +63,27 @@ export interface Issue {
   number?: number;
   isDraft?: boolean;
   projectItemId?: string;
+  state?: string;
+  url?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Extended Issue type with columnId for board functionality
+ */
+export interface BoardIssue extends Issue {
+  columnId?: string;
+  columnName?: string;
+  issueId?: string;
+  author?: {
+    login: string;
+    avatarUrl: string;
+  } | null;
+  assignees?: Array<{
+    login: string;
+    avatarUrl: string;
+  }>;
 }
 
 export interface ProjectFormData {

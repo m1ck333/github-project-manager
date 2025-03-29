@@ -12,6 +12,7 @@ export { CollaboratorService } from "./CollaboratorService";
 export { RepositoryService } from "./RepositoryService";
 export { UserService } from "./UserService";
 export type { GitHubUserProfile, TokenValidationResult } from "./UserService";
+export { LabelService } from "./LabelService";
 // These would be implemented and exported as the application grows
 // export { LabelService } from "./LabelService";
 
@@ -19,6 +20,7 @@ export type { GitHubUserProfile, TokenValidationResult } from "./UserService";
 import { CollaboratorService } from "./CollaboratorService";
 import { ColumnService } from "./ColumnService";
 import { IssueService } from "./IssueService";
+import { LabelService } from "./LabelService";
 import { ProjectService } from "./ProjectService";
 import { RepositoryService } from "./RepositoryService";
 import { userService } from "./UserService";
@@ -29,6 +31,7 @@ export const columnService = new ColumnService();
 export const issueService = new IssueService();
 export const collaboratorService = new CollaboratorService();
 export const repositoryService = new RepositoryService();
+export const labelService = new LabelService();
 export { userService };
 
 // These would be instantiated as the services are implemented

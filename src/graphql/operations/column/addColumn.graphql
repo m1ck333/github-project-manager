@@ -1,0 +1,24 @@
+# Mutation to add a new option to the Status field of a project
+mutation AddColumnToProject(
+  $fieldId: ID!
+  $name: String!
+  $color: ProjectV2SingleSelectFieldOptionColor!
+) {
+  updateProjectV2Field(
+    input: {
+      fieldId: $fieldId
+      singleSelectOptions: [{ name: $name, color: $color, description: "" }]
+    }
+  ) {
+    projectV2Field {
+      ... on ProjectV2SingleSelectField {
+        id
+        options {
+          id
+          name
+          color
+        }
+      }
+    }
+  }
+}

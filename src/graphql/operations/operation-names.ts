@@ -14,7 +14,7 @@ import {
   UpdateProjectDocument,
   CreateProjectDocument,
   DeleteProjectDocument,
-  CreateDraftIssueDocument,
+  CreateIssueDocument,
   UpdateProjectCollaboratorsDocument,
 } from "../generated/graphql";
 
@@ -31,7 +31,7 @@ export {
 export { GetColumnsDocument };
 
 // Export issue documents
-export { GetProjectIssuesDocument, UpdateIssueStatusDocument, CreateDraftIssueDocument };
+export { GetProjectIssuesDocument, UpdateIssueStatusDocument, CreateIssueDocument };
 
 // Export collaborator documents
 export { UpdateProjectCollaboratorsDocument };

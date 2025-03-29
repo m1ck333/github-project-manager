@@ -32048,6 +32048,45 @@ export type UpdateProjectCollaboratorsMutation = {
   } | null;
 };
 
+export type AddColumnToProjectMutationVariables = Exact<{
+  fieldId: Scalars["ID"];
+  name: Scalars["String"];
+  color: ProjectV2SingleSelectFieldOptionColor;
+}>;
+
+export type AddColumnToProjectMutation = {
+  __typename?: "Mutation";
+  updateProjectV2Field?: {
+    __typename?: "UpdateProjectV2FieldPayload";
+    projectV2Field?:
+      | { __typename?: "ProjectV2Field" }
+      | { __typename?: "ProjectV2IterationField" }
+      | {
+          __typename?: "ProjectV2SingleSelectField";
+          id: string;
+          options: Array<{
+            __typename?: "ProjectV2SingleSelectFieldOption";
+            id: string;
+            name: string;
+            color: ProjectV2SingleSelectFieldOptionColor;
+          }>;
+        }
+      | null;
+  } | null;
+};
+
+export type DeleteColumnMutationVariables = Exact<{
+  fieldId: Scalars["ID"];
+}>;
+
+export type DeleteColumnMutation = {
+  __typename?: "Mutation";
+  deleteProjectV2Field?: {
+    __typename?: "DeleteProjectV2FieldPayload";
+    clientMutationId?: string | null;
+  } | null;
+};
+
 export type GetColumnsQueryVariables = Exact<{
   projectId: Scalars["ID"];
 }>;
@@ -32332,6 +32371,34 @@ export type GetColumnsQuery = {
     | null;
 };
 
+export type UpdateColumnMutationVariables = Exact<{
+  fieldId: Scalars["ID"];
+  name: Scalars["String"];
+  options: Array<ProjectV2SingleSelectFieldOptionInput> | ProjectV2SingleSelectFieldOptionInput;
+}>;
+
+export type UpdateColumnMutation = {
+  __typename?: "Mutation";
+  updateProjectV2Field?: {
+    __typename?: "UpdateProjectV2FieldPayload";
+    projectV2Field?:
+      | { __typename?: "ProjectV2Field" }
+      | { __typename?: "ProjectV2IterationField" }
+      | {
+          __typename?: "ProjectV2SingleSelectField";
+          id: string;
+          name: string;
+          options: Array<{
+            __typename?: "ProjectV2SingleSelectFieldOption";
+            id: string;
+            name: string;
+            color: ProjectV2SingleSelectFieldOptionColor;
+          }>;
+        }
+      | null;
+  } | null;
+};
+
 export type ColumnFieldsFragment = {
   __typename?: "ProjectV2SingleSelectField";
   id: string;
@@ -32379,25 +32446,23 @@ export type ProjectFieldsFragment = {
     | { __typename: "User"; login: string; avatarUrl: any };
 } & { " $fragmentName"?: "ProjectFieldsFragment" };
 
-export type CreateDraftIssueMutationVariables = Exact<{
-  projectId: Scalars["ID"];
+export type CreateIssueMutationVariables = Exact<{
+  repositoryId: Scalars["ID"];
   title: Scalars["String"];
   body?: InputMaybe<Scalars["String"]>;
+  projectId: Scalars["ID"];
 }>;
 
-export type CreateDraftIssueMutation = {
+export type CreateIssueMutation = {
   __typename?: "Mutation";
-  addProjectV2DraftIssue?: {
-    __typename?: "AddProjectV2DraftIssuePayload";
-    projectItem?: {
-      __typename?: "ProjectV2Item";
+  createIssue?: {
+    __typename?: "CreateIssuePayload";
+    issue?: {
+      __typename?: "Issue";
       id: string;
-      project: { __typename?: "ProjectV2"; id: string };
-      content?:
-        | { __typename?: "DraftIssue"; id: string; title: string; body: string }
-        | { __typename?: "Issue" }
-        | { __typename?: "PullRequest" }
-        | null;
+      title: string;
+      body: string;
+      number: number;
     } | null;
   } | null;
 };
@@ -32724,7 +32789,7 @@ export type UpdateIssueStatusMutationVariables = Exact<{
   projectId: Scalars["ID"];
   itemId: Scalars["ID"];
   fieldId: Scalars["ID"];
-  optionId: Scalars["String"];
+  valueId: Scalars["String"];
 }>;
 
 export type UpdateIssueStatusMutation = {
@@ -33458,6 +33523,187 @@ export const UpdateProjectCollaboratorsDocument = {
   UpdateProjectCollaboratorsMutation,
   UpdateProjectCollaboratorsMutationVariables
 >;
+export const AddColumnToProjectDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "AddColumnToProject" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "color" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "NamedType",
+              name: { kind: "Name", value: "ProjectV2SingleSelectFieldOptionColor" },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "updateProjectV2Field" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: {
+                  kind: "ObjectValue",
+                  fields: [
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "fieldId" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+                    },
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "singleSelectOptions" },
+                      value: {
+                        kind: "ListValue",
+                        values: [
+                          {
+                            kind: "ObjectValue",
+                            fields: [
+                              {
+                                kind: "ObjectField",
+                                name: { kind: "Name", value: "name" },
+                                value: { kind: "Variable", name: { kind: "Name", value: "name" } },
+                              },
+                              {
+                                kind: "ObjectField",
+                                name: { kind: "Name", value: "color" },
+                                value: { kind: "Variable", name: { kind: "Name", value: "color" } },
+                              },
+                              {
+                                kind: "ObjectField",
+                                name: { kind: "Name", value: "description" },
+                                value: { kind: "StringValue", value: "", block: false },
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectV2Field" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "InlineFragment",
+                        typeCondition: {
+                          kind: "NamedType",
+                          name: { kind: "Name", value: "ProjectV2SingleSelectField" },
+                        },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "options" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  { kind: "Field", name: { kind: "Name", value: "id" } },
+                                  { kind: "Field", name: { kind: "Name", value: "name" } },
+                                  { kind: "Field", name: { kind: "Name", value: "color" } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AddColumnToProjectMutation, AddColumnToProjectMutationVariables>;
+export const DeleteColumnDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "DeleteColumn" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "deleteProjectV2Field" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: {
+                  kind: "ObjectValue",
+                  fields: [
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "fieldId" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [{ kind: "Field", name: { kind: "Name", value: "clientMutationId" } }],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteColumnMutation, DeleteColumnMutationVariables>;
 export const GetColumnsDocument = {
   kind: "Document",
   definitions: [
@@ -33568,17 +33814,137 @@ export const GetColumnsDocument = {
     },
   ],
 } as unknown as DocumentNode<GetColumnsQuery, GetColumnsQueryVariables>;
-export const CreateDraftIssueDocument = {
+export const UpdateColumnDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "mutation",
-      name: { kind: "Name", value: "CreateDraftIssue" },
+      name: { kind: "Name", value: "UpdateColumn" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "name" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+          },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "options" } },
+          type: {
+            kind: "NonNullType",
+            type: {
+              kind: "ListType",
+              type: {
+                kind: "NonNullType",
+                type: {
+                  kind: "NamedType",
+                  name: { kind: "Name", value: "ProjectV2SingleSelectFieldOptionInput" },
+                },
+              },
+            },
+          },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "updateProjectV2Field" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "input" },
+                value: {
+                  kind: "ObjectValue",
+                  fields: [
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "fieldId" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "fieldId" } },
+                    },
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "name" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "name" } },
+                    },
+                    {
+                      kind: "ObjectField",
+                      name: { kind: "Name", value: "singleSelectOptions" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "options" } },
+                    },
+                  ],
+                },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "projectV2Field" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      {
+                        kind: "InlineFragment",
+                        typeCondition: {
+                          kind: "NamedType",
+                          name: { kind: "Name", value: "ProjectV2SingleSelectField" },
+                        },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "name" } },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "options" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  { kind: "Field", name: { kind: "Name", value: "id" } },
+                                  { kind: "Field", name: { kind: "Name", value: "name" } },
+                                  { kind: "Field", name: { kind: "Name", value: "color" } },
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateColumnMutation, UpdateColumnMutationVariables>;
+export const CreateIssueDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "CreateIssue" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
           type: {
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
@@ -33597,13 +33963,21 @@ export const CreateDraftIssueDocument = {
           variable: { kind: "Variable", name: { kind: "Name", value: "body" } },
           type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+          type: {
+            kind: "NonNullType",
+            type: { kind: "NamedType", name: { kind: "Name", value: "ID" } },
+          },
+        },
       ],
       selectionSet: {
         kind: "SelectionSet",
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "addProjectV2DraftIssue" },
+            name: { kind: "Name", value: "createIssue" },
             arguments: [
               {
                 kind: "Argument",
@@ -33613,8 +33987,8 @@ export const CreateDraftIssueDocument = {
                   fields: [
                     {
                       kind: "ObjectField",
-                      name: { kind: "Name", value: "projectId" },
-                      value: { kind: "Variable", name: { kind: "Name", value: "projectId" } },
+                      name: { kind: "Name", value: "repositoryId" },
+                      value: { kind: "Variable", name: { kind: "Name", value: "repositoryId" } },
                     },
                     {
                       kind: "ObjectField",
@@ -33635,43 +34009,14 @@ export const CreateDraftIssueDocument = {
               selections: [
                 {
                   kind: "Field",
-                  name: { kind: "Name", value: "projectItem" },
+                  name: { kind: "Name", value: "issue" },
                   selectionSet: {
                     kind: "SelectionSet",
                     selections: [
                       { kind: "Field", name: { kind: "Name", value: "id" } },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "project" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [{ kind: "Field", name: { kind: "Name", value: "id" } }],
-                        },
-                      },
-                      {
-                        kind: "Field",
-                        name: { kind: "Name", value: "content" },
-                        selectionSet: {
-                          kind: "SelectionSet",
-                          selections: [
-                            {
-                              kind: "InlineFragment",
-                              typeCondition: {
-                                kind: "NamedType",
-                                name: { kind: "Name", value: "DraftIssue" },
-                              },
-                              selectionSet: {
-                                kind: "SelectionSet",
-                                selections: [
-                                  { kind: "Field", name: { kind: "Name", value: "id" } },
-                                  { kind: "Field", name: { kind: "Name", value: "title" } },
-                                  { kind: "Field", name: { kind: "Name", value: "body" } },
-                                ],
-                              },
-                            },
-                          ],
-                        },
-                      },
+                      { kind: "Field", name: { kind: "Name", value: "title" } },
+                      { kind: "Field", name: { kind: "Name", value: "body" } },
+                      { kind: "Field", name: { kind: "Name", value: "number" } },
                     ],
                   },
                 },
@@ -33682,7 +34027,7 @@ export const CreateDraftIssueDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<CreateDraftIssueMutation, CreateDraftIssueMutationVariables>;
+} as unknown as DocumentNode<CreateIssueMutation, CreateIssueMutationVariables>;
 export const GetProjectIssuesDocument = {
   kind: "Document",
   definitions: [
@@ -33981,7 +34326,7 @@ export const UpdateIssueStatusDocument = {
         },
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "optionId" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "valueId" } },
           type: {
             kind: "NonNullType",
             type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
@@ -34025,7 +34370,7 @@ export const UpdateIssueStatusDocument = {
                           {
                             kind: "ObjectField",
                             name: { kind: "Name", value: "singleSelectOptionId" },
-                            value: { kind: "Variable", name: { kind: "Name", value: "optionId" } },
+                            value: { kind: "Variable", name: { kind: "Name", value: "valueId" } },
                           },
                         ],
                       },

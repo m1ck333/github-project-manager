@@ -15,19 +15,25 @@ import { TypedDocumentNode as DocumentNode } from "@graphql-typed-document-node/
 const documents = {
   "mutation UpdateProjectCollaborators($projectId: ID!, $collaborators: [ProjectV2Collaborator!]!) {\n  updateProjectV2Collaborators(\n    input: {projectId: $projectId, collaborators: $collaborators}\n  ) {\n    clientMutationId\n  }\n}":
     types.UpdateProjectCollaboratorsDocument,
+  'mutation AddColumnToProject($fieldId: ID!, $name: String!, $color: ProjectV2SingleSelectFieldOptionColor!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, singleSelectOptions: [{name: $name, color: $color, description: ""}]}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}':
+    types.AddColumnToProjectDocument,
+  "mutation DeleteColumn($fieldId: ID!) {\n  deleteProjectV2Field(input: {fieldId: $fieldId}) {\n    clientMutationId\n  }\n}":
+    types.DeleteColumnDocument,
   "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}":
     types.GetColumnsDocument,
+  "mutation UpdateColumn($fieldId: ID!, $name: String!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, name: $name, singleSelectOptions: $options}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        name\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}":
+    types.UpdateColumnDocument,
   "fragment ColumnFields on ProjectV2SingleSelectField {\n  id\n  name\n  options {\n    id\n    name\n    color\n  }\n}":
     types.ColumnFieldsFragmentDoc,
   "fragment IssueFields on Issue {\n  id\n  title\n  body\n  number\n  createdAt\n  updatedAt\n  labels(first: 10) {\n    nodes {\n      id\n      name\n      color\n      description\n    }\n  }\n}":
     types.IssueFieldsFragmentDoc,
   "fragment ProjectFields on ProjectV2 {\n  id\n  title\n  shortDescription\n  url\n  createdAt\n  updatedAt\n  owner {\n    __typename\n    ... on User {\n      login\n      avatarUrl\n    }\n    ... on Organization {\n      login\n      avatarUrl\n    }\n  }\n}":
     types.ProjectFieldsFragmentDoc,
-  "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}":
-    types.CreateDraftIssueDocument,
+  "mutation CreateIssue($repositoryId: ID!, $title: String!, $body: String, $projectId: ID!) {\n  createIssue(input: {repositoryId: $repositoryId, title: $title, body: $body}) {\n    issue {\n      id\n      title\n      body\n      number\n    }\n  }\n}":
+    types.CreateIssueDocument,
   "query GetProjectIssues($projectId: ID!, $first: Int!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      items(first: $first) {\n        nodes {\n          id\n          fieldValues(first: 20) {\n            nodes {\n              ... on ProjectV2ItemFieldSingleSelectValue {\n                name\n                field {\n                  ... on ProjectV2SingleSelectField {\n                    name\n                  }\n                }\n              }\n            }\n          }\n          content {\n            ... on Issue {\n              id\n              title\n              body\n              number\n              labels(first: 10) {\n                nodes {\n                  id\n                  name\n                  color\n                  description\n                }\n              }\n            }\n            ... on DraftIssue {\n              id\n              title\n              body\n            }\n          }\n        }\n      }\n    }\n  }\n}":
     types.GetProjectIssuesDocument,
-  "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}":
+  "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $valueId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $valueId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}":
     types.UpdateIssueStatusDocument,
   "mutation CreateProject($input: CreateProjectV2Input!) {\n  createProjectV2(input: $input) {\n    projectV2 {\n      id\n      title\n      number\n      url\n      createdAt\n      updatedAt\n    }\n  }\n}":
     types.CreateProjectDocument,
@@ -81,8 +87,26 @@ export function gql(
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
+  source: 'mutation AddColumnToProject($fieldId: ID!, $name: String!, $color: ProjectV2SingleSelectFieldOptionColor!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, singleSelectOptions: [{name: $name, color: $color, description: ""}]}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}'
+): (typeof documents)['mutation AddColumnToProject($fieldId: ID!, $name: String!, $color: ProjectV2SingleSelectFieldOptionColor!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, singleSelectOptions: [{name: $name, color: $color, description: ""}]}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}'];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation DeleteColumn($fieldId: ID!) {\n  deleteProjectV2Field(input: {fieldId: $fieldId}) {\n    clientMutationId\n  }\n}"
+): (typeof documents)["mutation DeleteColumn($fieldId: ID!) {\n  deleteProjectV2Field(input: {fieldId: $fieldId}) {\n    clientMutationId\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
   source: "query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}"
 ): (typeof documents)["query GetColumns($projectId: ID!) {\n  node(id: $projectId) {\n    ... on ProjectV2 {\n      fields(first: 20) {\n        nodes {\n          ... on ProjectV2SingleSelectField {\n            id\n            name\n            options {\n              id\n              name\n              color\n            }\n          }\n        }\n      }\n    }\n  }\n}"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(
+  source: "mutation UpdateColumn($fieldId: ID!, $name: String!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, name: $name, singleSelectOptions: $options}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        name\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}"
+): (typeof documents)["mutation UpdateColumn($fieldId: ID!, $name: String!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {\n  updateProjectV2Field(\n    input: {fieldId: $fieldId, name: $name, singleSelectOptions: $options}\n  ) {\n    projectV2Field {\n      ... on ProjectV2SingleSelectField {\n        id\n        name\n        options {\n          id\n          name\n          color\n        }\n      }\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -105,8 +129,8 @@ export function gql(
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}"
-): (typeof documents)["mutation CreateDraftIssue($projectId: ID!, $title: String!, $body: String) {\n  addProjectV2DraftIssue(\n    input: {projectId: $projectId, title: $title, body: $body}\n  ) {\n    projectItem {\n      id\n      project {\n        id\n      }\n      content {\n        ... on DraftIssue {\n          id\n          title\n          body\n        }\n      }\n    }\n  }\n}"];
+  source: "mutation CreateIssue($repositoryId: ID!, $title: String!, $body: String, $projectId: ID!) {\n  createIssue(input: {repositoryId: $repositoryId, title: $title, body: $body}) {\n    issue {\n      id\n      title\n      body\n      number\n    }\n  }\n}"
+): (typeof documents)["mutation CreateIssue($repositoryId: ID!, $title: String!, $body: String, $projectId: ID!) {\n  createIssue(input: {repositoryId: $repositoryId, title: $title, body: $body}) {\n    issue {\n      id\n      title\n      body\n      number\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -117,8 +141,8 @@ export function gql(
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(
-  source: "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"
-): (typeof documents)["mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $optionId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"];
+  source: "mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $valueId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $valueId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"
+): (typeof documents)["mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $valueId: String!) {\n  updateProjectV2ItemFieldValue(\n    input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: {singleSelectOptionId: $valueId}}\n  ) {\n    projectV2Item {\n      id\n    }\n  }\n}"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

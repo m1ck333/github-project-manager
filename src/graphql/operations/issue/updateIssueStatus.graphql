@@ -1,11 +1,11 @@
-# Mutation to update the status of an issue in a project
-mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+# Mutation to update an issue's status in a project
+mutation UpdateIssueStatus($projectId: ID!, $itemId: ID!, $fieldId: ID!, $valueId: String!) {
   updateProjectV2ItemFieldValue(
     input: {
       projectId: $projectId
       itemId: $itemId
       fieldId: $fieldId
-      value: { singleSelectOptionId: $optionId }
+      value: { singleSelectOptionId: $valueId }
     }
   ) {
     projectV2Item {

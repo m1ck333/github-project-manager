@@ -1,0 +1,19 @@
+mutation UpdateColumn(
+  $fieldId: ID!
+  $name: String!
+  $options: [ProjectV2SingleSelectFieldOptionInput!]!
+) {
+  updateProjectV2Field(input: { fieldId: $fieldId, name: $name, singleSelectOptions: $options }) {
+    projectV2Field {
+      ... on ProjectV2SingleSelectField {
+        id
+        name
+        options {
+          id
+          name
+          color
+        }
+      }
+    }
+  }
+}
