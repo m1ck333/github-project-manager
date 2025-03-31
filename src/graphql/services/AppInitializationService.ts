@@ -74,6 +74,44 @@ type GitHubFieldValue =
       [key: string]: unknown;
     };
 
+// Define interfaces for the project item and its fields
+interface ProjectItem {
+  id: string;
+  content?: {
+    id: string;
+    title: string;
+    number: number;
+    body?: string;
+    state?: string;
+    url?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    author?: {
+      login: string;
+      avatarUrl: string;
+    };
+    labels?: {
+      nodes?: Array<{
+        id: string;
+        name: string;
+        color: string;
+        description?: string;
+      } | null>;
+    };
+  };
+  fieldValues?: {
+    nodes?: Array<{
+      name?: string;
+      optionId?: string;
+      field?: {
+        id?: string;
+        name?: string;
+      };
+      [key: string]: unknown;
+    } | null>;
+  };
+}
+
 class AppInitializationService {
   private initializedData: AllAppData | null = null;
   private isInitializing = false;
@@ -86,7 +124,6 @@ class AppInitializationService {
   async getAllInitialData(): Promise<AllAppData> {
     // Prevent multiple simultaneous initialization
     if (this.isInitializing) {
-      console.log("Initialization already in progress, waiting...");
       // Wait for existing initialization to complete
       await new Promise((resolve) => {
         const checkInit = () => {
@@ -104,14 +141,12 @@ class AppInitializationService {
 
     // If already initialized, return cached data
     if (this.initializedData !== null) {
-      console.log("Using already initialized data");
       return this.initializedData;
     }
 
     try {
       this.isInitializing = true;
       this.initializeCount++;
-      console.log(`Starting initialization #${this.initializeCount}`);
 
       const { data, error } = await client.query(GetAllInitialDataDocument, {}).toPromise();
 
@@ -545,10 +580,13 @@ class AppInitializationService {
     }
   }
 
-  // Add this method to directly create issues from items instead of relying on complex type checking
-  private createBoardIssuesFromProjectItems(projectItems: any[], columns: any[]): any[] {
+  // Update the method signature with proper types
+  private createBoardIssuesFromProjectItems(
+    projectItems: ProjectItem[],
+    columns: Column[]
+  ): BoardIssue[] {
     console.log(`Processing ${projectItems.length} project items`);
-    const issues: any[] = [];
+    const issues: BoardIssue[] = [];
 
     for (const item of projectItems) {
       if (!item || !item.content) {
@@ -567,7 +605,7 @@ class AppInitializationService {
       console.log(`Processing issue: "${content.title}" (#${content.number})`);
 
       // Create the base issue object
-      const issue = {
+      const issue: BoardIssue = {
         id: item.id,
         issueId: content.id,
         number: content.number,
@@ -576,12 +614,13 @@ class AppInitializationService {
         columnId: "no-status", // Default
         statusId: "",
         columnName: "No Status", // Default
-        createdAt: content.createdAt,
-        updatedAt: content.updatedAt,
+        createdAt: content.createdAt || new Date().toISOString(),
+        updatedAt: content.updatedAt || new Date().toISOString(),
         url: content.url || "",
         state: content.state || "OPEN",
         projectItemId: item.id,
         labels: [],
+        author: null, // Initialize with null
       };
 
       // Process field values to find the column
@@ -622,11 +661,11 @@ class AppInitializationService {
 
       // Add labels if available
       if (content.labels && content.labels.nodes) {
-        issue.labels = content.labels.nodes.filter(Boolean).map((label: any) => ({
-          id: label.id,
-          name: label.name,
-          color: label.color,
-          description: label.description || "",
+        issue.labels = content.labels.nodes.filter(Boolean).map((label) => ({
+          id: label!.id,
+          name: label!.name,
+          color: label!.color,
+          description: label!.description || "",
         }));
       }
 

@@ -9,6 +9,14 @@ import ViewOnGithub from "../ViewOnGithubLink";
 
 import styles from "./GitHubUserInfo.module.scss";
 
+// Define a type for GitHub user
+interface GitHubUser {
+  login: string;
+  avatarUrl: string;
+  url?: string;
+  name?: string;
+}
+
 /**
  * Component that displays the user's GitHub avatar and provides user info in a tooltip
  * when a valid token is present
@@ -16,7 +24,7 @@ import styles from "./GitHubUserInfo.module.scss";
 const GitHubUserInfo: React.FC = observer(() => {
   const [loading, setLoading] = useState(false);
   // Get user profile from localStorage if available
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<GitHubUser | null>(null);
 
   useEffect(() => {
     // Check if we can get user data from localStorage or from window object
@@ -34,7 +42,7 @@ const GitHubUserInfo: React.FC = observer(() => {
               localStorage.setItem("githubUserData", JSON.stringify(data));
             }
           })
-          .catch((err) => console.log("Error fetching user data:", err))
+          .catch((err) => console.error("Error fetching user data:", err))
           .finally(() => setLoading(false));
       }
     } catch (e) {

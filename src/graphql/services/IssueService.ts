@@ -460,8 +460,6 @@ export class IssueService {
           continue; // Try again
         }
 
-        // Success! Return the project item ID
-        console.log("Successfully added issue to project:", data.addProjectV2ItemById.item.id);
         return data.addProjectV2ItemById.item.id;
       } catch (err) {
         lastError = err;

@@ -144,9 +144,6 @@ export class ColumnService {
         };
       });
 
-      console.log("Status field ID:", statusFieldId);
-      console.log("All options to update:", allOptions);
-
       // Update the Status field with all options (including our updated one)
       const result = await this.client
         .mutation(UpdateColumnDocument, {

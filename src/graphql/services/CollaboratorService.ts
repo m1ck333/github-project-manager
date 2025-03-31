@@ -33,13 +33,6 @@ export class CollaboratorService {
   private client = client;
 
   /**
-   * Get collaborators for a project
-   */
-  async getProjectCollaborators(projectId: string): Promise<Collaborator[]> {
-    return appInitializationService.getProjectCollaborators(projectId);
-  }
-
-  /**
    * Add a collaborator to a project
    */
   async addProjectCollaborator(
