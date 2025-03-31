@@ -1,28 +1,39 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
+import { client } from "../graphql/client";
+import { ProjectV2SingleSelectFieldOptionColor } from "../graphql/generated/graphql";
 import {
-  projectService,
-  columnService,
-  issueService,
-  collaboratorService,
-} from "../graphql/services";
-import {
-  ColumnFormData,
-  Project,
-  ProjectFormData,
-  CollaboratorFormData,
-  Collaborator,
-  Repository,
-} from "../types";
+  CreateProjectDocument,
+  UpdateProjectDocument,
+  DeleteProjectDocument,
+  LinkRepositoryToProjectDocument,
+  AddColumnDocument,
+  CreateIssueDocument,
+  UpdateIssueStatusDocument,
+  CreateLabelDocument,
+  AddProjectItemDocument,
+  DeleteIssueDocument,
+} from "../graphql/operations/operation-names";
+import { appInitializationService } from "../graphql/services/AppInitializationService";
+import { ColumnFormData, Project, ProjectFormData, BoardIssue, Label, ColumnType } from "../types";
+import { projectSchema, issueSchema, labelSchema } from "../utils/validation";
+import { validateAndExecute } from "../utils/validationUtils";
 
 import { repositoryStore } from "./index";
 
+/**
+ * ProjectStore handles all project-related operations
+ * This includes projects, issues, labels, columns, and collaborators
+ * Mutations use the generated GraphQL hooks from codegen
+ * Data fetching is handled by AppInitializationService
+ */
 export class ProjectStore {
   projects: Project[] = [];
   loading = false;
   error: Error | string | null = null;
   selectedProject: Project | null = null;
   issuesVisible = true;
+  validationErrors: Record<string, unknown> | null = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -40,108 +51,193 @@ export class ProjectStore {
     return this.selectedProject;
   }
 
+  get repositories() {
+    return appInitializationService.getRepositories();
+  }
+
   set currentProject(project: Project | null) {
     this.selectedProject = project;
   }
 
+  // Clear validation errors
+  clearValidationErrors() {
+    this.validationErrors = null;
+  }
+
+  /**
+   * Fetches projects from the API
+   */
   async fetchProjects() {
     this.loading = true;
     this.error = null;
 
     try {
-      const projects = await projectService.getProjects();
-
-      // Set the projects first to show something to the user quickly
+      const data = await appInitializationService.getAllInitialData();
       runInAction(() => {
-        this.projects = projects.map((project) => ({
-          ...project,
-          columns: [],
-          collaborators: [],
-        }));
+        this.projects = data.projects || [];
         this.loading = false;
       });
-
-      return projects;
     } catch (error) {
       runInAction(() => {
-        this.setError(error);
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
-      throw error;
     }
   }
 
+  /**
+   * Creates a new project
+   */
   async createProject(projectData: ProjectFormData) {
-    this.loading = true;
-    this.error = null;
+    return validateAndExecute(projectSchema, projectData, async (validData) => {
+      this.loading = true;
+      this.error = null;
+      this.clearValidationErrors();
 
-    try {
-      const newProject = await projectService.createProject(projectData);
+      try {
+        const ownerId = appInitializationService.getUserId();
+        if (!ownerId) {
+          throw new Error("User ID not found");
+        }
 
-      if (newProject) {
+        const input = {
+          ownerId: ownerId,
+          title: validData.name,
+          ...(validData.description ? { description: validData.description } : {}),
+        };
+
+        const { data, error } = await client.mutation(CreateProjectDocument, { input }).toPromise();
+
+        if (error || !data?.createProjectV2?.projectV2) {
+          throw new Error(error?.message || "Failed to create project");
+        }
+
+        // Get the user data from appInitializationService
+        const userData = await appInitializationService.getCurrentUser();
+
+        // Create a well-formed project object from the response
+        const newProject: Project = {
+          id: data.createProjectV2.projectV2.id,
+          name: data.createProjectV2.projectV2.title,
+          description: projectData.description || "",
+          createdAt: data.createProjectV2.projectV2.createdAt,
+          updatedAt: data.createProjectV2.projectV2.updatedAt,
+          url: data.createProjectV2.projectV2.url,
+          html_url: data.createProjectV2.projectV2.url,
+          createdBy: {
+            login: userData?.login || "",
+            avatarUrl: userData?.avatarUrl || "",
+          },
+          owner: {
+            login: userData?.login || "",
+            avatar_url: userData?.avatarUrl || "",
+          },
+          columns: [],
+          issues: [],
+          collaborators: [],
+          repositories: [],
+        };
+
+        // Refresh data from appInitializationService to ensure consistent state
+        await appInitializationService.getAllInitialData();
+
+        // Update the state
         runInAction(() => {
-          this.projects.push({
-            ...newProject,
-            columns: [],
-            collaborators: [],
-          });
+          this.projects.push(newProject);
           this.loading = false;
         });
-      }
 
-      return newProject;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
+        return newProject;
+      } catch (error) {
+        runInAction(() => {
+          this.error = error instanceof Error ? error.message : String(error);
+          this.loading = false;
+        });
+        throw error;
+      }
+    });
   }
 
+  /**
+   * Update an existing project with zod validation
+   */
   async updateProject(projectId: string, projectData: ProjectFormData) {
-    this.loading = true;
-    this.error = null;
+    return validateAndExecute(projectSchema, projectData, async (validData) => {
+      this.loading = true;
+      this.error = null;
+      this.clearValidationErrors();
 
-    try {
-      const updatedProject = await projectService.updateProject(projectId, projectData);
+      try {
+        const input = {
+          projectId: projectId,
+          title: validData.name,
+          ...(validData.description ? { shortDescription: validData.description } : {}),
+        };
 
-      if (updatedProject) {
+        // Use the generated mutation document
+        const { data, error } = await client.mutation(UpdateProjectDocument, { input }).toPromise();
+
+        if (error || !data?.updateProjectV2?.projectV2) {
+          throw new Error(error?.message || "Failed to update project");
+        }
+
+        const projectData = data.updateProjectV2.projectV2;
+
+        // Find the existing project to preserve its relationships
+        const existingProject = this.projects.find((p) => p.id === projectId);
+        if (!existingProject) {
+          throw new Error(`Project with ID ${projectId} not found`);
+        }
+
+        // Create an updated project object
+        const updatedProject: Project = {
+          ...existingProject,
+          id: projectData.id,
+          name: projectData.title,
+          description: projectData.title || "", // Using title as fallback since shortDescription isn't available
+          updatedAt: projectData.updatedAt,
+          url: projectData.url,
+          html_url: projectData.url,
+        };
+
+        // Update the state
         runInAction(() => {
           const index = this.projects.findIndex((p) => p.id === projectId);
           if (index !== -1) {
-            // Preserve columns and collaborators from the existing project
-            const existingProject = this.projects[index];
-            this.projects[index] = {
-              ...updatedProject,
-              columns: existingProject.columns || [],
-              collaborators: existingProject.collaborators || [],
-            };
+            this.projects[index] = updatedProject;
           }
           this.loading = false;
         });
-      }
 
-      return updatedProject;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
+        return updatedProject;
+      } catch (error) {
+        runInAction(() => {
+          this.setError(error);
+          this.loading = false;
+        });
+        throw error;
+      }
+    });
   }
 
+  /**
+   * Delete a project
+   */
   async deleteProject(projectId: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      const response = await projectService.deleteProject(projectId);
+      const input = {
+        projectId: projectId,
+      };
+
+      // Use the generated mutation document
+      const { data, error } = await client.mutation(DeleteProjectDocument, { input }).toPromise();
 
       // The GraphQL mutation returns {data: {deleteProjectV2: {clientMutationId: null}}}
       // which indicates a successful deletion even with null clientMutationId
-      const success = typeof response === "boolean" ? response : true;
+      const success = error ? false : Boolean(data?.deleteProjectV2);
 
       runInAction(() => {
         if (success) {
@@ -167,19 +263,27 @@ export class ProjectStore {
     }
   }
 
-  // Columns management
+  /**
+   * Get columns for a project from AppInitializationService
+   */
   async getProjectColumns(projectId: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      const columns = await columnService.getColumns(projectId);
+      // Get columns from the appInitializationService
+      const columns = appInitializationService.getProjectColumns(projectId);
 
       runInAction(() => {
         const project = this.projects.find((p) => p.id === projectId);
         if (project) {
           project.columns = columns;
         }
+
+        if (this.selectedProject?.id === projectId) {
+          this.selectedProject.columns = columns;
+        }
+
         this.loading = false;
       });
 
@@ -193,97 +297,98 @@ export class ProjectStore {
     }
   }
 
+  /**
+   * Add a column to a project
+   */
   async addColumn(projectId: string, columnData: ColumnFormData) {
     this.loading = true;
     this.error = null;
 
     try {
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project) {
-        throw new Error("Project not found");
+      // Get the status field ID from the existing columns
+      const columns = appInitializationService.getProjectColumns(projectId);
+
+      // Get the status field ID (from the first column's fieldId)
+      const statusFieldId = columns.length > 0 ? columns[0].fieldId : null;
+
+      if (!statusFieldId) {
+        throw new Error("Status field not found in project");
       }
 
-      // The new structure requires implementing a mutation to add a status option
-      // to the Status field using the columnData
-      // This needs to be implemented in ColumnService
+      // Use the generated mutation document
+      const { data, error } = await client
+        .mutation(AddColumnDocument, {
+          fieldId: statusFieldId,
+          name: columnData.name,
+          color:
+            ProjectV2SingleSelectFieldOptionColor[
+              this.getColorForColumnType(
+                columnData.type
+              ) as keyof typeof ProjectV2SingleSelectFieldOptionColor
+            ],
+        })
+        .toPromise();
 
-      // For now, create a mock column with a temporary ID
-      const mockColumn = {
-        id: `temp-${Date.now()}`,
-        name: columnData.name,
-        type: columnData.type,
-      };
+      if (error || !data) {
+        throw new Error(error?.message || "Failed to add column");
+      }
 
-      // Update the UI optimistically
+      // Refresh project data from appInitializationService
+      await appInitializationService.getAllInitialData();
+      const updatedColumns = appInitializationService.getProjectColumns(projectId);
+
+      // Find the newly added column by name
+      const newColumn = updatedColumns.find((col) => col.name === columnData.name);
+      if (!newColumn) {
+        throw new Error("Failed to find the new column");
+      }
+
+      // Update the state
       runInAction(() => {
-        if (!project.columns) {
-          project.columns = [];
+        const project = this.projects.find((p) => p.id === projectId);
+        if (project) {
+          project.columns = updatedColumns;
         }
-        project.columns.push(mockColumn);
+
+        if (this.selectedProject?.id === projectId) {
+          this.selectedProject.columns = updatedColumns;
+        }
+
         this.loading = false;
       });
 
-      // Since we've only updated the UI but not actually created on GitHub,
-      // add a warning in the console
-      console.warn(
-        `Column creation not implemented in the API. Added column ${columnData.name} to UI only.`
-      );
-
-      return mockColumn;
+      return newColumn;
     } catch (error) {
       runInAction(() => {
         this.setError(error);
         this.loading = false;
       });
-      throw error;
+      return null;
     }
   }
 
-  async deleteColumn(projectId: string, columnId: string) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project || !project.columns) {
-        throw new Error("Project or columns not found");
-      }
-
-      // The new structure requires implementing a mutation to delete a status option
-      // from the Status field using the columnId (which is the option ID)
-      // This needs to be implemented in ColumnService
-
-      // For now, just update the UI optimistically
-      runInAction(() => {
-        project.columns = project.columns!.filter((column) => column.id !== columnId);
-        this.loading = false;
-      });
-
-      // Since we've only updated the UI but not actually deleted on GitHub,
-      // add a warning in the console
-      console.warn(
-        `Column deletion not implemented in the API. Removed column ${columnId} from UI only.`
-      );
-
-      return true;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  // Project items management
+  /**
+   * Get project issues from AppInitializationService
+   */
   async getProjectIssues(projectId: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      const issues = await issueService.getIssues(projectId);
+      // Get issues from the appInitializationService
+      const issues = appInitializationService.getProjectIssues(projectId);
 
+      // Update the state
       runInAction(() => {
+        const project = this.projects.find((p) => p.id === projectId);
+        if (project) {
+          project.issues = issues;
+        }
+
+        if (this.selectedProject?.id === projectId) {
+          this.selectedProject.issues = issues;
+        }
+
         this.loading = false;
       });
 
@@ -297,334 +402,176 @@ export class ProjectStore {
     }
   }
 
-  async createDraftIssue(projectId: string, title: string, body?: string, statusId?: string) {
-    this.loading = true;
-    this.error = null;
+  /**
+   * Create an issue with zod validation
+   */
+  async createIssue(projectId: string, title: string, description?: string, columnId?: string) {
+    const issueDescription = description || "";
+    const labelIds: string[] = [];
 
-    try {
-      // The IssueService.createDraftIssue only accepts projectId, title and body
-      const issue = await issueService.createDraftIssue(projectId, title, body);
+    return validateAndExecute(
+      issueSchema,
+      { title, description: issueDescription, labels: labelIds, assignees: [] },
+      async (validData) => {
+        this.loading = true;
+        this.error = null;
+        this.clearValidationErrors();
 
-      // If we have a statusId, update the issue status separately
-      if (issue && statusId) {
-        // Get the status field ID first
-        const fieldId = await this.getStatusFieldId(projectId);
-        if (fieldId && issue.projectItemId) {
-          await issueService.updateIssueStatus(projectId, issue.projectItemId, fieldId, statusId);
+        try {
+          // Get a repository for this project from the repositories store
+          if (!repositoryStore.repositories.length) {
+            await repositoryStore.fetchUserRepositories();
+          }
+
+          if (!repositoryStore.repositories.length) {
+            throw new Error("No repositories available");
+          }
+
+          // Use the first repository as the target
+          const repositoryId = repositoryStore.repositories[0].id;
+
+          // Create the issue
+          const { data, error } = await client
+            .mutation(CreateIssueDocument, {
+              repositoryId,
+              title: validData.title,
+              body: validData.description || "",
+            })
+            .toPromise();
+
+          if (error || !data?.createIssue?.issue) {
+            throw new Error(error?.message || "Failed to create issue");
+          }
+
+          const issueId = data.createIssue.issue.id;
+
+          // Add the issue to the project
+          const addInput = {
+            projectId,
+            contentId: issueId,
+          };
+
+          // Use the generated document from operation-names
+          const { data: addItemData, error: addItemError } = await client
+            .mutation(AddProjectItemDocument, { input: addInput })
+            .toPromise();
+
+          if (addItemError || !addItemData?.addProjectV2ItemById?.item) {
+            throw new Error(addItemError?.message || "Failed to add issue to project");
+          }
+
+          const projectItemId = addItemData.addProjectV2ItemById.item.id;
+
+          // If columnId is provided, update the issue status
+          if (columnId) {
+            try {
+              await this.updateIssueStatus(projectId, projectItemId, columnId);
+            } catch (statusError) {
+              console.warn("Failed to set initial column:", statusError);
+              // Continue anyway, the issue was created successfully
+            }
+          }
+
+          // Refresh data from appInitializationService
+          await appInitializationService.getAllInitialData();
+
+          // Create a BoardIssue object from the response
+          const newIssue: BoardIssue = {
+            id: projectItemId,
+            issueId,
+            title: validData.title,
+            body: validData.description || "",
+            number: data.createIssue.issue.number,
+            status: columnId ? this.getColumnNameById(columnId) : "TODO", // Default status for new issues
+            columnId: columnId || "no-status",
+            labels: [],
+            url: "",
+            author: null,
+            assignees: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          // Update the state
+          runInAction(() => {
+            const project = this.projects.find((p) => p.id === projectId);
+            if (project && project.issues) {
+              project.issues.push(newIssue);
+            }
+
+            if (this.selectedProject?.id === projectId && this.selectedProject.issues) {
+              this.selectedProject.issues.push(newIssue);
+            }
+
+            this.loading = false;
+          });
+
+          return newIssue;
+        } catch (error) {
+          runInAction(() => {
+            this.setError(error);
+            this.loading = false;
+          });
+          throw error;
         }
       }
-
-      runInAction(() => {
-        this.loading = false;
-      });
-
-      return issue;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
+    );
   }
 
+  /**
+   * Helper method to get column name by ID
+   */
+  private getColumnNameById(columnId: string): string {
+    if (!this.selectedProject?.columns) return "TODO";
+
+    const column = this.selectedProject.columns.find((col) => col.id === columnId);
+    return column?.name || "TODO";
+  }
+
+  /**
+   * Update an issue's status
+   */
   async updateIssueStatus(projectId: string, itemId: string, statusOptionId: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      // Get the status field ID first
-      const fieldId = await this.getStatusFieldId(projectId);
-      if (!fieldId) {
+      // Get the status field from appInitializationService
+      const columns = appInitializationService.getProjectColumns(projectId);
+      const statusField = columns.length > 0 ? columns[0].fieldId : null;
+
+      if (!statusField) {
         throw new Error("Status field not found");
       }
 
-      // Updated to match the signature in IssueService
-      const success = await issueService.updateIssueStatus(
-        projectId,
-        itemId,
-        fieldId,
-        statusOptionId
-      );
+      // Find the status option name
+      const column = columns.find((col) => col.id === statusOptionId);
+      const statusName = column?.name || "TODO";
 
-      runInAction(() => {
-        this.loading = false;
-      });
+      // Use the generated mutation document
+      const { data, error } = await client
+        .mutation(UpdateIssueStatusDocument, {
+          projectId,
+          itemId,
+          fieldId: statusField,
+          valueId: statusOptionId,
+        })
+        .toPromise();
 
-      return success;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  // Helper method to get the status field ID
-  private async getStatusFieldId(projectId: string): Promise<string | null> {
-    try {
-      // Using the public method from issueService
-      const fieldId = await issueService.getStatusFieldId(projectId);
-      return fieldId;
-    } catch (error) {
-      console.error("Error getting status field ID:", error);
-      return null;
-    }
-  }
-
-  selectProject(projectId: string) {
-    const project = this.projects.find((p) => p.id === projectId);
-    if (project) {
-      this.selectedProject = project;
-    } else {
-      this.error = "Project not found";
-    }
-  }
-
-  clearSelectedProject() {
-    this.selectedProject = null;
-  }
-
-  clearError() {
-    this.error = null;
-  }
-
-  async createIssue(
-    projectId: string,
-    title: string,
-    description: string,
-    _labelIds: string[] = []
-  ) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // Create the draft issue first
-      const issue = await this.createDraftIssue(projectId, title, description);
-
-      // Add labels if needed (this would require additional implementation)
-      // For now, just returning the created issue
-
-      runInAction(() => {
-        this.loading = false;
-      });
-
-      return issue;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  async createLabel(_projectId: string, name: string, color: string, description?: string) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // Mock implementation - replace with actual API call when available
-      const label = {
-        id: `label-${Date.now()}`,
-        name,
-        color,
-        description: description || "",
-      };
-
-      runInAction(() => {
-        // In a real implementation, you would update the label list in the project
-        this.loading = false;
-      });
-
-      console.warn("Label creation is not fully implemented. Created label for UI only.");
-      return label;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  async addCollaborator(projectId: string, collaboratorData: CollaboratorFormData) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project) {
-        throw new Error("Project not found");
+      if (error || !data?.updateProjectV2ItemFieldValue?.projectV2Item) {
+        throw new Error(error?.message || "Failed to update issue status");
       }
 
-      // Call the CollaboratorService to add the collaborator via GraphQL API
-      const success = await collaboratorService.addProjectCollaborator(projectId, collaboratorData);
-
-      // If the API call was successful, create the collaborator object for the UI
-      if (success) {
-        const mockCollaborator: Collaborator = {
-          id: `temp-${Date.now()}`,
-          username: collaboratorData.username,
-          avatar: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
-          role: collaboratorData.role,
-        };
-
-        // Update the UI
-        runInAction(() => {
-          if (!project.collaborators) {
-            project.collaborators = [];
+      // Update the local issue
+      runInAction(() => {
+        const project = this.projects.find((p) => p.id === projectId);
+        if (project && project.issues) {
+          const issueIndex = project.issues.findIndex((i) => i.id === itemId);
+          if (issueIndex !== -1) {
+            project.issues[issueIndex].status = statusName;
           }
-          project.collaborators.push(mockCollaborator);
-          this.loading = false;
-        });
+        }
 
-        return mockCollaborator;
-      } else {
-        throw new Error("Failed to add collaborator via API");
-      }
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  async removeCollaborator(projectId: string, collaboratorId: string) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project || !project.collaborators) {
-        throw new Error("Project or collaborators not found");
-      }
-
-      // Find the collaborator in our store to get their username
-      const collaborator = project.collaborators.find((c) => c.id === collaboratorId);
-      if (!collaborator) {
-        throw new Error("Collaborator not found in project");
-      }
-
-      // Pass the username to the service for lookup
-      const success = await collaboratorService.removeProjectCollaborator(
-        projectId,
-        collaborator.username
-      );
-
-      if (success) {
-        // Update the UI
-        runInAction(() => {
-          project.collaborators = project.collaborators!.filter(
-            (collaborator) => collaborator.id !== collaboratorId
-          );
-          this.loading = false;
-        });
-
-        return true;
-      } else {
-        throw new Error("Failed to remove collaborator via API");
-      }
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      throw error;
-    }
-  }
-
-  // Repository integration
-  async linkRepositoryToProject(
-    projectId: string,
-    repositoryOwner: string,
-    repositoryName: string
-  ): Promise<boolean> {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // Find the project
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project) {
-        throw new Error("Project not found");
-      }
-
-      // Check if repository exists in repository store
-      let repository: Repository | undefined = repositoryStore.repositories.find(
-        (r) => r.owner.login === repositoryOwner && r.name === repositoryName
-      );
-
-      // If not found, fetch it
-      if (!repository) {
-        repository = await repositoryStore.fetchRepository(repositoryOwner, repositoryName);
-      }
-
-      if (!repository) {
-        throw new Error("Repository not found");
-      }
-
-      // Link the repository using the updated ProjectService
-      const success = await projectService.linkRepositoryToProject(
-        projectId,
-        repositoryOwner,
-        repositoryName
-      );
-
-      if (success) {
-        // Update local state
-        runInAction(() => {
-          if (!project.repositories) {
-            project.repositories = [];
-          }
-
-          // Check if already linked
-          const alreadyLinked = project.repositories.some(
-            (r) =>
-              r.id === repository?.id ||
-              (r.owner?.login === repositoryOwner && r.name === repositoryName)
-          );
-
-          if (!alreadyLinked && repository) {
-            project.repositories.push(repository);
-          }
-        });
-
-        // Force a refresh of projects to ensure consistency with server
-        await this.fetchProjects();
-      }
-
-      runInAction(() => {
-        this.loading = false;
-      });
-
-      return success;
-    } catch (error) {
-      runInAction(() => {
-        this.setError(error);
-        this.loading = false;
-      });
-      return false;
-    }
-  }
-
-  async unlinkRepositoryFromProject(projectId: string, repositoryId: string) {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // Find the project
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project || !project.repositories) {
-        throw new Error(`Project with ID ${projectId} not found or has no repositories`);
-      }
-
-      // Remove the repository from the project
-      runInAction(() => {
-        project.repositories = project.repositories!.filter((r) => r.id !== repositoryId);
         this.loading = false;
       });
 
@@ -638,42 +585,192 @@ export class ProjectStore {
     }
   }
 
-  async getProjectRepositories(projectId: string) {
+  /**
+   * Create a label for a repository with zod validation
+   */
+  async createLabel(projectId: string, name: string, color: string, description?: string) {
+    return validateAndExecute(labelSchema, { name, color, description }, async (validData) => {
+      this.loading = true;
+      this.error = null;
+      this.clearValidationErrors();
+
+      try {
+        // Get a repository for this project
+        if (!repositoryStore.repositories.length) {
+          await repositoryStore.fetchUserRepositories();
+        }
+
+        if (!repositoryStore.repositories.length) {
+          throw new Error("No repositories available");
+        }
+
+        // Use the first repository as the target
+        const repositoryId = repositoryStore.repositories[0].id;
+
+        // GitHub expects hex colors without the # prefix
+        const colorHex = validData.color.startsWith("#")
+          ? validData.color.substring(1)
+          : validData.color;
+
+        // Use the generated CreateLabelDocument
+        const input = {
+          repositoryId,
+          name: validData.name,
+          color: colorHex,
+          description: validData.description || "",
+        };
+
+        const { data, error } = await client.mutation(CreateLabelDocument, { input }).toPromise();
+
+        if (error || !data?.createLabel?.label) {
+          throw new Error(error?.message || "Failed to create label");
+        }
+
+        const labelData = data.createLabel.label;
+        const newLabel: Label = {
+          id: labelData.id,
+          name: labelData.name,
+          color: `#${labelData.color}`,
+          description: labelData.description || "",
+        };
+
+        // Refresh data from appInitializationService
+        await appInitializationService.getAllInitialData();
+
+        // Update the state
+        runInAction(() => {
+          const project = this.projects.find((p) => p.id === projectId);
+          if (project) {
+            if (!project.labels) {
+              project.labels = [];
+            }
+            project.labels.push(newLabel);
+          }
+
+          this.loading = false;
+        });
+
+        return newLabel;
+      } catch (error) {
+        runInAction(() => {
+          this.setError(error);
+          this.loading = false;
+        });
+        throw error;
+      }
+    });
+  }
+
+  /**
+   * Link a repository to a project
+   */
+  async linkRepositoryToProject(
+    projectId: string,
+    repositoryOwner: string,
+    repositoryName: string
+  ): Promise<boolean> {
     this.loading = true;
     this.error = null;
 
     try {
-      // Find the project
-      const project = this.projects.find((p) => p.id === projectId);
-      if (!project) {
-        throw new Error(`Project with ID ${projectId} not found`);
+      const input = {
+        projectId,
+        repositoryId: `${repositoryOwner}/${repositoryName}`,
+      };
+
+      // Use the generated mutation document
+      const { data, error } = await client
+        .mutation(LinkRepositoryToProjectDocument, { input })
+        .toPromise();
+
+      if (error || !data?.linkProjectV2ToRepository) {
+        throw new Error(error?.message || "Failed to link repository to project");
       }
 
-      // In a real implementation, you would fetch the repositories from the API
-      // For this example, we'll just return what's already in the project
-      runInAction(() => {
-        this.loading = false;
-      });
+      // Refresh data from appInitializationService
+      await appInitializationService.getAllInitialData();
 
-      return project.repositories || [];
+      // Update the state from the refreshed data
+      const updatedProject = appInitializationService.getProjectById(projectId);
+      if (updatedProject) {
+        runInAction(() => {
+          // Find and update the project in our state
+          const index = this.projects.findIndex((p) => p.id === projectId);
+          if (index !== -1) {
+            this.projects[index] = updatedProject;
+          }
+
+          // Update selected project if needed
+          if (this.selectedProject?.id === projectId) {
+            this.selectedProject = updatedProject;
+          }
+
+          this.loading = false;
+        });
+      }
+
+      return true;
     } catch (error) {
       runInAction(() => {
         this.setError(error);
         this.loading = false;
       });
-      return [];
+      return false;
+    }
+  }
+
+  // Helper methods
+  /**
+   * Select a project by ID
+   */
+  selectProject(projectId: string) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (project) {
+      this.selectedProject = project;
+    }
+  }
+
+  /**
+   * Clear the selected project
+   */
+  clearSelectedProject() {
+    this.selectedProject = null;
+  }
+
+  /**
+   * Clear any error
+   */
+  clearError() {
+    this.error = null;
+  }
+
+  /**
+   * Helper method to get a color for a column type
+   */
+  private getColorForColumnType(type: ColumnType): string {
+    switch (type) {
+      case ColumnType.TODO:
+        return "Blue";
+      case ColumnType.IN_PROGRESS:
+        return "Yellow";
+      case ColumnType.DONE:
+        return "Green";
+      case ColumnType.BACKLOG:
+        return "Purple";
+      default:
+        return "Gray";
     }
   }
 
   /**
    * Set projects directly from app initialization data
-   * This allows us to directly populate the projects from a single query
-   * rather than making multiple individual queries
    */
   setProjects(projects: Project[]) {
-    this.projects = projects;
-    this.loading = false;
-    this.error = null;
+    runInAction(() => {
+      this.projects = projects;
+      this.loading = false;
+      this.error = null;
+    });
   }
 
   /**
@@ -704,6 +801,114 @@ export class ProjectStore {
       }
     } else {
       this.error = "An unknown error occurred";
+    }
+  }
+
+  /**
+   * Update issue labels
+   */
+  async updateIssueLabels(issueId: string, labelIds: string[]): Promise<boolean> {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // For now, we'll just update the local state
+      // In a real implementation, this would call a GraphQL mutation
+      if (this.selectedProject && this.selectedProject.issues) {
+        const issueIndex = this.selectedProject.issues.findIndex((issue) => issue.id === issueId);
+
+        if (issueIndex !== -1) {
+          // Get labels from the project, if available
+          const projectLabels = this.selectedProject.labels || [];
+
+          // Filter to only the selected label IDs, or create placeholder labels
+          const selectedLabels = labelIds.map((id) => {
+            const existingLabel = projectLabels.find((label) => label.id === id);
+            if (existingLabel) {
+              return existingLabel;
+            }
+            // Create a placeholder if label not found
+            return {
+              id,
+              name: `Label ${id}`,
+              color: "#cccccc",
+              description: "",
+            };
+          });
+
+          // Update the issue's labels
+          runInAction(() => {
+            if (this.selectedProject?.issues && issueIndex !== -1) {
+              this.selectedProject.issues[issueIndex].labels = selectedLabels;
+            }
+            this.loading = false;
+          });
+
+          return true;
+        }
+      }
+
+      this.loading = false;
+      return false;
+    } catch (error) {
+      runInAction(() => {
+        this.setError(error);
+        this.loading = false;
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Delete an issue from a project
+   */
+  async deleteIssue(projectId: string, issueId: string, projectItemId: string): Promise<boolean> {
+    this.loading = true;
+    this.error = null;
+
+    try {
+      // First, optimistically update the UI by removing the issue
+      runInAction(() => {
+        // Update the selected project if it matches
+        if (this.selectedProject?.id === projectId && this.selectedProject.issues) {
+          this.selectedProject.issues = this.selectedProject.issues.filter(
+            (issue) => issue.id !== projectItemId
+          );
+        }
+
+        // Update the projects list
+        const projectIndex = this.projects.findIndex((p) => p.id === projectId);
+        if (projectIndex !== -1 && this.projects[projectIndex].issues) {
+          this.projects[projectIndex].issues = this.projects[projectIndex].issues!.filter(
+            (issue) => issue.id !== projectItemId
+          );
+        }
+      });
+
+      // Now perform the actual deletion
+      const { error } = await client.mutation(DeleteIssueDocument, { issueId }).toPromise();
+
+      if (error) {
+        throw new Error(error.message || "Failed to delete issue");
+      }
+
+      // Refresh project data to ensure we're in sync with the server
+      await appInitializationService.getAllInitialData();
+
+      runInAction(() => {
+        this.loading = false;
+      });
+
+      return true;
+    } catch (error) {
+      // Log the error but don't revert the UI changes to avoid confusion
+      console.error("Error deleting issue:", error);
+      runInAction(() => {
+        this.setError(error);
+        this.loading = false;
+      });
+
+      return false;
     }
   }
 }

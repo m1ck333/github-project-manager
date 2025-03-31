@@ -1,6 +1,7 @@
 query GetAllInitialData {
   # Get current user profile
   viewer {
+    id
     login
     name
     avatarUrl

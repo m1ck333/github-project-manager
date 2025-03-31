@@ -1,5 +1,5 @@
-# Mutation to create a new issue in a project
-mutation CreateIssue($repositoryId: ID!, $title: String!, $body: String, $projectId: ID!) {
+# Mutation to create a new issue in a repository
+mutation CreateIssue($repositoryId: ID!, $title: String!, $body: String) {
   createIssue(input: { repositoryId: $repositoryId, title: $title, body: $body }) {
     issue {
       id

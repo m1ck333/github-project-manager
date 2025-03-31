@@ -1,0 +1,18 @@
+mutation DisableRepository($repositoryId: ID!) {
+  # This is a workaround since GitHub's GraphQL API doesn't support full repository deletion
+  # We'll disable functionality to effectively "soft delete" the repository
+  updateRepository(
+    input: {
+      repositoryId: $repositoryId
+      hasIssuesEnabled: false
+      hasProjectsEnabled: false
+      hasWikiEnabled: false
+      hasDiscussionsEnabled: false
+    }
+  ) {
+    repository {
+      id
+      name
+    }
+  }
+}

@@ -8,6 +8,7 @@
   background-color: rgba(var(--color-danger-rgb), 0.1);
   margin-bottom: 1.5rem;
   border: 1px solid var(--color-danger);
+  width: 100%;
 
   .errorIcon {
     color: var(--color-danger);
@@ -43,6 +44,7 @@
     align-items: center;
     gap: 0.5rem;
     height: fit-content;
+    margin-top: 10px;
   }
 }
 
@@ -52,8 +54,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 3rem 1rem;
+  min-height: 80vh;
+  padding: 1rem;
   max-width: 600px;
   margin: 0 auto;
 
@@ -74,8 +76,21 @@
     line-height: 1.6;
   }
 
+  .fullPageInfoBox {
+    max-width: 600px;
+    width: 100%;
+  }
+
   .actionButtons {
     display: flex;
-    gap: 1rem;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-start;
+  }
+
+  .retryButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 }

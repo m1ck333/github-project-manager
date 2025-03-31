@@ -26,8 +26,8 @@ const RepositoriesPage: React.FC = observer(() => {
   const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [deleteRepository, setDeleteRepository] = useState<Repository | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [disableRepository, setDisableRepository] = useState<Repository | null>(null);
+  const [isDisabling, setIsDisabling] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -86,27 +86,30 @@ const RepositoriesPage: React.FC = observer(() => {
       false
   );
 
-  // Handle repository deletion
-  const handleDeleteRepository = (repository: Repository) => {
-    setDeleteRepository(repository);
+  // Handle repository disabling
+  const handleDisableRepository = (repository: Repository) => {
+    setDisableRepository(repository);
   };
 
   const navigateToRepository = (repository: Repository) => {
     navigate(`/repositories/${repository.owner.login}/${repository.name}`);
   };
 
-  const confirmDelete = async () => {
-    if (deleteRepository) {
+  const confirmDisable = async () => {
+    if (disableRepository) {
       try {
-        setIsDeleting(true);
-        // Implement the actual deletion
-        await repositoryStore.deleteRepository(deleteRepository.owner.login, deleteRepository.name);
-        toast.toast.success(`Repository "${deleteRepository.name}" deleted successfully`);
-        setDeleteRepository(null);
+        setIsDisabling(true);
+        // Implement the actual disabling using updateRepository mutation
+        await repositoryStore.disableRepository(
+          disableRepository.owner.login,
+          disableRepository.name
+        );
+        toast.toast.success(`Repository "${disableRepository.name}" disabled successfully`);
+        setDisableRepository(null);
       } catch (error) {
-        toast.toast.error(`Failed to delete repository: ${(error as Error).message}`);
+        toast.toast.error(`Failed to disable repository: ${(error as Error).message}`);
       } finally {
-        setIsDeleting(false);
+        setIsDisabling(false);
       }
     }
   };
@@ -135,7 +138,7 @@ const RepositoriesPage: React.FC = observer(() => {
             key={repository.id}
             repository={repository}
             onClick={() => navigateToRepository(repository)}
-            onDelete={handleDeleteRepository}
+            onDisable={handleDisableRepository}
           />
         ))}
       </GridContainer>
@@ -219,22 +222,23 @@ const RepositoriesPage: React.FC = observer(() => {
         </form>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
-      {deleteRepository && (
+      {/* Disable Repository Confirmation Modal */}
+      {disableRepository && (
         <Modal
-          isOpen={!!deleteRepository}
-          onClose={() => !isDeleting && setDeleteRepository(null)}
-          title="Delete Repository"
+          isOpen={!!disableRepository}
+          onClose={() => !isDisabling && setDisableRepository(null)}
+          title="Disable Repository"
         >
           <ConfirmationDialog
-            title="Delete Repository Confirmation"
-            message={`Are you sure you want to delete repository "${deleteRepository.name}"?`}
-            warningMessage="This action cannot be undone."
-            confirmLabel={isDeleting ? "Deleting..." : "Delete Repository"}
-            isSubmitting={isDeleting}
-            onConfirm={confirmDelete}
-            onCancel={() => setDeleteRepository(null)}
-            confirmVariant="danger"
+            title="Disable Repository Confirmation"
+            description={`Are you sure you want to disable repository "${disableRepository.name}"? This will turn off issues, projects, wiki, and discussions.`}
+            footer={
+              <Button variant="danger" onClick={confirmDisable} disabled={isDisabling}>
+                {isDisabling ? "Disabling..." : "Disable Repository"}
+              </Button>
+            }
+            isOpen={!!disableRepository}
+            onClose={() => !isDisabling && setDisableRepository(null)}
           />
         </Modal>
       )}

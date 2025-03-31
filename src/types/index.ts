@@ -18,6 +18,7 @@ export interface Project {
   issues?: BoardIssue[];
   collaborators?: Collaborator[];
   repositories?: Repository[];
+  labels?: Label[];
 }
 
 export enum ColumnType {
@@ -79,6 +80,7 @@ export interface BoardIssue extends Issue {
   columnId?: string;
   columnName?: string;
   issueId?: string;
+  status?: string;
   author?: {
     login: string;
     avatarUrl: string;

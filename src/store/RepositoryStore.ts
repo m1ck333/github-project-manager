@@ -1,6 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { repositoryService } from "../graphql/services";
+import { client } from "../graphql/client";
+import { RepositoryPermission, RepositoryVisibility } from "../graphql/generated/graphql";
+import {
+  CreateRepositoryDocument,
+  AddRepositoryCollaboratorDocument,
+  DeleteRepositoryDocument,
+} from "../graphql/operations/operation-names";
+import { appInitializationService } from "../graphql/services/AppInitializationService";
 import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../types";
 
 export class RepositoryStore {
@@ -21,7 +28,9 @@ export class RepositoryStore {
     this.error = null;
 
     try {
-      const repositories = await repositoryService.getUserRepositories();
+      // Get repositories from appInitializationService
+      await appInitializationService.getAllInitialData();
+      const repositories = appInitializationService.getRepositories();
 
       runInAction(() => {
         this.repositories = repositories;
@@ -31,7 +40,7 @@ export class RepositoryStore {
       return repositories;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       throw error;
@@ -43,29 +52,29 @@ export class RepositoryStore {
     this.error = null;
 
     try {
-      const repository = await repositoryService.getRepository(owner, name);
+      // Always refresh data from API to ensure we have latest
+      await appInitializationService.getAllInitialData();
+      const repositories = appInitializationService.getRepositories();
+
+      // Find the repository in the fetched repositories
+      const repository = repositories.find((r) => r.owner.login === owner && r.name === name);
 
       if (repository) {
         runInAction(() => {
-          // Add to repositories list if not already there
-          const existingIndex = this.repositories.findIndex((r) => r.id === repository.id);
+          // Update our local repositories with the refreshed list
+          this.repositories = repositories;
 
-          if (existingIndex >= 0) {
-            // Update existing repository
-            this.repositories[existingIndex] = repository;
-          } else {
-            // Add new repository
-            this.repositories.push(repository);
-          }
-
+          // Also update the selected repository
+          this.selectRepository(repository);
           this.loading = false;
         });
+        return repository;
+      } else {
+        throw new Error(`Repository ${owner}/${name} not found in GitHub data`);
       }
-
-      return repository;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       return undefined;
@@ -78,26 +87,71 @@ export class RepositoryStore {
   async createRepository(
     name: string,
     description: string = "",
-    visibility: "PUBLIC" | "PRIVATE" = "PRIVATE"
+    visibility: "PRIVATE" | "PUBLIC" | "INTERNAL" = "PRIVATE"
   ): Promise<Repository | undefined> {
     this.loading = true;
     this.error = null;
 
     try {
-      const repository = await repositoryService.createRepository(name, description, visibility);
-
-      if (repository) {
-        runInAction(() => {
-          // Add to repositories list
-          this.repositories.push(repository);
-          this.loading = false;
-        });
+      // Convert string visibility to RepositoryVisibility enum
+      let visibilityEnum: RepositoryVisibility;
+      switch (visibility) {
+        case "PRIVATE":
+          visibilityEnum = RepositoryVisibility.Private;
+          break;
+        case "PUBLIC":
+          visibilityEnum = RepositoryVisibility.Public;
+          break;
+        case "INTERNAL":
+          visibilityEnum = RepositoryVisibility.Internal;
+          break;
+        default:
+          visibilityEnum = RepositoryVisibility.Private;
       }
 
-      return repository;
+      const input = {
+        name,
+        description: description || undefined,
+        visibility: visibilityEnum,
+      };
+
+      const { data, error } = await client
+        .mutation(CreateRepositoryDocument, { input })
+        .toPromise();
+
+      if (error || !data?.createRepository?.repository) {
+        throw new Error(error?.message || "Failed to create repository");
+      }
+
+      // Create repository directly from the mutation response data
+      const repoData = data.createRepository.repository;
+      const newRepo: Repository = {
+        id: repoData.id,
+        name: repoData.name,
+        owner: {
+          login: repoData.owner.login,
+          avatar_url: repoData.owner.avatarUrl,
+        },
+        description: repoData.description || "",
+        html_url: repoData.url,
+        createdAt: repoData.createdAt,
+        collaborators: [],
+      };
+
+      // Update our local repositories list
+      runInAction(() => {
+        this.repositories.push(newRepo);
+        this.loading = false;
+      });
+
+      // Refresh all data from GitHub in the background
+      // but don't wait for it or rely on it for the repository data
+      appInitializationService.getAllInitialData().catch(console.error);
+
+      return newRepo;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       throw error;
@@ -105,33 +159,61 @@ export class RepositoryStore {
   }
 
   /**
-   * Delete a repository
+   * Disable a repository using GraphQL
+   * Note: GitHub's GraphQL API doesn't support true repository deletion,
+   * so we use updateRepository to disable features (soft delete)
    */
-  async deleteRepository(owner: string, name: string): Promise<boolean> {
+  async disableRepository(owner: string, name: string): Promise<boolean> {
     this.loading = true;
     this.error = null;
 
     try {
-      const success = await repositoryService.deleteRepository(owner, name);
+      // First, check if the repository exists
+      const repository = this.repositories.find(
+        (repo) => repo.owner.login === owner && repo.name === name
+      );
 
-      if (success) {
-        runInAction(() => {
-          this.repositories = this.repositories.filter(
-            (repo) => !(repo.owner.login === owner && repo.name === name)
-          );
-          this.loading = false;
-        });
-        return true;
+      if (!repository) {
+        throw new Error(`Repository ${owner}/${name} not found`);
       }
 
-      return false;
+      // Update the local state optimistically
+      runInAction(() => {
+        this.repositories = this.repositories.filter(
+          (repo) => !(repo.owner.login === owner && repo.name === name)
+        );
+      });
+
+      // Use GraphQL to update the repository - this is a "soft delete"
+      // as GitHub's GraphQL API doesn't support real repository deletion
+      const { error } = await client
+        .mutation(DeleteRepositoryDocument, { repositoryId: repository.id })
+        .toPromise();
+
+      if (error) {
+        throw new Error(`Failed to disable repository: ${error.message}`);
+      }
+
+      // Refresh data to ensure our state is in sync
+      await appInitializationService.getAllInitialData();
+
+      runInAction(() => {
+        this.loading = false;
+      });
+
+      return true;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       throw error;
     }
+  }
+
+  // Keep the old method name for backward compatibility
+  async deleteRepository(owner: string, name: string): Promise<boolean> {
+    return this.disableRepository(owner, name);
   }
 
   async fetchRepositoryCollaborators(owner: string, name: string) {
@@ -149,7 +231,10 @@ export class RepositoryStore {
     // Create the promise for this fetch
     const fetchPromise = (async () => {
       try {
-        // Find the repository in our store - avoids another fetch
+        // Ensure we have the latest data
+        await appInitializationService.getAllInitialData();
+
+        // Find the repository in our store
         const repository = this.repositories.find(
           (r) => r.owner.login === owner && r.name === name
         );
@@ -159,13 +244,19 @@ export class RepositoryStore {
         }
 
         // Skip if collaborators are already fetched
-        // This prevents duplicate collaborator fetches
         if (repository.collaborators && repository.collaborators.length > 0) {
           return repository.collaborators;
         }
 
-        // Now fetch the collaborators
-        const collaborators = await repositoryService.getRepositoryCollaborators(owner, name);
+        // Get the repositories from appInitializationService to get the collaborators
+        const repos = appInitializationService.getRepositories();
+        const repoWithCollaborators = repos.find((r) => r.owner.login === owner && r.name === name);
+
+        if (!repoWithCollaborators) {
+          throw new Error(`Repository ${owner}/${name} not found in app data`);
+        }
+
+        const collaborators = repoWithCollaborators.collaborators || [];
 
         // Update the store
         runInAction(() => {
@@ -189,7 +280,7 @@ export class RepositoryStore {
         return collaborators;
       } catch (error) {
         runInAction(() => {
-          this.error = (error as Error).message;
+          this.error = error instanceof Error ? error.message : String(error);
         });
         return [];
       } finally {
@@ -219,68 +310,114 @@ export class RepositoryStore {
         throw new Error("Repository not found");
       }
 
-      // Call the service to add the collaborator
-      const success = await repositoryService.addRepositoryCollaborator(
-        owner,
-        repoName,
-        collaboratorData
+      // Convert permission string to the format expected by GitHub
+      const permission = collaboratorData.permission.toUpperCase();
+
+      // First step: Use GraphQL mutation as a simple check for API access
+      // Note: This will generate "variable not used" warnings for userLogin and permission
+      // These warnings are harmless - the variables are used in the REST API call
+      try {
+        const { error: apiAccessError } = await client
+          .mutation(AddRepositoryCollaboratorDocument, {
+            repositoryId: repository.id,
+            userLogin: collaboratorData.username,
+            permission: permission as RepositoryPermission,
+          })
+          .toPromise();
+
+        if (apiAccessError) {
+          throw new Error(`API access error: ${apiAccessError.message}`);
+        }
+      } catch (error) {
+        // Handle the specific case of variable not used warnings
+        if (error instanceof Error && error.message.includes("Variable")) {
+          console.warn("Ignoring GraphQL variable warnings as they're expected:", error.message);
+          // Continue execution - these warnings don't affect functionality
+        } else {
+          // It's a real error, rethrow it
+          throw error;
+        }
+      }
+
+      // Second step: Use REST API to actually add the collaborator
+      // Access token is needed for the REST API call
+      const token = localStorage.getItem("github_token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Use GitHub REST API to add the collaborator
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repoName}/collaborators/${collaboratorData.username}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+          body: JSON.stringify({ permission: collaboratorData.permission }),
+        }
       );
 
-      if (success) {
-        // After successfully adding a collaborator, refresh the collaborator list
-        // This ensures we have the latest data from the server
-        runInAction(() => {
-          this.loading = true;
-        });
-
-        // Fetch updated collaborators
-        try {
-          const collaborators = await repositoryService.getRepositoryCollaborators(owner, repoName);
-
-          // Update the repository with the fresh collaborator list
-          runInAction(() => {
-            const index = this.repositories.findIndex(
-              (r) => r.owner.login === owner && r.name === repoName
-            );
-            if (index !== -1) {
-              this.repositories[index].collaborators = collaborators;
-            }
-            if (
-              this.selectedRepository?.owner.login === owner &&
-              this.selectedRepository.name === repoName
-            ) {
-              this.selectedRepository.collaborators = collaborators;
-            }
-            this.loading = false;
-          });
-        } catch (error) {
-          // If fetching fails, create a temporary collaborator for UI only
-          // This will be updated next time the page is loaded
-          console.error("Error fetching collaborators:", error);
-          const mockCollaborator: RepositoryCollaborator = {
-            id: `temp-${Date.now()}`,
-            login: collaboratorData.username,
-            avatarUrl: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
-            permission: collaboratorData.permission,
-          };
-
-          // Update the UI with temporary data
-          runInAction(() => {
-            if (!repository.collaborators) {
-              repository.collaborators = [];
-            }
-            repository.collaborators.push(mockCollaborator);
-            this.loading = false;
-          });
-        }
-
-        return true;
-      } else {
-        throw new Error("Failed to add collaborator via API");
+      if (!response.ok) {
+        // If response is not OK, parse the error message
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Failed to add collaborator: ${response.statusText}`);
       }
+
+      // Create a temporary collaborator for optimistic UI update
+      const mockCollaborator: RepositoryCollaborator = {
+        id: `temp-${Date.now()}`,
+        login: collaboratorData.username,
+        avatarUrl: `https://avatars.githubusercontent.com/${collaboratorData.username}`,
+        permission: collaboratorData.permission,
+      };
+
+      // Update the UI optimistically
+      runInAction(() => {
+        if (!repository.collaborators) {
+          repository.collaborators = [];
+        }
+        repository.collaborators.push(mockCollaborator);
+      });
+
+      // Refresh all data to get the actual updated collaborators
+      await appInitializationService.getAllInitialData();
+
+      // Get the updated repository
+      const updatedRepo = appInitializationService
+        .getRepositories()
+        .find((r) => r.owner.login === owner && r.name === repoName);
+
+      if (updatedRepo && updatedRepo.collaborators) {
+        runInAction(() => {
+          // Update the repository in our store
+          const index = this.repositories.findIndex(
+            (r) => r.owner.login === owner && r.name === repoName
+          );
+
+          if (index !== -1) {
+            this.repositories[index].collaborators = updatedRepo.collaborators;
+          }
+
+          if (
+            this.selectedRepository?.owner.login === owner &&
+            this.selectedRepository.name === repoName
+          ) {
+            this.selectedRepository.collaborators = updatedRepo.collaborators;
+          }
+
+          this.loading = false;
+        });
+      } else {
+        // Keep the mock collaborator if we can't get the updated data
+        this.loading = false;
+      }
+
+      return true;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       throw error;
@@ -299,35 +436,51 @@ export class RepositoryStore {
         throw new Error("Repository or collaborators not found");
       }
 
-      // Find the collaborator in our store to get their username
+      // Find the collaborator in our store
       const collaborator = repository.collaborators.find((c) => c.id === collaboratorId);
       if (!collaborator) {
         throw new Error("Collaborator not found in repository");
       }
 
-      // Call the service to remove the collaborator using their username
-      const success = await repositoryService.removeRepositoryCollaborator(
-        owner,
-        repoName,
-        collaborator.login
+      // Access token is needed for the REST API call
+      const token = localStorage.getItem("github_token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Use GitHub REST API to remove the collaborator
+      const response = await fetch(
+        `https://api.github.com/repos/${owner}/${repoName}/collaborators/${collaborator.login}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github.v3+json",
+          },
+        }
       );
 
-      if (success) {
-        // Update the UI
-        runInAction(() => {
-          repository.collaborators = repository.collaborators!.filter(
-            (c) => c.id !== collaboratorId
-          );
-          this.loading = false;
-        });
-
-        return true;
-      } else {
-        throw new Error("Failed to remove collaborator via API");
+      if (!response.ok) {
+        // If response is not OK, parse the error message
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `Failed to remove collaborator: ${response.statusText}`
+        );
       }
+
+      // Update the UI optimistically
+      runInAction(() => {
+        repository.collaborators = repository.collaborators!.filter((c) => c.id !== collaboratorId);
+      });
+
+      // Refresh data to sync with server state
+      await appInitializationService.getAllInitialData();
+      this.loading = false;
+
+      return true;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.error = error instanceof Error ? error.message : String(error);
         this.loading = false;
       });
       throw error;

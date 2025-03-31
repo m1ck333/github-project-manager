@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-import { appInitializationService } from "../graphql/services";
+import { appInitializationService } from "../graphql/services/AppInitializationService";
 import { useStore } from "../store";
-import { AllAppData } from "../types";
 
 // Track initialization across renders
 let globalInitialized = false;

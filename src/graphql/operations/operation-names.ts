@@ -16,20 +16,20 @@ import {
   UpdateProjectDocument,
   AddRepositoryCollaboratorDocument,
   CreateRepositoryDocument,
+  DisableRepositoryDocument,
   ProjectV2Roles,
   ProjectV2FieldType,
+  CreateLabelDocument,
+  AddProjectItemDocument,
+  GetViewerDocument,
+  DeleteIssueDocument,
 } from "../generated/graphql";
 
 // Export app document - keep only this GET operation
-export { GetAllInitialDataDocument };
+export { GetAllInitialDataDocument, GetViewerDocument };
 
 // Export project documents
-export {
-  CreateProjectDocument,
-  UpdateProjectDocument,
-  DeleteProjectDocument,
-  LinkRepositoryToProjectDocument,
-};
+export { CreateProjectDocument, UpdateProjectDocument, DeleteProjectDocument };
 
 // Export column documents
 export {
@@ -39,13 +39,25 @@ export {
 };
 
 // Export issue documents
-export { CreateIssueDocument, UpdateIssueStatusDocument };
+export {
+  CreateIssueDocument,
+  UpdateIssueStatusDocument,
+  AddProjectItemDocument,
+  DeleteIssueDocument,
+};
 
 // Export collaborator documents
 export { UpdateProjectCollaboratorsDocument, AddRepositoryCollaboratorDocument };
 
 // Export repository documents
-export { CreateRepositoryDocument };
+export {
+  CreateRepositoryDocument,
+  LinkRepositoryToProjectDocument,
+  DisableRepositoryDocument as DeleteRepositoryDocument, // Alias for backward compatibility
+};
+
+// Export label documents
+export { CreateLabelDocument };
 
 // Export enums
 export { ProjectV2Roles, ProjectV2FieldType };

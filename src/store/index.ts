@@ -16,22 +16,39 @@ export interface RootStore {
   userStore: UserStore;
 }
 
-// Create a store context
-const storeContext = createContext<RootStore>({
+// Create a root store object
+export const rootStore: RootStore = {
   projectStore,
   repositoryStore,
   userStore,
-});
+};
+
+// Create a store context with the root store
+const storeContext = createContext<RootStore>(rootStore);
+
+// Initialize all stores
+export const initializeStores = async (): Promise<void> => {
+  try {
+    // Initialize user store first for authentication
+    await userStore.validateToken();
+
+    // Then initialize other stores
+    await Promise.all([repositoryStore.fetchUserRepositories(), projectStore.fetchProjects()]);
+  } catch (error) {
+    console.error("Failed to initialize stores:", error);
+  }
+};
 
 // Create a hook to use the store
-export const useStore = () => useContext(storeContext);
+export const useStore = (): RootStore => useContext(storeContext);
+
+// Create a hook to use a specific store
+export const useProjectStore = (): ProjectStore => useContext(storeContext).projectStore;
+export const useRepositoryStore = (): RepositoryStore => useContext(storeContext).repositoryStore;
+export const useUserStore = (): UserStore => useContext(storeContext).userStore;
 
 // Create a store provider for components
 export const StoreProvider = storeContext.Provider;
 
 // Export the store
-export default {
-  projectStore,
-  repositoryStore,
-  userStore,
-};
+export default rootStore;

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
+import Button from "@/components/ui/Button";
+
 import ProjectCard from "../../components/features/project/ProjectCard";
 import ProjectForm from "../../components/features/project/ProjectForm";
 import Container from "../../components/layout/Container";
@@ -90,7 +92,7 @@ const Projects: React.FC = observer(() => {
         onSearchChange={handleSearchChange}
         onRefresh={handleRefresh}
         loading={loading}
-        error={error}
+        error={error as string | null}
         onRetry={handleRetry}
         loadingText="Loading projects..."
         emptyState={
@@ -147,13 +149,14 @@ const Projects: React.FC = observer(() => {
         >
           <ConfirmationDialog
             title="Delete Project Confirmation"
-            message={`Are you sure you want to delete project "${deleteProject.name}"?`}
-            warningMessage="This action cannot be undone."
-            confirmLabel={isDeleting ? "Deleting..." : "Delete Project"}
-            isSubmitting={isDeleting}
-            onConfirm={confirmDelete}
-            onCancel={() => setDeleteProject(null)}
-            confirmVariant="danger"
+            description={`Are you sure you want to delete project "${deleteProject.name}"?`}
+            footer={
+              <Button variant="danger" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "Delete Project"}
+              </Button>
+            }
+            isOpen={!!deleteProject}
+            onClose={() => !isDeleting && setDeleteProject(null)}
           />
         </Modal>
       )}

@@ -62,24 +62,18 @@ const RepositoryPage: React.FC = observer(() => {
 
   useEffect(() => {
     if (owner && name) {
-      // Only fetch the repository if it's not already in the store
-      const existingRepo = repositoryStore.repositories.find(
-        (r) => r.owner.login === owner && r.name === name
-      );
-
-      if (!existingRepo) {
-        // Only fetch if we don't have the repository
-        repositoryStore.loading = true;
-        repositoryStore
-          .fetchRepository(owner, name)
-          .catch((error) => console.error("Error loading repository data:", error))
-          .finally(() => {
-            repositoryStore.loading = false;
-          });
-      } else {
-        // Update selected repository in store for consistent UI
-        repositoryStore.selectRepository(existingRepo);
-      }
+      // Always fetch the repository to ensure we have the latest data
+      repositoryStore.loading = true;
+      repositoryStore
+        .fetchRepository(owner, name)
+        .catch((error) => {
+          console.error("Error loading repository data:", error);
+          // Set the error in the store to display it to the user
+          repositoryStore.error = error instanceof Error ? error.message : String(error);
+        })
+        .finally(() => {
+          repositoryStore.loading = false;
+        });
     }
   }, [owner, name]);
 

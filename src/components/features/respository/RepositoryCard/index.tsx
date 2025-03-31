@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiUsers, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiUsers, FiEdit, FiPower } from "react-icons/fi";
 
 import { repositoryStore } from "../../../../store";
 import { Repository } from "../../../../types";
@@ -12,14 +12,14 @@ interface RepositoryCardProps {
   repository: Repository;
   onClick: () => void;
   onEdit?: (repository: Repository) => void;
-  onDelete?: (repository: Repository) => void;
+  onDisable?: (repository: Repository) => void;
 }
 
 const RepositoryCard: React.FC<RepositoryCardProps> = ({
   repository,
   onClick,
   onEdit,
-  onDelete,
+  onDisable,
 }) => {
   const [isLoadingCollaborators, setIsLoadingCollaborators] = useState(false);
 
@@ -63,14 +63,14 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
     });
   }
 
-  if (onDelete) {
+  if (onDisable) {
     cardActions.push({
-      icon: <FiTrash2 size={16} />,
-      label: "Delete",
-      ariaLabel: "Delete repository",
+      icon: <FiPower size={16} />,
+      label: "Disable",
+      ariaLabel: "Disable repository",
       onClick: (e: React.MouseEvent) => {
         e.stopPropagation();
-        onDelete(repository);
+        onDisable(repository);
       },
     });
   }

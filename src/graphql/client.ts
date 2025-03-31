@@ -7,18 +7,19 @@
  */
 import { Client, fetchExchange } from "@urql/core";
 
+import { env } from "../config/env";
 import { GITHUB_GRAPHQL_API_URL } from "../constants/github";
-
-// Initialize urql client
-const token = import.meta.env.VITE_GITHUB_TOKEN;
 
 // Create the client instance
 export const client = new Client({
   url: GITHUB_GRAPHQL_API_URL,
-  fetchOptions: {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  fetchOptions: () => {
+    // Get the latest token each time a request is made
+    return {
+      headers: {
+        Authorization: env.githubToken ? `Bearer ${env.githubToken}` : "",
+      },
+    };
   },
   exchanges: [fetchExchange],
 });

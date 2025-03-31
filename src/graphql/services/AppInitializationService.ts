@@ -3,7 +3,6 @@ import {
   BoardIssue,
   Column,
   ColumnType,
-  Label,
   Project,
   Repository,
   RepositoryCollaborator,
@@ -12,110 +11,28 @@ import {
 import { client } from "../client";
 import { GetAllInitialDataDocument } from "../generated/graphql";
 
-// Define interfaces for GitHub data types
-interface GitHubIssue {
-  __typename?: "Issue";
-  id: string;
-  title: string;
-  number: number;
-  body?: string;
-  state: string;
-  url: string;
-  createdAt: string;
-  updatedAt: string;
-  repository?: {
-    id: string;
-    name: string;
-  };
-  author?: {
-    login: string;
-    url: string;
-    avatarUrl: string;
-  };
-  labels?: {
-    nodes?: Array<{
-      id: string;
-      name: string;
-      color: string;
-      description?: string;
-    } | null>;
-  };
-}
-
-interface GitHubFieldNode {
-  __typename?: string;
-  id: string;
-  name: string;
-  dataType: string;
-  options?: Array<{
-    id: string;
-    name: string;
-  } | null> | null;
-}
-
-interface GitHubProjectItemNode {
-  id: string;
-  content?: GitHubIssue | null;
-  fieldValues?: {
-    nodes?: Array<GitHubFieldValue | null> | null;
-  };
-}
-
-type GitHubFieldValue =
-  | {
-      __typename: "ProjectV2ItemFieldSingleSelectValue";
-      field?: { id: string; name: string };
-      optionId?: string;
-      name?: string;
-    }
-  | {
-      __typename: string;
-      field?: { id: string; name: string };
-      [key: string]: unknown;
-    };
-
-// Define interfaces for the project item and its fields
-interface ProjectItem {
-  id: string;
-  content?: {
-    id: string;
-    title: string;
-    number: number;
-    body?: string;
-    state?: string;
-    url?: string;
-    createdAt?: string;
-    updatedAt?: string;
-    author?: {
-      login: string;
-      avatarUrl: string;
-    };
-    labels?: {
-      nodes?: Array<{
-        id: string;
-        name: string;
-        color: string;
-        description?: string;
-      } | null>;
-    };
-  };
-  fieldValues?: {
-    nodes?: Array<{
-      name?: string;
-      optionId?: string;
-      field?: {
-        id?: string;
-        name?: string;
-      };
-      [key: string]: unknown;
-    } | null>;
-  };
-}
-
 class AppInitializationService {
   private initializedData: AllAppData | null = null;
   private isInitializing = false;
   private initializeCount = 0;
+  private viewerId: string | null = null;
+
+  /**
+   * Gets the current user ID from initialized data
+   */
+  public getUserId(): string | null {
+    return this.viewerId;
+  }
+
+  /**
+   * Gets the current user profile from initialized data
+   */
+  public getCurrentUser(): UserProfile | null {
+    if (!this.initializedData) {
+      return null;
+    }
+    return this.initializedData.user;
+  }
 
   /**
    * Fetches all application data in a single query
@@ -161,6 +78,9 @@ class AppInitializationService {
       // Direct mapping without the transformation utility
       const { viewer } = data;
 
+      // Save the viewer ID for later use in mutations
+      this.viewerId = viewer.id || null;
+
       // Transform user profile
       const user: UserProfile = {
         login: viewer.login,
@@ -194,20 +114,6 @@ class AppInitializationService {
               };
             })
             .filter(Boolean) as RepositoryCollaborator[];
-
-          // Transform repository labels
-          const labels: Label[] = (repo.labels?.nodes || [])
-            .filter(Boolean)
-            .map((label) => {
-              if (!label) return null;
-              return {
-                id: label.id,
-                name: label.name,
-                color: label.color,
-                description: label.description || undefined,
-              };
-            })
-            .filter(Boolean) as Label[];
 
           return {
             id: repo.id,
@@ -443,166 +349,25 @@ class AppInitializationService {
     return this.initializedData !== null;
   }
 
-  // Helper to check if content is a GitHub issue
-  private isGitHubIssue(content: unknown): content is GitHubIssue {
-    return (
-      typeof content === "object" &&
-      content !== null &&
-      "title" in content &&
-      typeof content.title === "string" &&
-      "number" in content &&
-      typeof content.number === "number" &&
-      "__typename" in content &&
-      content.__typename === "Issue" &&
-      "id" in content &&
-      typeof content.id === "string"
-    );
-  }
-
-  // Helper to process field options into columns
-  private processFieldOptions(field: GitHubFieldNode, columns: Column[]): number {
-    let added = 0;
-
-    if (field.options) {
-      // First check if we already have columns with the same IDs
-      const existingColumnIds = new Set(columns.map((col) => col.id));
-
-      for (const option of field.options) {
-        if (option && !existingColumnIds.has(option.id)) {
-          // Determine column type based on name
-          let columnType = ColumnType.TODO;
-          const lowerName = option.name.toLowerCase();
-
-          if (lowerName.includes("done")) {
-            columnType = ColumnType.DONE;
-          } else if (lowerName.includes("progress")) {
-            columnType = ColumnType.IN_PROGRESS;
-          } else if (lowerName.includes("backlog")) {
-            columnType = ColumnType.BACKLOG;
-          }
-
-          columns.push({
-            id: option.id,
-            name: option.name,
-            type: columnType,
-            fieldId: field.id,
-          });
-
-          // Add ID to the set to prevent duplicates
-          existingColumnIds.add(option.id);
-          added++;
-        }
-      }
+  private createBoardIssuesFromProjectItems(projectItems, columns: Column[]): BoardIssue[] {
+    if (!projectItems || !Array.isArray(projectItems)) {
+      return [];
     }
 
-    return added;
-  }
-
-  // Helper to process an issue from an item's content
-  private processIssueFromContent(
-    content: GitHubIssue,
-    item: GitHubProjectItemNode,
-    statusFieldId?: string,
-    columns?: Column[]
-  ): BoardIssue | null {
-    try {
-      // Find status field value
-      let statusOption: string | null = null;
-
-      // Process field values to extract status and other information
-      if (item.fieldValues?.nodes) {
-        for (const fieldValue of item.fieldValues.nodes) {
-          if (!fieldValue) continue;
-
-          // Check if this is the status field and has optionId property
-          if (
-            fieldValue.field?.id === statusFieldId &&
-            fieldValue.__typename === "ProjectV2ItemFieldSingleSelectValue" &&
-            "optionId" in fieldValue &&
-            fieldValue.optionId &&
-            typeof fieldValue.optionId === "string"
-          ) {
-            statusOption = fieldValue.optionId;
-            break;
-          }
-        }
-      }
-
-      // Find matching column
-      let columnId = "no-status";
-      let columnName = "No Status";
-
-      if (statusOption && columns) {
-        const matchingColumn = columns.find((column) => column.id === statusOption);
-        if (matchingColumn) {
-          columnId = matchingColumn.id;
-          columnName = matchingColumn.name;
-        }
-      }
-
-      // Process labels
-      const labels: Label[] = [];
-      if (content.labels?.nodes) {
-        for (const label of content.labels.nodes) {
-          if (label) {
-            labels.push({
-              id: label.id,
-              name: label.name,
-              color: label.color,
-              description: label.description || "",
-            });
-          }
-        }
-      }
-
-      // Create BoardIssue object
-      const issue: BoardIssue = {
-        id: item.id,
-        issueId: content.id,
-        number: content.number,
-        title: content.title,
-        body: content.body || "",
-        columnId,
-        columnName,
-        labels: labels || [],
-        url: content.url,
-        author: content.author
-          ? {
-              login: content.author.login,
-              avatarUrl: content.author.avatarUrl,
-            }
-          : null,
-      };
-
-      return issue;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  // Update the method signature with proper types
-  private createBoardIssuesFromProjectItems(
-    projectItems: ProjectItem[],
-    columns: Column[]
-  ): BoardIssue[] {
-    console.log(`Processing ${projectItems.length} project items`);
+    // Filter out null items
+    const validItems = projectItems.filter((item) => item !== null);
     const issues: BoardIssue[] = [];
 
-    for (const item of projectItems) {
+    for (const item of validItems) {
       if (!item || !item.content) {
-        console.log("Skipping item - no content");
         continue;
       }
 
       // Check if content seems like an issue
       const content = item.content;
       if (!content.id || !content.title || !content.number) {
-        console.log("Item content doesn't look like an issue:", content);
         continue;
       }
-
-      // Log that we're processing this item
-      console.log(`Processing issue: "${content.title}" (#${content.number})`);
 
       // Create the base issue object
       const issue: BoardIssue = {
@@ -636,7 +401,6 @@ class AppInitializationService {
             fieldValue.field.name === "Status"
           ) {
             const statusOptionId = fieldValue.optionId;
-            console.log(`Found Status: ${fieldValue.name} (${statusOptionId})`);
 
             // Find the matching column
             const column = columns.find((c) => c.id === statusOptionId);
@@ -644,7 +408,6 @@ class AppInitializationService {
               issue.columnId = column.id;
               issue.statusId = statusOptionId;
               issue.columnName = column.name;
-              console.log(`Assigned to column: ${column.name}`);
             }
             break;
           }
@@ -671,10 +434,8 @@ class AppInitializationService {
 
       // Add the issue to our array
       issues.push(issue);
-      console.log(`Added issue: ${content.title}`);
     }
 
-    console.log(`Total issues processed: ${issues.length}`);
     return issues;
   }
 }

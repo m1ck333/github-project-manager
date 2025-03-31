@@ -1,47 +1,31 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
-import Button from "../Button";
+import Modal from "../Modal";
 
 import styles from "./ConfirmationDialog.module.scss";
 
-interface ConfirmationDialogProps {
+export interface ConfirmationDialogProps {
   title: string;
-  message: string;
-  warningMessage?: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  isSubmitting?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-  confirmVariant?: "primary" | "secondary" | "danger";
+  description: ReactNode;
+  footer: ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   title,
-  message,
-  warningMessage,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  isSubmitting = false,
-  onConfirm,
-  onCancel,
-  confirmVariant = "danger",
+  description,
+  footer,
+  isOpen,
+  onClose,
 }) => {
   return (
-    <div className={styles.confirmationDialog}>
-      {title && <h3 className={styles.title}>{title}</h3>}
-      <p className={styles.message}>{message}</p>
-      {warningMessage && <p className={styles.warning}>{warningMessage}</p>}
-
-      <div className={styles.actions}>
-        <Button type="button" variant="secondary" onClick={onCancel} disabled={isSubmitting}>
-          {cancelLabel}
-        </Button>
-        <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={isSubmitting}>
-          {isSubmitting ? "Processing..." : confirmLabel}
-        </Button>
+    <Modal isOpen={isOpen} onClose={onClose} title={title}>
+      <div className={styles.container}>
+        <div className={styles.description}>{description}</div>
+        <div className={styles.footer}>{footer}</div>
       </div>
-    </div>
+    </Modal>
   );
 };
 
