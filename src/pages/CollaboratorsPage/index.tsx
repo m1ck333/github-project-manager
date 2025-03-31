@@ -24,32 +24,24 @@ const CollaboratorsPage: React.FC = observer(() => {
   const { showToast } = useToast();
 
   useEffect(() => {
-    const fetchProjectDetails = async () => {
-      if (!projectId) return;
+    if (!projectId) return;
 
-      try {
-        setIsLoading(true);
-        // If the project isn't in the store already, fetch it
-        if (!projectStore.projects.find((p) => p.id === projectId)) {
-          await projectStore.fetchProjects();
-        }
+    try {
+      setIsLoading(true);
+      // Project data is already loaded during app initialization
+      // Just select the current project
+      projectStore.selectProject(projectId);
 
-        // Select the project
-        projectStore.selectProject(projectId);
-
-        // Get collaborators
-        if (projectStore.selectedProject?.collaborators) {
-          setCollaborators(projectStore.selectedProject.collaborators);
-        }
-
-        setIsLoading(false);
-      } catch (err) {
-        setError((err as Error).message || "Failed to load project");
-        setIsLoading(false);
+      // Get collaborators
+      if (projectStore.selectedProject?.collaborators) {
+        setCollaborators(projectStore.selectedProject.collaborators);
       }
-    };
 
-    fetchProjectDetails();
+      setIsLoading(false);
+    } catch (err) {
+      setError((err as Error).message || "Failed to load project");
+      setIsLoading(false);
+    }
   }, [projectId]);
 
   const handleBack = () => {

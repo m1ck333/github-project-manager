@@ -5,23 +5,15 @@ import * as dotenv from "dotenv";
 
 import { GITHUB_GRAPHQL_API_URL } from "./src/constants/github";
 
-// Load environment variables from different env files
-// Try to load from .env.development first, then fall back to .env
 dotenv.config({ path: path.resolve(process.cwd(), ".env.development") });
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
-// Read the token from VITE_GITHUB_TOKEN
 const token = process.env.VITE_GITHUB_TOKEN;
 if (!token) {
   console.warn(
     "Warning: VITE_GITHUB_TOKEN environment variable is not set. Schema generation will likely fail."
   );
 }
-
-console.log(
-  "Using token:",
-  token ? `${token.substring(0, 4)}...${token.substring(token.length - 4)}` : "No token found"
-);
 
 const config: CodegenConfig = {
   schema: {
@@ -34,7 +26,6 @@ const config: CodegenConfig = {
   },
   documents: ["./src/graphql/operations/**/*.graphql"],
   generates: {
-    // Generate the base schema types
     "./src/types/github-schema.ts": {
       plugins: ["typescript"],
       config: {
@@ -48,7 +39,6 @@ const config: CodegenConfig = {
         },
       },
     },
-    // Generate typed operations and hooks
     "./src/graphql/generated/": {
       preset: "client",
       presetConfig: {

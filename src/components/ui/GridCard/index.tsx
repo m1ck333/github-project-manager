@@ -2,6 +2,8 @@ import React, { ReactNode } from "react";
 import { FiCalendar, FiArrowRight, FiGithub } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
+import ViewOnGithub from "@/components/features/github/ViewOnGithubLink";
+
 import styles from "./GridCard.module.scss";
 
 export interface GridCardProps {
@@ -110,17 +112,7 @@ const GridCard: React.FC<GridCardProps> = ({
             )}
 
             <div className={styles.footerLinks}>
-              {htmlUrl && (
-                <a
-                  href={htmlUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className={styles.footerLink}
-                >
-                  <FiGithub size={14} /> View on GitHub
-                </a>
-              )}
+              {htmlUrl && <ViewOnGithub link={htmlUrl} />}
               {viewPath && (
                 <Link
                   to={viewPath}

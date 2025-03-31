@@ -1,75 +1,72 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
-import { projectStore, repositoryStore, userStore } from "../store";
+import { appInitializationService } from "../graphql/services";
+import { useStore } from "../store";
+import { AllAppData } from "../types";
 
-// Track initialization globally to avoid duplicate initialization in strict mode
+// Track initialization across renders
 let globalInitialized = false;
 
 /**
- * Hook for initializing application data
- * Fetches user information, repositories, and projects on app startup
- * and stores them in MobX stores for access throughout the app
+ * Hook to initialize all application data in a single request
+ * This loads user profile, repositories, projects, and all related data
  */
 export function useAppInitialization() {
-  const [isInitializing, setIsInitializing] = useState(!globalInitialized);
-  const [isInitialized, setIsInitialized] = useState(globalInitialized);
+  const [loading, setLoading] = useState(!globalInitialized);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(globalInitialized);
 
+  // Use a ref to track initialization state across renders
+  const initStartedRef = useRef(false);
+
+  // Get store references
+  const { userStore, repositoryStore, projectStore } = useStore();
+
+  // Initialize the application on mount
   useEffect(() => {
-    // Skip if already initialized
-    if (isInitialized) return;
-
     const initialize = async () => {
-      // If already globally initialized, just update local state
-      if (globalInitialized) {
-        setIsInitialized(true);
-        setIsInitializing(false);
-        return;
-      }
+      if (initialized) return;
 
-      setIsInitializing(true);
-      setError(null);
+      // Set loading state
+      setLoading(true);
 
       try {
-        // 1. Fetch user information first
-        await userStore.fetchUserProfile(false);
-
-        // 2. Fetch repositories if none are loaded
-        if (repositoryStore.repositories.length === 0) {
-          await repositoryStore.fetchUserRepositories();
+        // Only initialize if we have a token
+        if (!userStore.hasToken()) {
+          setLoading(false);
+          return;
         }
 
-        // 3. Fetch projects if none are loaded
-        if (projectStore.projects.length === 0) {
-          await projectStore.fetchProjects();
-        }
+        // Fetch initialization data
+        const data = await appInitializationService.getAllInitialData();
 
-        // Mark as initialized both locally and globally
-        setIsInitialized(true);
-        globalInitialized = true;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error during initialization";
-        console.error("Initialization error:", err);
-        setError(errorMessage);
-      } finally {
-        setIsInitializing(false);
+        // Set repositories and projects in their respective stores
+        repositoryStore.setRepositories(data.repositories);
+        projectStore.setProjects(data.projects);
+
+        // Set initialized flag
+        setInitialized(true);
+        setLoading(false);
+      } catch (error) {
+        setError((error as Error).message);
+        setLoading(false);
       }
     };
 
     initialize();
-  }, [isInitialized]);
+  }, [initialized, userStore]);
 
-  // Retry function resets both local and global initialization state
-  const retryInitialization = () => {
+  const retry = () => {
+    // Reset both local and global state
     globalInitialized = false;
-    setIsInitialized(false);
+    initStartedRef.current = false;
+    setInitialized(false);
   };
 
   return {
-    isInitializing,
-    isInitialized,
+    loading,
     error,
-    retryInitialization,
+    initialized,
+    retry,
   };
 }

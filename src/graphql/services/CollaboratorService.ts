@@ -6,9 +6,11 @@
  */
 import { gql } from "urql";
 
-import { CollaboratorFormData, CollaboratorRole } from "../../types";
+import { Collaborator, CollaboratorFormData, CollaboratorRole } from "../../types";
 import { client } from "../client";
 import { ProjectV2Roles, UpdateProjectCollaboratorsDocument } from "../operations/operation-names";
+
+import { appInitializationService } from "./AppInitializationService";
 
 // Define the GetUser query directly since it's not in the operations folder
 const GetUserDocument = gql`
@@ -29,6 +31,13 @@ const GetUserDocument = gql`
  */
 export class CollaboratorService {
   private client = client;
+
+  /**
+   * Get collaborators for a project
+   */
+  async getProjectCollaborators(projectId: string): Promise<Collaborator[]> {
+    return appInitializationService.getProjectCollaborators(projectId);
+  }
 
   /**
    * Add a collaborator to a project

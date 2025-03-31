@@ -1,0 +1,81 @@
+@use "src/styles/variables.scss" as *;
+
+.errorBanner {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(var(--color-danger-rgb), 0.1);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-danger);
+
+  .errorIcon {
+    color: var(--color-danger);
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .errorContent {
+    flex: 1;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      color: var(--color-danger);
+    }
+
+    p {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .retryButton {
+    flex-shrink: 0;
+    margin-left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: fit-content;
+  }
+}
+
+// For full-page error messages
+.fullPageError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+
+  .errorIcon {
+    color: var(--color-danger);
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+
+  p {
+    margin: 0 0 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .actionButtons {
+    display: flex;
+    gap: 1rem;
+  }
+}

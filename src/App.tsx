@@ -1,22 +1,95 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
+import { AppInitializer } from "./components/layout/AppInitializer";
 import Layout from "./components/layout/Layout";
-import Button from "./components/ui/Button";
-import InfoBox from "./components/ui/InfoBox";
-import Loading from "./components/ui/Loading";
+import { FullPageError } from "./components/ui/ErrorBanner";
 import { ToastProvider } from "./components/ui/Toast";
-import { useAppInitialization } from "./hooks/useAppInitialization";
 import CollaboratorsPage from "./pages/CollaboratorsPage";
 import Home from "./pages/HomePage";
 import ProjectPage from "./pages/ProjectPage";
 import Projects from "./pages/ProjectsPage";
 import RepositoriesPage from "./pages/RepositoriesPage";
 import RepositoryPage from "./pages/RepositoryPage";
+import { StoreProvider, projectStore, repositoryStore, userStore } from "./store";
 
-// Extract routes to a separate component with keys
-const AppRoutes = () => {
+// Error boundary component for React Router
+const ErrorBoundaryRoutes = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [error, setError] = useState<Error | null>(null);
+
+  // Reset error when location changes
+  useEffect(() => {
+    setError(null);
+  }, [location.pathname]);
+
+  // Global error handler
+  useEffect(() => {
+    // Save original console.error
+    const originalConsoleError = console.error;
+
+    // Create error handler
+    const handleError = (event: ErrorEvent) => {
+      setError(event.error || new Error("An unexpected application error occurred"));
+      event.preventDefault();
+    };
+
+    // Handler for unhandled promise rejections
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      setError(event.reason || new Error("Unhandled Promise Rejection"));
+    };
+
+    // Override console.error to catch React errors
+    console.error = (...args) => {
+      // Call original console.error
+      originalConsoleError(...args);
+
+      // Check if this is a React error
+      const errorMessage = args.join(" ");
+      if (
+        errorMessage.includes("React") ||
+        errorMessage.includes("Error") ||
+        errorMessage.includes("Exception")
+      ) {
+        setError(new Error(errorMessage));
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleRejection);
+
+    // Clean up
+    return () => {
+      console.error = originalConsoleError;
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleRejection);
+    };
+  }, []);
+
+  if (error) {
+    return (
+      <FullPageError
+        error={error}
+        onRetry={() => {
+          setError(null);
+          window.location.reload();
+        }}
+        actions={
+          <button
+            onClick={() => {
+              setError(null);
+              navigate("/");
+            }}
+            className="button button-secondary"
+          >
+            Go to Home
+          </button>
+        }
+      />
+    );
+  }
 
   return (
     <Routes key={location.pathname}>
@@ -31,37 +104,24 @@ const AppRoutes = () => {
 };
 
 const App: React.FC = () => {
-  const { isInitializing, error, retryInitialization } = useAppInitialization();
-
-  if (isInitializing) {
-    return (
-      <div className="initializingContainer">
-        <Loading text="Initializing application..." />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="initializingContainer">
-        <InfoBox variant="error" title="Initialization Error">
-          <p>{error}</p>
-          <Button variant="secondary" size="small" onClick={retryInitialization}>
-            Retry
-          </Button>
-        </InfoBox>
-      </div>
-    );
-  }
+  const stores = {
+    projectStore,
+    repositoryStore,
+    userStore,
+  };
 
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <Layout>
-          <AppRoutes />
-        </Layout>
-      </ToastProvider>
-    </BrowserRouter>
+    <StoreProvider value={stores}>
+      <BrowserRouter>
+        <ToastProvider>
+          <AppInitializer>
+            <Layout>
+              <ErrorBoundaryRoutes />
+            </Layout>
+          </AppInitializer>
+        </ToastProvider>
+      </BrowserRouter>
+    </StoreProvider>
   );
 };
 

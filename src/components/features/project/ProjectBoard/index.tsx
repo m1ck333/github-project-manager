@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   FiPlus,
   FiTag,
@@ -9,32 +9,41 @@ import {
   FiEdit,
   FiTrash2,
   FiInfo,
+  FiEye,
+  FiEyeOff,
+  FiMove,
+  FiAlertCircle,
+  FiEdit2,
+  FiGrid,
 } from "react-icons/fi";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import {
-  columnService,
-  ProjectV2SingleSelectFieldOptionColor,
-} from "../../../../graphql/services/ColumnService";
+import { columnService } from "../../../../graphql/services/ColumnService";
 import { issueService } from "../../../../graphql/services/IssueService";
 import { labelService } from "../../../../graphql/services/LabelService";
-import { Column, Issue, Project, ColumnType, Label } from "../../../../types";
+import { ProjectService } from "../../../../graphql/services/ProjectService";
+import { RepositoryService } from "../../../../graphql/services/RepositoryService";
+import { projectStore } from "../../../../stores/ProjectStore";
+import { Column, Issue, Project, ColumnType, Label, BoardIssue } from "../../../../types";
 import Button from "../../../ui/Button";
 import ConfirmationDialog from "../../../ui/ConfirmationDialog";
+import ErrorBanner from "../../../ui/ErrorBanner";
+import GridCard from "../../../ui/GridCard";
+import GridCardAdd from "../../../ui/GridCardAdd";
+import GridContainer from "../../../ui/GridContainer";
+import InfoBox from "../../../ui/InfoBox";
 import Loading from "../../../ui/Loading";
 import Modal from "../../../ui/Modal";
 import { useToast } from "../../../ui/Toast";
 
 import styles from "./ProjectBoard.module.scss";
 
-type ActiveView = "issues" | "labels" | "columns";
+// Define the available views
+type ActiveView = "board" | "issues" | "labels" | "columns";
 
 interface ProjectBoardProps {
   project: Project;
-}
-
-// Extended Issue type with columnId for board functionality
-interface BoardIssue extends Issue {
-  columnId?: string;
 }
 
 interface SimpleColumnFormProps {
@@ -117,11 +126,22 @@ interface SimpleLabelFormProps {
   onSubmit: (name: string, color: string) => void;
   onCancel: () => void;
   isLoading: boolean;
+  initialName?: string;
+  initialColor?: string;
 }
 
-const SimpleLabelForm: React.FC<SimpleLabelFormProps> = ({ onSubmit, onCancel, isLoading }) => {
-  const [name, setName] = useState("");
-  const [color, setColor] = useState("#3498db");
+const SimpleLabelForm: React.FC<SimpleLabelFormProps> = ({
+  onSubmit,
+  onCancel,
+  isLoading,
+  initialName = "",
+  initialColor = "#3498db",
+}) => {
+  const [name, setName] = useState(initialName);
+  const [color, setColor] = useState(initialColor);
+
+  // Determine if we're in edit mode
+  const isEditMode = !!initialName;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,63 +200,88 @@ const SimpleLabelForm: React.FC<SimpleLabelFormProps> = ({ onSubmit, onCancel, i
           Cancel
         </Button>
         <Button type="submit" disabled={!name.trim() || isLoading}>
-          {isLoading ? "Creating Label..." : "Create Label"}
+          {isLoading
+            ? isEditMode
+              ? "Updating Label..."
+              : "Creating Label..."
+            : isEditMode
+              ? "Update Label"
+              : "Create Label"}
         </Button>
       </div>
     </form>
   );
 };
 
+// Fix SimpleIssueForm component
 interface SimpleIssueFormProps {
-  onSubmit: (title: string, body: string) => void;
-  onCancel: () => void;
-  isLoading: boolean;
-  repositories: Array<{ id: string; name: string }>;
+  onSubmit: (data: { title: string; body?: string }) => void;
+  isSubmitting?: boolean;
+  repositories?: { id: string; name: string }[];
+  targetColumn?: string | null;
+  initialValues?: { title: string; body: string };
+  isEditing?: boolean;
+  onCancel?: () => void;
+  error?: Error | null;
 }
 
 const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
   onSubmit,
+  isSubmitting = false,
+  repositories = [],
+  targetColumn = null,
+  initialValues,
+  isEditing = false,
   onCancel,
-  isLoading,
-  repositories,
+  error = null,
 }) => {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [title, setTitle] = useState(initialValues?.title || "");
+  const [body, setBody] = useState(initialValues?.body || "");
   const [repositoryId, setRepositoryId] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && repositoryId) {
-      onSubmit(title.trim(), body.trim());
-    }
+    onSubmit({
+      title,
+      body,
+    });
   };
 
   // Set the first repository as default when repositories are loaded
   useEffect(() => {
-    if (repositories.length > 0 && !repositoryId) {
+    if (repositories.length > 0 && !repositoryId && !isEditing) {
       setRepositoryId(repositories[0].id);
     }
-  }, [repositories, repositoryId]);
+  }, [repositories, repositoryId, isEditing]);
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
-        <label htmlFor="repository">Repository</label>
-        <select
-          id="repository"
-          className={styles.select}
-          value={repositoryId}
-          onChange={(e) => setRepositoryId(e.target.value)}
-          required
-        >
-          <option value="">Select a repository</option>
-          {repositories.map((repo) => (
-            <option key={repo.id} value={repo.id}>
-              {repo.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {error && (
+        <div className={styles.formError}>
+          <ErrorBanner error={error} onRetry={() => {}} />
+        </div>
+      )}
+
+      {/* Only show repository selection for new issues */}
+      {!isEditing && (
+        <div className={styles.formGroup}>
+          <label htmlFor="repository">Repository</label>
+          <select
+            id="repository"
+            className={styles.select}
+            value={repositoryId}
+            onChange={(e) => setRepositoryId(e.target.value)}
+            required
+          >
+            <option value="">Select a repository</option>
+            {repositories.map((repo) => (
+              <option key={repo.id} value={repo.id}>
+                {repo.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className={styles.formGroup}>
         <label htmlFor="issue-title">Issue Title</label>
@@ -264,511 +309,648 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
       </div>
 
       <div className={styles.actions}>
-        <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
+        <Button variant="secondary" type="button" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!title.trim() || !repositoryId || isLoading}>
-          {isLoading ? "Creating Issue..." : "Create Issue"}
+        <Button
+          type="submit"
+          disabled={!title.trim() || (!isEditing && !repositoryId) || isSubmitting}
+        >
+          {isSubmitting
+            ? isEditing
+              ? "Updating Issue..."
+              : "Creating Issue..."
+            : isEditing
+              ? "Update Issue"
+              : "Create Issue"}
         </Button>
       </div>
     </form>
   );
 };
 
+// Add SimpleLabelSelectorForm component
+interface SimpleLabelSelectorFormProps {
+  onSubmit: (selectedLabelIds: string[]) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+  availableLabels: Label[];
+  currentLabels: Label[];
+}
+
+const SimpleLabelSelectorForm: React.FC<SimpleLabelSelectorFormProps> = ({
+  onSubmit,
+  onCancel,
+  isLoading,
+  availableLabels,
+  currentLabels,
+}) => {
+  const [selectedLabelIds, setSelectedLabelIds] = useState<string[]>(
+    currentLabels.map((label) => label.id)
+  );
+
+  const handleLabelToggle = (labelId: string) => {
+    if (selectedLabelIds.includes(labelId)) {
+      // Remove label if already selected
+      setSelectedLabelIds(selectedLabelIds.filter((id) => id !== labelId));
+    } else {
+      // Add label if not selected
+      setSelectedLabelIds([...selectedLabelIds, labelId]);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(selectedLabelIds);
+  };
+
+  return (
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <div className={styles.formGroup}>
+        <label>Select Labels</label>
+        <div className={styles.labelsList}>
+          {availableLabels.length === 0 ? (
+            <p className={styles.emptyMessage}>No labels available. Create some labels first.</p>
+          ) : (
+            availableLabels.map((label) => (
+              <div key={label.id} className={styles.labelCheckboxItem}>
+                <label className={styles.labelCheckbox}>
+                  <input
+                    type="checkbox"
+                    checked={selectedLabelIds.includes(label.id)}
+                    onChange={() => handleLabelToggle(label.id)}
+                  />
+                  <span
+                    className={styles.labelColor}
+                    style={{ backgroundColor: label.color }}
+                  ></span>
+                  <span className={styles.labelName}>{label.name}</span>
+                </label>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className={styles.actions}>
+        <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isLoading || availableLabels.length === 0}>
+          {isLoading ? "Updating Labels..." : "Update Labels"}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// Add a new component for displaying columns in board view
+interface BoardColumnProps {
+  column: Column | { id: string; name: string; type: ColumnType };
+  issues: BoardIssue[];
+  columns: Column[];
+  onAddIssue: () => void;
+  onMoveIssue: (issueId: string, columnId: string) => void;
+  onEditIssue: (issue: BoardIssue) => void;
+  onDeleteIssue: (issue: BoardIssue) => void;
+  onManageLabels: (issue: BoardIssue) => void;
+}
+
+const BoardColumn: React.FC<BoardColumnProps> = ({
+  column,
+  issues,
+  columns,
+  onAddIssue,
+  onMoveIssue,
+  onEditIssue,
+  onDeleteIssue,
+  onManageLabels,
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState<string | null>(null);
+
+  // Handle opening the issue move dropdown
+  const handleOpenMoveDropdown = (issueId: string) => {
+    setIsDropdownOpen(isDropdownOpen === issueId ? null : issueId);
+  };
+
+  // Handle move within the dropdown
+  const handleMoveIssueToColumn = (issueId: string, columnId: string) => {
+    setIsDropdownOpen(null);
+    onMoveIssue(issueId, columnId);
+  };
+
+  return (
+    <div className={styles.boardColumn}>
+      <div className={styles.columnHeader}>
+        <h3>{column.name}</h3>
+        <span className={styles.issueCount}>{issues.length}</span>
+      </div>
+      <div className={styles.columnContent}>
+        {issues.length === 0 ? (
+          <div className={styles.emptyColumn}>
+            <p>No issues in this column</p>
+          </div>
+        ) : (
+          <div className={styles.issuesList}>
+            {issues.map((issue) => (
+              <div key={issue.id} className={styles.issueCard}>
+                <div className={styles.issueHeader}>
+                  <h4>{issue.title}</h4>
+                  <div className={styles.issueActions}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => handleOpenMoveDropdown(issue.id)}
+                      aria-label="Move issue"
+                    >
+                      <FiMove size={16} />
+                    </button>
+                    {isDropdownOpen === issue.id && (
+                      <div className={styles.moveDropdown}>
+                        {column.id !== "no-status" && (
+                          <button
+                            className={styles.moveButton}
+                            onClick={() => handleMoveIssueToColumn(issue.id, "no-status")}
+                          >
+                            No Status
+                          </button>
+                        )}
+                        {columns
+                          .filter((col: Column) => col.id !== column.id) // Don't show current column
+                          .map((col: Column) => (
+                            <button
+                              key={col.id}
+                              className={styles.moveButton}
+                              onClick={() => handleMoveIssueToColumn(issue.id, col.id)}
+                            >
+                              {col.name}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onManageLabels(issue)}
+                      aria-label="Manage labels"
+                    >
+                      <FiTag size={16} />
+                    </button>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onEditIssue(issue)}
+                      aria-label="Edit issue"
+                    >
+                      <FiEdit size={16} />
+                    </button>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => onDeleteIssue(issue)}
+                      aria-label="Delete issue"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+                {issue.labels && issue.labels.length > 0 && (
+                  <div className={styles.issueLabels}>
+                    {issue.labels.map((label) => (
+                      <span
+                        key={label.id}
+                        className={styles.issueLabel}
+                        style={{
+                          backgroundColor: label.color.startsWith("#")
+                            ? label.color
+                            : `#${label.color}`,
+                        }}
+                      >
+                        {label.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className={styles.issueNumber}>#{issue.number}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <Button onClick={onAddIssue} variant="secondary" className={styles.addIssueButton}>
+          <FiPlus size={16} /> Add Issue
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) => {
   const { showToast } = useToast();
-  const [isColumnModalOpen, setIsColumnModalOpen] = useState(false);
-  const [isLabelModalOpen, setIsLabelModalOpen] = useState(false);
+
+  // UI states - only keep what's needed for UI interaction
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
-  const [isCreatingColumn, setIsCreatingColumn] = useState(false);
-  const [isCreatingLabel, setIsCreatingLabel] = useState(false);
-  const [isCreatingIssue, setIsCreatingIssue] = useState(false);
-  const [activeView, setActiveView] = useState<ActiveView>("issues");
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [isIssueEditModalOpen, setIsIssueEditModalOpen] = useState(false);
+  const [issueToEdit, setIssueToEdit] = useState<BoardIssue | null>(null);
+  const [isIssueDeleteConfirmOpen, setIsIssueDeleteConfirmOpen] = useState(false);
+  const [issueToDelete, setIssueToDelete] = useState<BoardIssue | null>(null);
+  const [isLabelSelectorModalOpen, setIsLabelSelectorModalOpen] = useState(false);
+  const [issueForLabels, setIssueForLabels] = useState<BoardIssue | null>(null);
+  const [selectedColumnForIssue, setSelectedColumnForIssue] = useState<string | null>(null);
+  const [issueError, setIssueError] = useState<Error | null>(null);
 
-  // Data states
-  const [issues, setIssues] = useState<BoardIssue[]>([]);
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [labels, setLabels] = useState<Label[]>([]);
-
-  // Repositories for issue creation
-  const [repositories] = useState<Array<{ id: string; name: string }>>([]);
-  const [selectedRepositoryId] = useState<string>("");
-
-  // UI states for modals
-  const [isEditLimitationModalOpen, setIsEditLimitationModalOpen] = useState(false);
-  const [columnToDelete, setColumnToDelete] = useState<Column | null>(null);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isColumnEditModalOpen, setIsColumnEditModalOpen] = useState(false);
-  const [columnToEdit, setColumnToEdit] = useState<Column | null>(null);
-
-  // Load initial data
+  // Set the selected project in the store
   useEffect(() => {
-    loadInitialData();
-  }, [project.id]);
-
-  const loadInitialData = async () => {
-    setInitialLoading(true);
-    try {
-      // Load columns first, then load issues with those columns
-      const loadedColumns = await loadColumns();
-      await loadIssues(loadedColumns);
-    } catch (error) {
-      console.error("Error loading initial data:", error);
-    } finally {
-      setInitialLoading(false);
+    // We don't need to load project data as it's already loaded during app initialization
+    // Just set the current project in the store
+    if (project && project.id) {
+      projectStore.currentProject = project;
     }
+  }, [project]);
+
+  // Helper function to get issues for a specific column
+  const getIssuesForColumn = (columnId: string): BoardIssue[] => {
+    if (!project?.issues) return [];
+
+    // Find issues that match this column
+    const matchingIssues = project.issues.filter((issue) => {
+      const matches = issue.columnId === columnId;
+      return matches;
+    });
+
+    return matchingIssues;
   };
 
-  const loadColumns = async () => {
-    try {
-      const projectColumns = await columnService.getColumns(project.id);
+  // Get issues with no status
+  const getIssuesWithoutStatus = (): BoardIssue[] => {
+    if (!project?.issues) return [];
 
-      if (projectColumns.length > 0) {
-        setColumns(projectColumns);
-        return projectColumns;
-      } else {
-        // The project might not have columns yet - GitHub creates them automatically
-        // Let's create the initial basic columns if none exist
-        if (project.columns && project.columns.length > 0) {
-          // Use predefined columns from the project if available
-          setColumns(project.columns);
-          return project.columns;
-        }
-
-        // Otherwise just return empty array
-        return [];
-      }
-    } catch (error) {
-      console.error("Error loading columns:", error);
-      showToast("Failed to load columns", "error");
-      return [];
-    }
+    return project.issues.filter((issue) => {
+      return issue.columnId === "no-status";
+    });
   };
 
-  const loadIssues = async (columnsData?: Column[]) => {
-    try {
-      const projectIssues = await issueService.getProjectIssues(project.id);
-
-      // Use existing columns if provided, otherwise use current state
-      const availableColumns = columnsData || columns;
-
-      if (availableColumns.length > 0) {
-        // Match issues to columns based on status values from GitHub API
-        const mappedIssues = projectIssues.map((issue) => {
-          // Find matching column based on GitHub's status/column name
-          const matchingColumn = availableColumns.find(
-            (column) => issue.columnName?.toLowerCase() === column.name.toLowerCase()
-          );
-
-          return {
-            ...issue,
-            columnId: matchingColumn?.id || availableColumns[0].id, // Default to first column if no match
-          };
-        });
-
-        setIssues(mappedIssues);
-        return mappedIssues;
-      } else {
-        // If no columns, reset issues
-        setIssues([]);
-        return [];
-      }
-    } catch (error) {
-      console.error("Error loading issues:", error);
-      showToast("Failed to load issues", "error");
-      return [];
-    }
-  };
-
-  // Refresh board - fetch fresh data from API
-  const refreshBoard = async () => {
-    setLoading(true);
+  const handleCreateIssue = async (data: { title: string; body?: string }) => {
+    // Clear any previous errors
+    setIssueError(null);
 
     try {
-      const [fetchedIssues, fetchedColumns, fetchedLabels] = await Promise.all([
-        issueService.getProjectIssues(project.id),
-        columnService.getColumns(project.id),
-        labelService.getLabels(project.id),
-      ]);
+      // Use the first column as default if available
+      const targetColumnId =
+        selectedColumnForIssue ||
+        (projectStore.columns.length > 0 ? projectStore.columns[0].id : undefined);
 
-      setIssues(fetchedIssues);
-      setColumns(fetchedColumns);
-      setLabels(fetchedLabels);
+      const createdIssue = await projectStore.createIssue(data.title, data.body, targetColumnId);
 
-      showToast("Board refreshed successfully", "success");
-    } catch (error) {
-      console.error("Error refreshing board:", error);
-      showToast("Failed to refresh board", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddColumn = async (name: string, type: ColumnType) => {
-    setIsCreatingColumn(true);
-
-    try {
-      const columnFormData = {
-        name,
-        type,
-      };
-
-      const newColumn = await columnService.addColumn(project.id, columnFormData);
-
-      if (newColumn) {
-        setColumns([...columns, newColumn]);
-        showToast(`Column "${name}" added successfully!`, "success");
-        setIsColumnModalOpen(false);
-      } else {
-        showToast("Failed to add column", "error");
-      }
-    } catch (error) {
-      console.error("Error adding column:", error);
-      showToast("Failed to add column", "error");
-    } finally {
-      setIsCreatingColumn(false);
-    }
-  };
-
-  const handleCreateLabel = async (name: string, color: string) => {
-    setIsCreatingLabel(true);
-
-    try {
-      // Convert web hex color to GitHub enum color
-      // This is a simplified version - in a real app you'd map colors more precisely
-      mapHexToGitHubColor(color); // Use the function to avoid unused variable warning
-
-      // Currently just mocking the API call as label creation needs additional implementation
-      // Note: This would be replaced with actual GraphQL label creation
-      setTimeout(() => {
-        const newLabel = {
-          id: `label-${Date.now()}`,
-          name,
-          color,
-          description: "",
-        };
-
-        setLabels([...labels, newLabel]);
-        showToast(`Label "${name}" created successfully!`, "success");
-        setIsLabelModalOpen(false);
-        setIsCreatingLabel(false);
-      }, 500);
-    } catch (error) {
-      console.error("Error creating label:", error);
-      showToast("Failed to create label", "error");
-      setIsCreatingLabel(false);
-    }
-  };
-
-  const handleCreateIssue = async (title: string, body: string) => {
-    setIsCreatingIssue(true);
-
-    try {
-      if (!selectedRepositoryId) {
-        showToast("Please select a repository", "error");
-        setIsCreatingIssue(false);
-        return;
-      }
-
-      const issueId = await issueService.createIssue(selectedRepositoryId, title, body);
-
-      if (issueId) {
-        // After creation, refresh the issues to show the new one
-        await loadIssues();
-        showToast(`Issue "${title}" created successfully!`, "success");
+      if (createdIssue) {
+        showToast(`Issue "${data.title}" created successfully!`, "success");
         setIsIssueModalOpen(false);
       } else {
         showToast("Failed to create issue", "error");
       }
     } catch (error) {
       console.error("Error creating issue:", error);
+      setIssueError(error as Error);
       showToast("Failed to create issue", "error");
-    } finally {
-      setIsCreatingIssue(false);
     }
   };
 
-  // Map hex color to GitHub color enum (simplified)
-  const mapHexToGitHubColor = (hexColor: string): ProjectV2SingleSelectFieldOptionColor => {
-    const colorMap: Record<string, ProjectV2SingleSelectFieldOptionColor> = {
-      "#3498db": ProjectV2SingleSelectFieldOptionColor.BLUE,
-      "#2ecc71": ProjectV2SingleSelectFieldOptionColor.GREEN,
-      "#e74c3c": ProjectV2SingleSelectFieldOptionColor.RED,
-      "#9b59b6": ProjectV2SingleSelectFieldOptionColor.PURPLE,
-      "#e67e22": ProjectV2SingleSelectFieldOptionColor.ORANGE,
-      "#f1c40f": ProjectV2SingleSelectFieldOptionColor.YELLOW,
-    };
-
-    return colorMap[hexColor] || ProjectV2SingleSelectFieldOptionColor.GRAY;
-  };
-
-  // Format column type for display
-  const formatColumnType = (type: ColumnType): string => {
-    // Convert "TODO" to "Todo", "IN_PROGRESS" to "In Progress", etc.
-    return type
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
-  };
-
-  // Update the handleUpdateColumn function in your ProjectBoard component:
-
-  const handleUpdateColumn = async (columnId: string, name: string) => {
-    try {
-      // First get the current options for the column
-      const column = columns.find((col) => col.id === columnId);
-      if (!column) {
-        showToast("Column not found", "error");
-        return;
-      }
-
-      console.log("Updating column:", column);
-      console.log("Column ID format:", columnId);
-
-      // Prepare the options in the required format
-      const options = [
-        {
-          name: name, // Use the new name
-          color: ProjectV2SingleSelectFieldOptionColor.BLUE, // Default to blue
-          description: "",
-        },
-      ];
-
-      console.log("Options for update:", options);
-
-      // Make the update with the new name and options
-      // Pass the project ID from props
-      const updatedColumn = await columnService.updateColumn(
-        project.id, // Pass the project ID
-        columnId,
-        name,
-        options
-      );
-
-      if (!updatedColumn) {
-        showToast("Failed to update column", "error");
-        return;
-      }
-
-      // Update the local state
-      setColumns(columns.map((col) => (col.id === columnId ? updatedColumn : col)));
-      showToast("Column updated successfully", "success");
-    } catch (error) {
-      console.error("Error updating column:", error);
-      showToast("Error updating column", "error");
-    }
-  };
-
-  // Update the handleDeleteColumn function to use the GraphQL mutation
-  const handleDeleteColumn = async () => {
-    if (!columnToDelete) return;
+  const handleUpdateIssue = async (data: { title: string; body?: string }) => {
+    if (!issueToEdit) return;
 
     try {
-      // Check if there are issues in this column
-      const issuesInColumn = issues.filter((issue) => issue.columnId === columnToDelete.id);
-      if (issuesInColumn.length > 0) {
-        setIsDeleteConfirmOpen(false);
-        setIsEditLimitationModalOpen(true);
-        return;
-      }
-
-      const success = await columnService.deleteColumn(project.id, columnToDelete.id);
-      if (!success) {
-        showToast("Failed to delete column", "error");
-        return;
-      }
-
-      // Update the local state
-      setColumns(columns.filter((col) => col.id !== columnToDelete.id));
-      showToast("Column deleted successfully", "success");
+      // Update issue implementation would go here
+      // For now, just close the modal
+      setIsIssueEditModalOpen(false);
+      setIssueToEdit(null);
+      showToast("Issue updated successfully", "success");
     } catch (error) {
-      console.error("Error deleting column:", error);
-      showToast("Error deleting column", "error");
-    } finally {
-      setIsDeleteConfirmOpen(false);
-      setColumnToDelete(null);
+      console.error("Error updating issue:", error);
+      showToast("Failed to update issue", "error");
     }
   };
 
-  // Update the delete column button click handler
-  const openDeleteConfirmation = (column: Column) => {
-    setColumnToDelete(column);
-    setIsDeleteConfirmOpen(true);
+  const handleDeleteIssue = async () => {
+    if (!issueToDelete) return;
+
+    try {
+      // Delete issue implementation would go here
+      // For now, just close the modal
+      setIsIssueDeleteConfirmOpen(false);
+      setIssueToDelete(null);
+      showToast("Issue deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting issue:", error);
+      showToast("Failed to delete issue", "error");
+    }
   };
 
-  const renderIssuesView = () => {
-    if (initialLoading) {
+  const handleUpdateIssueLabels = async (selectedLabelIds: string[]) => {
+    if (!issueForLabels) return;
+
+    try {
+      const success = await projectStore.updateIssueLabels(issueForLabels.id, selectedLabelIds);
+
+      if (success) {
+        showToast("Labels updated successfully", "success");
+      } else {
+        showToast("Failed to update labels", "error");
+      }
+
+      setIsLabelSelectorModalOpen(false);
+      setIssueForLabels(null);
+    } catch (error) {
+      console.error("Error updating issue labels:", error);
+      showToast("Failed to update labels", "error");
+    }
+  };
+
+  const openLabelSelector = (issue: BoardIssue) => {
+    setIssueForLabels(issue);
+    setIsLabelSelectorModalOpen(true);
+  };
+
+  // Find the No Status column
+  const noStatusColumn = project?.columns?.find((column) => column.id === "no-status");
+
+  // Add a function to handle moving issues between columns
+  const moveIssue = (issueId: string, targetColumnId: string) => {
+    try {
+      // Find the issue in the project
+      const issue = project.issues?.find((i) => i.id === issueId);
+      if (!issue) {
+        showToast("Issue not found", "error");
+        return;
+      }
+
+      // Find the target column in the project
+      const targetColumn = project.columns?.find((c) => c.id === targetColumnId);
+      if (!targetColumn) {
+        showToast("Target column not found", "error");
+        return;
+      }
+
+      // For now, we'll update the issue locally in the UI
+      // In a real implementation, this would call a GraphQL mutation
+      issue.columnId = targetColumnId;
+      issue.columnName = targetColumn.name;
+
+      // Force a re-render by creating a new reference
+      const updatedIssues = [...(project.issues || [])];
+      project.issues = updatedIssues;
+
+      showToast(`Moved issue to ${targetColumn.name}`, "success");
+    } catch (error) {
+      console.error("Error moving issue:", error);
+      showToast("Failed to move issue", "error");
+    }
+  };
+
+  // Render all columns content
+  const renderBoardView = () => {
+    if (projectStore.loading) {
       return (
         <div className={styles.loadingContainer}>
           <Loading size="large" />
-          <p>Loading issues...</p>
+          <p>Loading project board...</p>
         </div>
       );
     }
 
-    return (
-      <div className={styles.issuesContainer}>
-        {columns.length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiColumns size={24} />
-            <h3>No columns found</h3>
-            <p>Add columns to organize your issues</p>
-            <Button onClick={() => setIsColumnModalOpen(true)}>Add Column</Button>
-          </div>
-        ) : issues.length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiList size={24} />
-            <h3>No issues found</h3>
-            <p>Create issues to track work in your project</p>
-            <Button onClick={() => setIsIssueModalOpen(true)}>Create Issue</Button>
-          </div>
-        ) : (
-          <div className={styles.boardContainer}>
-            {columns.map((column) => (
-              <div key={column.id} className={styles.column}>
-                <div className={styles.columnHeader}>
-                  <h3>{column.name}</h3>
-                  <div className={styles.columnActions}>
-                    <button
-                      className={styles.columnAction}
-                      onClick={() => {
-                        setColumnToEdit(column);
-                        setIsColumnEditModalOpen(true);
-                      }}
-                      title="Edit column"
-                    >
-                      <FiEdit size={16} />
-                    </button>
-                    <button
-                      className={styles.columnAction}
-                      onClick={() => openDeleteConfirmation(column)}
-                      title="Delete column"
-                    >
-                      <FiTrash2 size={14} />
-                    </button>
-                    <span className={styles.count}>
-                      {issues.filter((issue) => issue.columnId === column.id).length}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.issuesList}>
-                  {issues
-                    .filter((issue) => issue.columnId === column.id)
-                    .map((issue) => (
-                      <div key={issue.id} className={styles.issueCard}>
-                        <div className={styles.issueTitle}>{issue.title}</div>
-                        {issue.labels && issue.labels.length > 0 && (
-                          <div className={styles.issueLabels}>
-                            {issue.labels.map((label) => (
-                              <span
-                                key={label.id}
-                                className={styles.label}
-                                style={{ backgroundColor: label.color }}
-                              >
-                                {label.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderLabelsView = () => {
-    if (initialLoading) {
+    // Handle errors with our new ErrorBanner component
+    if (projectStore.error) {
       return (
-        <div className={styles.loadingContainer}>
-          <Loading size="large" />
-          <p>Loading labels...</p>
+        <div className={styles.errorContainer}>
+          <ErrorBanner error={projectStore.error} onRetry={() => window.location.reload()} />
         </div>
       );
     }
 
-    return (
-      <div className={styles.labelsContainer}>
-        {labels.length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiTag size={24} />
-            <h3>No labels found</h3>
-            <p>Create labels to categorize issues</p>
-            <Button onClick={() => setIsLabelModalOpen(true)}>Create Label</Button>
-          </div>
-        ) : (
-          <div className={styles.labelsList}>
-            {labels.map((label) => (
-              <div key={label.id} className={styles.labelItem}>
-                <span className={styles.labelColor} style={{ backgroundColor: label.color }}></span>
-                <span className={styles.labelName}>{label.name}</span>
-                {label.description && (
-                  <span className={styles.labelDescription}>{label.description}</span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderColumnsView = () => {
-    if (initialLoading) {
+    // Add check for missing project data
+    if (!project) {
       return (
-        <div className={styles.loadingContainer}>
-          <Loading size="large" />
-          <p>Loading columns...</p>
+        <div className={styles.emptyState}>
+          <FiAlertCircle size={48} />
+          <h3>Project Not Found</h3>
+          <p>The project data could not be loaded. Please try refreshing.</p>
         </div>
       );
     }
 
+    // Check if the project has columns directly
+    if (!project.columns || project.columns.length === 0) {
+      return (
+        <div className={styles.emptyState}>
+          <FiColumns size={48} />
+          <h3>No Columns Found</h3>
+          <p>
+            This GitHub Project doesn't have any Status field options. Please go to GitHub and add
+            column options to your Status field.
+          </p>
+        </div>
+      );
+    }
+
+    // Filter out columns that aren't "no-status"
+    const noStatusColumn = project.columns.find((col) => col.id === "no-status");
+
+    // Create a map to deduplicate columns by ID
+    const columnMap = new Map();
+    // Add No Status column first if it exists
+    if (noStatusColumn) {
+      columnMap.set(noStatusColumn.id, noStatusColumn);
+    }
+
+    // Add other columns, ensuring no duplicates
+    project.columns.forEach((column) => {
+      if (column.id !== "no-status" && !columnMap.has(column.id)) {
+        columnMap.set(column.id, column);
+      }
+    });
+
+    // Convert map back to array for rendering
+    const uniqueColumns = Array.from(columnMap.values());
+    const statusColumns = uniqueColumns.filter((col) => col.id !== "no-status");
+
+    // Return board view with columns
     return (
-      <div className={styles.columnsContainer}>
-        {columns.length === 0 ? (
-          <div className={styles.emptyState}>
-            <FiColumns size={24} />
-            <h3>No columns found</h3>
-            <p>Add columns to organize your issues</p>
-            <Button onClick={() => setIsColumnModalOpen(true)}>Add Column</Button>
-          </div>
-        ) : (
-          <div className={styles.columnsList}>
-            {columns.map((column) => (
-              <div key={column.id} className={styles.columnItem}>
-                <div className={styles.columnInfo}>
-                  <span className={styles.columnName}>{column.name}</span>
-                  <span className={styles.columnType}>{formatColumnType(column.type)}</span>
-                </div>
-                <div className={styles.columnItemActions}>
-                  <button
-                    className={styles.columnAction}
-                    onClick={() => {
-                      setColumnToEdit(column);
-                      setIsColumnEditModalOpen(true);
-                    }}
-                    title="Edit column"
-                  >
-                    <FiEdit size={16} />
-                  </button>
-                  <button
-                    className={styles.columnAction}
-                    onClick={() => openDeleteConfirmation(column)}
-                    title="Delete column"
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
-                </div>
+      <div className={styles.boardContainer}>
+        <div className={styles.boardColumns}>
+          {/* Render No Status column first */}
+          {noStatusColumn && (
+            <div key={noStatusColumn.id} className={styles.columnContainer}>
+              <div className={styles.columnHeader}>
+                <h3>{noStatusColumn.name}</h3>
               </div>
-            ))}
-          </div>
-        )}
+              <div className={styles.issuesContainer}>
+                {getIssuesWithoutStatus().map((issue) => (
+                  <GridCard
+                    key={issue.id}
+                    title={`#${issue.number}: ${issue.title}`}
+                    description={issue.body}
+                    actions={[
+                      {
+                        icon: <FiMove size={16} />,
+                        label: "Move",
+                        onClick: () => {
+                          // Show a dropdown for move options
+                          const columnOptions = [
+                            { id: "no-status", name: "No Status" },
+                            ...(project.columns || [])
+                              .filter((col) => col.id !== "no-status")
+                              .map((col) => ({ id: col.id, name: col.name })),
+                          ];
+
+                          const newColumn = window.prompt(
+                            "Enter column ID to move to:",
+                            columnOptions.length > 0 ? columnOptions[0].id : ""
+                          );
+
+                          if (newColumn) {
+                            // Implement move functionality here when it's available
+                            moveIssue(issue.id, newColumn);
+                          }
+                        },
+                      },
+                      {
+                        icon: <FiEdit2 size={16} />,
+                        label: "Edit",
+                        onClick: () => {
+                          setIssueToEdit(issue);
+                          setIsIssueEditModalOpen(true);
+                        },
+                      },
+                      {
+                        icon: <FiTag size={16} />,
+                        label: "Labels",
+                        onClick: () => openLabelSelector(issue),
+                      },
+                    ]}
+                    stats={
+                      issue.labels && issue.labels.length > 0
+                        ? [
+                            {
+                              icon: <FiTag size={14} />,
+                              text: (
+                                <div className={styles.labelContainer}>
+                                  {issue.labels.map((label) => (
+                                    <span
+                                      key={label.id}
+                                      className={styles.labelDot}
+                                      style={{
+                                        backgroundColor: label.color.startsWith("#")
+                                          ? label.color
+                                          : `#${label.color}`,
+                                      }}
+                                      title={label.name}
+                                    />
+                                  ))}
+                                </div>
+                              ),
+                            },
+                          ]
+                        : undefined
+                    }
+                  />
+                ))}
+                <GridCardAdd
+                  label="Add Issue"
+                  onClick={() => {
+                    setSelectedColumnForIssue("no-status");
+                    setIsIssueModalOpen(true);
+                  }}
+                  className={styles.addIssueCard}
+                  size="small"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Render columns from Status field */}
+          {statusColumns.map((column) => (
+            <div key={column.id} className={styles.columnContainer}>
+              <div className={styles.columnHeader}>
+                <h3>{column.name}</h3>
+              </div>
+              <div className={styles.issuesContainer}>
+                {getIssuesForColumn(column.id).map((issue) => (
+                  <GridCard
+                    key={issue.id}
+                    title={`#${issue.number}: ${issue.title}`}
+                    description={issue.body}
+                    actions={[
+                      {
+                        icon: <FiMove size={16} />,
+                        label: "Move",
+                        onClick: () => {
+                          // Show a dropdown for move options
+                          const columnOptions = [
+                            { id: "no-status", name: "No Status" },
+                            ...(project.columns || [])
+                              .filter((col) => col.id !== "no-status")
+                              .map((col) => ({ id: col.id, name: col.name })),
+                          ];
+
+                          const newColumn = window.prompt(
+                            "Enter column ID to move to:",
+                            columnOptions.length > 0 ? columnOptions[0].id : ""
+                          );
+
+                          if (newColumn) {
+                            // Implement move functionality here when it's available
+                            moveIssue(issue.id, newColumn);
+                          }
+                        },
+                      },
+                      {
+                        icon: <FiEdit2 size={16} />,
+                        label: "Edit",
+                        onClick: () => {
+                          setIssueToEdit(issue);
+                          setIsIssueEditModalOpen(true);
+                        },
+                      },
+                      {
+                        icon: <FiTag size={16} />,
+                        label: "Labels",
+                        onClick: () => openLabelSelector(issue),
+                      },
+                    ]}
+                    stats={
+                      issue.labels && issue.labels.length > 0
+                        ? [
+                            {
+                              icon: <FiTag size={14} />,
+                              text: (
+                                <div className={styles.labelContainer}>
+                                  {issue.labels.map((label) => (
+                                    <span
+                                      key={label.id}
+                                      className={styles.labelDot}
+                                      style={{
+                                        backgroundColor: label.color.startsWith("#")
+                                          ? label.color
+                                          : `#${label.color}`,
+                                      }}
+                                      title={label.name}
+                                    />
+                                  ))}
+                                </div>
+                              ),
+                            },
+                          ]
+                        : undefined
+                    }
+                  />
+                ))}
+                <GridCardAdd
+                  label="Add Issue"
+                  onClick={() => {
+                    setSelectedColumnForIssue(column.id);
+                    setIsIssueModalOpen(true);
+                  }}
+                  className={styles.addIssueCard}
+                  size="small"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -776,172 +958,69 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) 
   return (
     <div className={styles.projectBoard}>
       <div className={styles.header}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeView === "issues" ? styles.active : ""}`}
-            onClick={() => setActiveView("issues")}
-          >
-            <FiList />
-            <span>Issues</span>
-          </button>
-          <button
-            className={`${styles.tab} ${activeView === "labels" ? styles.active : ""}`}
-            onClick={() => setActiveView("labels")}
-          >
-            <FiTag />
-            <span>Labels</span>
-          </button>
-          <button
-            className={`${styles.tab} ${activeView === "columns" ? styles.active : ""}`}
-            onClick={() => setActiveView("columns")}
-          >
-            <FiColumns />
-            <span>Columns</span>
-          </button>
-        </div>
+        <h2>{project.name}</h2>
         <div className={styles.actions}>
           <Button
+            onClick={() => (projectStore.currentProject = project)}
             variant="secondary"
-            onClick={refreshBoard}
-            disabled={loading}
-            title="Refresh board"
+            disabled={projectStore.loading}
           >
-            <FiRefreshCw className={loading ? styles.spinning : ""} />
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              if (activeView === "issues") setIsIssueModalOpen(true);
-              if (activeView === "labels") setIsLabelModalOpen(true);
-              if (activeView === "columns") setIsColumnModalOpen(true);
-            }}
-          >
-            <FiPlus />
-            {activeView === "issues" && "Create Issue"}
-            {activeView === "labels" && "Create Label"}
-            {activeView === "columns" && "Add Column"}
+            <FiRefreshCw className={projectStore.loading ? styles.spinning : ""} />
+            Refresh
           </Button>
         </div>
       </div>
-
       <div className={styles.content}>
-        {activeView === "issues" && renderIssuesView()}
-        {activeView === "labels" && renderLabelsView()}
-        {activeView === "columns" && renderColumnsView()}
+        {/* Render board view directly */}
+        {renderBoardView()}
       </div>
 
-      {/* Column Modals */}
-      <Modal
-        isOpen={isColumnModalOpen}
-        onClose={() => setIsColumnModalOpen(false)}
-        title="Add Column"
-      >
-        <SimpleColumnForm
-          onSubmit={handleAddColumn}
-          onCancel={() => setIsColumnModalOpen(false)}
-          isLoading={isCreatingColumn}
-        />
-      </Modal>
-
-      <Modal
-        isOpen={isEditLimitationModalOpen}
-        onClose={() => setIsEditLimitationModalOpen(false)}
-        title="GitHub API Limitation"
-      >
-        <div className={styles.apiLimitationInfo}>
-          <div className={styles.infoHeader}>
-            <FiInfo size={24} className={styles.infoIcon} />
-            <h3>Column Deletion Limitation</h3>
-          </div>
-          <p>
-            Due to limitations in GitHub's Project V2 API, columns that contain issues cannot be
-            deleted directly.
-          </p>
-          <p>Before deleting a column, you need to:</p>
-          <ul>
-            <li>Move all issues to other columns</li>
-            <li>Then attempt deletion again</li>
-          </ul>
-          <div className={styles.actions}>
-            <Button variant="secondary" onClick={() => setIsEditLimitationModalOpen(false)}>
-              Close
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Other Modals */}
-      <Modal
-        isOpen={isLabelModalOpen}
-        onClose={() => setIsLabelModalOpen(false)}
-        title="Create Label"
-      >
-        <SimpleLabelForm
-          onSubmit={handleCreateLabel}
-          onCancel={() => setIsLabelModalOpen(false)}
-          isLoading={isCreatingLabel}
-        />
-      </Modal>
-
+      {/* Modals - Issue modal */}
       <Modal
         isOpen={isIssueModalOpen}
-        onClose={() => setIsIssueModalOpen(false)}
-        title="Create Issue"
+        onClose={() => {
+          setIsIssueModalOpen(false);
+          setIssueError(null);
+        }}
+        title="Create New Issue"
       >
         <SimpleIssueForm
           onSubmit={handleCreateIssue}
-          onCancel={() => setIsIssueModalOpen(false)}
-          isLoading={isCreatingIssue}
-          repositories={repositories}
+          isSubmitting={projectStore.loading}
+          repositories={projectStore.repositories}
+          targetColumn={selectedColumnForIssue}
+          onCancel={() => {
+            setIsIssueModalOpen(false);
+            setIssueError(null);
+          }}
+          error={issueError}
         />
       </Modal>
 
-      <Modal
-        isOpen={isColumnEditModalOpen}
-        onClose={() => {
-          setIsColumnEditModalOpen(false);
-          setColumnToEdit(null);
-        }}
-        title="Edit Column"
-      >
-        {columnToEdit && (
-          <SimpleColumnForm
-            onSubmit={(name, type) => {
-              console.log("Submitting column edit for:", columnToEdit.id, name);
-              handleUpdateColumn(columnToEdit.id, name);
-              setIsColumnEditModalOpen(false);
-              setColumnToEdit(null);
-            }}
-            onCancel={() => {
-              setIsColumnEditModalOpen(false);
-              setColumnToEdit(null);
-            }}
-            isLoading={false}
-            initialName={columnToEdit.name}
-            initialType={columnToEdit.type}
-          />
-        )}
-      </Modal>
-
-      {/* Confirmation Dialog */}
-      {isDeleteConfirmOpen && columnToDelete && (
+      {/* Other modals here */}
+      {isLabelSelectorModalOpen && (
         <Modal
-          isOpen={isDeleteConfirmOpen}
-          onClose={() => setIsDeleteConfirmOpen(false)}
-          title="Confirm Delete"
+          isOpen={isLabelSelectorModalOpen}
+          onClose={() => setIsLabelSelectorModalOpen(false)}
+          title="Manage Issue Labels"
         >
-          <ConfirmationDialog
-            title="Delete Column"
-            message={`Are you sure you want to delete the column "${columnToDelete.name}"?`}
-            warningMessage="This action cannot be undone."
-            confirmLabel="Delete"
-            onConfirm={handleDeleteColumn}
-            onCancel={() => setIsDeleteConfirmOpen(false)}
-            isSubmitting={false}
-            confirmVariant="danger"
+          <InfoBox variant="info" className={styles.labelInfoBox}>
+            <p>
+              Labels are managed through GitHub. Only labels from the repository where this issue is
+              created will be available. Any changes made here will be reflected in GitHub.
+            </p>
+          </InfoBox>
+          <SimpleLabelSelectorForm
+            onSubmit={handleUpdateIssueLabels}
+            onCancel={() => setIsLabelSelectorModalOpen(false)}
+            isLoading={projectStore.loading}
+            availableLabels={[]}
+            currentLabels={issueForLabels?.labels || []}
           />
         </Modal>
       )}
     </div>
   );
 });
+
+export default ProjectBoard;

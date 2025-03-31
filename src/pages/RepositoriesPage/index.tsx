@@ -33,24 +33,8 @@ const RepositoriesPage: React.FC = observer(() => {
 
   useEffect(() => {
     document.title = "Repositories | GitHub Project Manager";
-    fetchRepositories();
+    // No need to fetch repositories as they're already loaded during app initialization
   }, []);
-
-  const fetchRepositories = async () => {
-    try {
-      await repositoryStore.fetchUserRepositories();
-
-      // For each repository, fetch collaborators
-      const repos = repositoryStore.repositories;
-      for (const repo of repos) {
-        if (!repo.collaborators) {
-          repositoryStore.fetchRepositoryCollaborators(repo.owner.login, repo.name);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching repositories:", error);
-    }
-  };
 
   const handleCreateRepository = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +66,7 @@ const RepositoriesPage: React.FC = observer(() => {
   };
 
   const handleRefresh = () => {
-    fetchRepositories();
+    repositoryStore.fetchUserRepositories();
   };
 
   const handleRetry = () => {

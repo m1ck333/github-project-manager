@@ -20,11 +20,28 @@ import { repositoryStore } from "./index";
 export class ProjectStore {
   projects: Project[] = [];
   loading = false;
-  error: string | null = null;
+  error: Error | string | null = null;
   selectedProject: Project | null = null;
+  issuesVisible = true;
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  get columns() {
+    return this.selectedProject?.columns || [];
+  }
+
+  get issues() {
+    return this.selectedProject?.issues || [];
+  }
+
+  get currentProject() {
+    return this.selectedProject;
+  }
+
+  set currentProject(project: Project | null) {
+    this.selectedProject = project;
   }
 
   async fetchProjects() {
@@ -47,7 +64,7 @@ export class ProjectStore {
       return projects;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -75,7 +92,7 @@ export class ProjectStore {
       return newProject;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -108,7 +125,7 @@ export class ProjectStore {
       return updatedProject;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -143,7 +160,7 @@ export class ProjectStore {
       return success;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       return false;
@@ -169,7 +186,7 @@ export class ProjectStore {
       return columns;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -215,7 +232,7 @@ export class ProjectStore {
       return mockColumn;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -251,7 +268,7 @@ export class ProjectStore {
       return true;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -273,7 +290,7 @@ export class ProjectStore {
       return issues;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -304,7 +321,7 @@ export class ProjectStore {
       return issue;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -337,7 +354,7 @@ export class ProjectStore {
       return success;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -357,7 +374,12 @@ export class ProjectStore {
   }
 
   selectProject(projectId: string) {
-    this.selectedProject = this.projects.find((p) => p.id === projectId) || null;
+    const project = this.projects.find((p) => p.id === projectId);
+    if (project) {
+      this.selectedProject = project;
+    } else {
+      this.error = "Project not found";
+    }
   }
 
   clearSelectedProject() {
@@ -391,7 +413,7 @@ export class ProjectStore {
       return issue;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -420,7 +442,7 @@ export class ProjectStore {
       return label;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -464,7 +486,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -508,7 +530,7 @@ export class ProjectStore {
       }
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       throw error;
@@ -582,7 +604,7 @@ export class ProjectStore {
       return success;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       return false;
@@ -609,7 +631,7 @@ export class ProjectStore {
       return true;
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       return false;
@@ -636,10 +658,52 @@ export class ProjectStore {
       return project.repositories || [];
     } catch (error) {
       runInAction(() => {
-        this.error = (error as Error).message;
+        this.setError(error);
         this.loading = false;
       });
       return [];
+    }
+  }
+
+  /**
+   * Set projects directly from app initialization data
+   * This allows us to directly populate the projects from a single query
+   * rather than making multiple individual queries
+   */
+  setProjects(projects: Project[]) {
+    this.projects = projects;
+    this.loading = false;
+    this.error = null;
+  }
+
+  /**
+   * Set an error in the store, with special handling for rate limit errors
+   */
+  setError(error: unknown) {
+    if (error instanceof Error) {
+      // Check if this is a GraphQL error related to rate limiting
+      if (
+        error.message.includes("API rate limit") ||
+        error.message.includes("secondary rate limit")
+      ) {
+        // Create a dedicated RateLimitError for better handling
+        const rateLimitError = new Error("GitHub API rate limit exceeded. Please try again later.");
+        rateLimitError.name = "RateLimitError";
+        this.error = rateLimitError;
+      } else {
+        this.error = error;
+      }
+    } else if (typeof error === "string") {
+      if (error.includes("API rate limit") || error.includes("secondary rate limit")) {
+        // Create a dedicated RateLimitError for better handling
+        const rateLimitError = new Error("GitHub API rate limit exceeded. Please try again later.");
+        rateLimitError.name = "RateLimitError";
+        this.error = rateLimitError;
+      } else {
+        this.error = error;
+      }
+    } else {
+      this.error = "An unknown error occurred";
     }
   }
 }

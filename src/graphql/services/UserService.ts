@@ -3,12 +3,34 @@
  *
  * Service class to handle GitHub user information and token validation.
  */
+import { gql } from "urql";
+
 import { env } from "@/config/env";
 import { GITHUB_URL } from "@/constants/github";
 import { OPERATIONS } from "@/constants/operations";
 
-import { GetViewerDocument, GetViewerQuery, User } from "../generated/graphql";
+import { User } from "../generated/graphql";
 import { executeNamedQuery } from "../operationUtils";
+
+// Define GetViewerDocument directly since it's not available in generated
+const GetViewerDocument = gql`
+  query GetViewer {
+    viewer {
+      id
+      login
+      avatarUrl
+    }
+  }
+`;
+
+// Define GetViewerQuery interface
+interface GetViewerQuery {
+  viewer: {
+    id: string;
+    login: string;
+    avatarUrl: string;
+  };
+}
 
 export interface GitHubUserProfile {
   id: string;

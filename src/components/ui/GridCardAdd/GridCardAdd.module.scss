@@ -24,6 +24,7 @@
     color: $primary-color;
     margin-top: $spacing-sm;
     font-weight: $font-weight-medium;
+    margin-bottom: 0;
   }
 }
 
@@ -39,5 +40,25 @@
 
   svg {
     color: $primary-color;
+  }
+}
+
+.small {
+  min-height: 40px;
+  height: 40px;
+  padding: 0.5rem;
+  flex-direction: row;
+  gap: 0.5rem;
+  border-width: 1px;
+
+  .addIcon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0;
+  }
+
+  p {
+    margin-top: 0;
+    font-size: 0.9rem;
   }
 }

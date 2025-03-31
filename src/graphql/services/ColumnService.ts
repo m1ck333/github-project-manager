@@ -4,112 +4,24 @@
  * Service class to handle all column-related operations.
  * Uses the GraphQL generated hooks and handles data transformation.
  */
-import { gql } from "urql";
-
 import { Column, ColumnFormData, ColumnType } from "../../types";
 import { client } from "../client";
+import { ProjectV2SingleSelectFieldOptionColor as GQLProjectV2SingleSelectFieldOptionColor } from "../generated/graphql";
+import {
+  AddColumnDocument,
+  DeleteColumnDocument,
+  UpdateColumnDocument,
+} from "../operations/operation-names";
 
-// ProjectV2SingleSelectFieldOptionColor enum
-export enum ProjectV2SingleSelectFieldOptionColor {
-  BLUE = "BLUE",
-  GRAY = "GRAY",
-  GREEN = "GREEN",
-  ORANGE = "ORANGE",
-  PINK = "PINK",
-  PURPLE = "PURPLE",
-  RED = "RED",
-  YELLOW = "YELLOW",
-}
+import { appInitializationService } from "./AppInitializationService";
 
-// Define GraphQL documents
-const GetColumnsDocument = gql`
-  query GetColumns($projectId: ID!) {
-    node(id: $projectId) {
-      ... on ProjectV2 {
-        fields(first: 20) {
-          nodes {
-            ... on ProjectV2SingleSelectField {
-              id
-              name
-              options {
-                id
-                name
-                color
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+// Type alias for compatibility
+type ProjectV2SingleSelectFieldOptionColorType = GQLProjectV2SingleSelectFieldOptionColor;
 
-const AddColumnDocument = gql`
-  mutation AddColumnToProject(
-    $fieldId: ID!
-    $name: String!
-    $color: ProjectV2SingleSelectFieldOptionColor!
-  ) {
-    updateProjectV2Field(
-      input: {
-        fieldId: $fieldId
-        singleSelectOptions: [{ name: $name, color: $color, description: "" }]
-      }
-    ) {
-      projectV2Field {
-        ... on ProjectV2SingleSelectField {
-          id
-          options {
-            id
-            name
-            color
-          }
-        }
-      }
-    }
-  }
-`;
-
-const UpdateColumnDocument = gql`
-  mutation UpdateColumn($fieldId: ID!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {
-    updateProjectV2Field(input: { fieldId: $fieldId, singleSelectOptions: $options }) {
-      projectV2Field {
-        ... on ProjectV2SingleSelectField {
-          id
-          name
-          options {
-            id
-            name
-            color
-          }
-        }
-      }
-    }
-  }
-`;
-
-const DeleteColumnDocument = gql`
-  mutation DeleteColumn($fieldId: ID!) {
-    deleteProjectV2Field(input: { fieldId: $fieldId }) {
-      clientMutationId
-    }
-  }
-`;
-
-// Type definitions for GraphQL responses
-interface ProjectFieldNode {
-  __typename?: string;
-  id?: string;
-  name?: string;
-  options?: Array<{
-    id: string;
-    name: string;
-    color?: string;
-  }>;
-}
-
-// Extended interface for Status field
-interface StatusFieldNode extends ProjectFieldNode {
+// Type for field update response
+interface SingleSelectField {
+  __typename?: "ProjectV2SingleSelectField";
+  id: string;
   name: string;
   options: Array<{
     id: string;
@@ -125,145 +37,46 @@ export class ColumnService {
   private client = client;
 
   /**
-   * Get columns for a project
+   * Get columns for a project - uses only appInitializationService
    */
   async getColumns(projectId: string): Promise<Column[]> {
-    const { data, error } = await this.client.query(GetColumnsDocument, { projectId }).toPromise();
-
-    if (error || !data?.node) {
-      console.error("Error fetching columns:", error);
-      return [];
-    }
-
-    // Check if we have fields and nodes
-    if (!data.node.fields?.nodes) {
-      return [];
-    }
-
-    // Find the Status field and extract its options
-    const statusField = data.node.fields.nodes.find((field: ProjectFieldNode) => {
-      if (!field) return false;
-      // Make sure the field is named "Status" and has options
-      return field.name === "Status" && Array.isArray(field.options);
-    }) as StatusFieldNode | undefined;
-
-    if (!statusField || !statusField.options) {
-      return [];
-    }
-
-    // Map options to our Column type
-    const columns = statusField.options.map(
-      (option: { id: string; name: string; color?: string }) => ({
-        id: option.id,
-        name: option.name,
-        type: this.mapNameToColumnType(option.name),
-      })
-    );
-
-    return columns;
+    return appInitializationService.getProjectColumns(projectId);
   }
 
   /**
-   * Add a new column (status field option) to a project
+   * Get the Status field ID for a project - uses only appInitializationService
    */
-  async addColumn(projectId: string, columnData: ColumnFormData): Promise<Column | null> {
-    try {
-      // First, get the status field ID
-      const statusFieldId = await this.getStatusFieldId(projectId);
-      if (!statusFieldId) {
-        console.error("Status field not found in project");
-        return null;
+  async getStatusFieldId(projectId: string): Promise<string | null> {
+    const columns = appInitializationService.getProjectColumns(projectId);
+    if (columns.length > 0) {
+      // Find the first column that has a fieldId
+      const columnWithFieldId = columns.find((column) => column.fieldId !== undefined);
+      if (columnWithFieldId && columnWithFieldId.fieldId) {
+        return columnWithFieldId.fieldId;
       }
+    }
+    return null;
+  }
 
-      // Get all existing columns/options
-      const existingColumns = await this.getColumns(projectId);
-
-      // Generate a color based on the column type
-      const color = this.getColorForColumnType(columnData.type);
-
-      // Create the new option to add
-      const newOption = {
-        name: columnData.name,
-        color: color,
-        description: "",
-      };
-
-      // Create an array with all existing options plus the new one
-      const allOptions = existingColumns.map((col) => ({
-        name: col.name,
-        color: this.getColorForColumnType(col.type),
-        description: "",
-      }));
-
-      // Add the new option
-      allOptions.push(newOption);
-
-      // Update the Status field with all options including the new one
-      const { data, error } = await this.client
-        .mutation(UpdateColumnDocument, {
-          fieldId: statusFieldId,
-          options: allOptions,
-        })
-        .toPromise();
-
-      if (error || !data?.updateProjectV2Field?.projectV2Field) {
-        console.error("Error creating column:", error);
-        return null;
-      }
-
-      const field = data.updateProjectV2Field.projectV2Field;
-      if (!field.options || field.options.length === 0) {
-        console.error("No options returned after creating column");
-        return null;
-      }
-
-      // Find the newly added option (should match our new name)
-      const newOptionFromResponse = field.options.find(
-        (opt: { id: string; name: string; color?: string }) => opt.name === columnData.name
+  /**
+   * Get a column option ID by name - uses only appInitializationService
+   */
+  async getColumnOptionId(
+    projectId: string,
+    statusFieldId: string,
+    columnName: string
+  ): Promise<string | null> {
+    const columns = appInitializationService.getProjectColumns(projectId);
+    if (columns.length > 0) {
+      // Find the column by name
+      const matchingColumn = columns.find(
+        (column) => column.name.toLowerCase() === columnName.toLowerCase()
       );
-
-      if (!newOptionFromResponse) {
-        console.error("Could not find newly created column option");
-        return null;
+      if (matchingColumn) {
+        return matchingColumn.id;
       }
-
-      return {
-        id: newOptionFromResponse.id,
-        name: newOptionFromResponse.name,
-        type: columnData.type,
-      };
-    } catch (err) {
-      console.error("Exception adding column:", err);
-      return null;
     }
-  }
-
-  /**
-   * Get the Status field ID for a project
-   */
-  private async getStatusFieldId(projectId: string): Promise<string | null> {
-    const { data, error } = await this.client.query(GetColumnsDocument, { projectId }).toPromise();
-
-    if (error || !data?.node) {
-      console.error("Error fetching project fields:", error);
-      return null;
-    }
-
-    if (!data.node.fields?.nodes) {
-      return null;
-    }
-
-    // Find the Status field
-    const statusField = data.node.fields.nodes.find((field: ProjectFieldNode) => {
-      if (!field) return false;
-      return field.name === "Status" && Array.isArray(field.options);
-    }) as StatusFieldNode | undefined;
-
-    if (!statusField) {
-      return null;
-    }
-
-    return statusField.id || null;
+    return null;
   }
 
   /**
@@ -289,34 +102,25 @@ export class ColumnService {
   /**
    * Get a color for a column type
    */
-  private getColorForColumnType(type: ColumnType): ProjectV2SingleSelectFieldOptionColor {
+  private getColorForColumnType(type: ColumnType): GQLProjectV2SingleSelectFieldOptionColor {
     switch (type) {
       case ColumnType.TODO:
-        return ProjectV2SingleSelectFieldOptionColor.BLUE;
+        return GQLProjectV2SingleSelectFieldOptionColor.Blue;
       case ColumnType.IN_PROGRESS:
-        return ProjectV2SingleSelectFieldOptionColor.YELLOW;
+        return GQLProjectV2SingleSelectFieldOptionColor.Yellow;
       case ColumnType.DONE:
-        return ProjectV2SingleSelectFieldOptionColor.GREEN;
+        return GQLProjectV2SingleSelectFieldOptionColor.Green;
       case ColumnType.BACKLOG:
-        return ProjectV2SingleSelectFieldOptionColor.PURPLE;
+        return GQLProjectV2SingleSelectFieldOptionColor.Purple;
       default:
-        return ProjectV2SingleSelectFieldOptionColor.GRAY;
+        return GQLProjectV2SingleSelectFieldOptionColor.Gray;
     }
   }
 
   /**
    * Update an existing column (status field)
    */
-  async updateColumn(
-    projectId: string,
-    columnId: string,
-    name: string,
-    options: Array<{
-      name: string;
-      color: ProjectV2SingleSelectFieldOptionColor;
-      description: string;
-    }>
-  ): Promise<Column | null> {
+  async updateColumn(projectId: string, columnId: string, name: string): Promise<Column | null> {
     try {
       // First, we need to get the actual Status field ID
       const statusFieldId = await this.getStatusFieldId(projectId);
@@ -347,6 +151,7 @@ export class ColumnService {
       const result = await this.client
         .mutation(UpdateColumnDocument, {
           fieldId: statusFieldId,
+          name: "Status",
           options: allOptions,
         })
         .toPromise();
@@ -357,13 +162,15 @@ export class ColumnService {
       }
 
       // Find our updated column in the response
-      const updatedField = result.data?.updateProjectV2Field?.projectV2Field;
-      if (!updatedField || !updatedField.options) {
+      const updatedField = result.data?.updateProjectV2Field?.projectV2Field as SingleSelectField;
+      if (!updatedField?.options) {
         console.error("No field data returned from update mutation");
         return null;
       }
 
-      const updatedOption = updatedField.options.find((opt) => opt.name === name);
+      const updatedOption = updatedField.options.find(
+        (opt: { id: string; name: string; color?: string }) => opt.name === name
+      );
       if (!updatedOption) {
         console.error("Could not find updated column in response");
         return null;
@@ -373,7 +180,6 @@ export class ColumnService {
         id: updatedOption.id,
         name: updatedOption.name,
         type: this.mapNameToColumnType(updatedOption.name),
-        options: [updatedOption],
       };
     } catch (error) {
       console.error("Error updating column:", error);
@@ -418,6 +224,7 @@ export class ColumnService {
       const { data, error } = await this.client
         .mutation(UpdateColumnDocument, {
           fieldId: statusFieldId,
+          name: "Status",
           options: remainingOptions,
         })
         .toPromise();
@@ -431,6 +238,82 @@ export class ColumnService {
     } catch (error) {
       console.error("Exception deleting column:", error);
       return false;
+    }
+  }
+
+  /**
+   * Add a new column (status field option) to a project
+   */
+  async addColumn(projectId: string, columnData: ColumnFormData): Promise<Column | null> {
+    try {
+      // First, get the status field ID
+      const statusFieldId = await this.getStatusFieldId(projectId);
+      if (!statusFieldId) {
+        console.error("Status field not found in project");
+        return null;
+      }
+
+      // Get all existing columns/options
+      const existingColumns = await this.getColumns(projectId);
+
+      // Generate a color based on the column type
+      const color = this.getColorForColumnType(columnData.type);
+
+      // Create the new option to add
+      const newOption = {
+        name: columnData.name,
+        color: color,
+        description: "",
+      };
+
+      // Create an array with all existing options plus the new one
+      const allOptions = existingColumns.map((col) => ({
+        name: col.name,
+        color: this.getColorForColumnType(col.type),
+        description: "",
+      }));
+
+      // Add the new option
+      allOptions.push(newOption);
+
+      // Update the Status field with all options including the new one
+      const { data, error } = await this.client
+        .mutation(UpdateColumnDocument, {
+          fieldId: statusFieldId,
+          name: "Status",
+          options: allOptions,
+        })
+        .toPromise();
+
+      if (error || !data?.updateProjectV2Field?.projectV2Field) {
+        console.error("Error creating column:", error);
+        return null;
+      }
+
+      const field = data.updateProjectV2Field.projectV2Field as SingleSelectField;
+      if (!field?.options || field.options.length === 0) {
+        console.error("No options returned after creating column");
+        return null;
+      }
+
+      // Find the newly added option (should match our new name)
+      const newOptionFromResponse = field.options.find(
+        (opt: { id: string; name: string; color?: string }) => opt.name === columnData.name
+      );
+
+      if (!newOptionFromResponse) {
+        console.error("Could not find newly created column option");
+        return null;
+      }
+
+      return {
+        id: newOptionFromResponse.id,
+        name: newOptionFromResponse.name,
+        type: columnData.type,
+      };
+    } catch (err) {
+      console.error("Exception adding column:", err);
+      return null;
     }
   }
 }

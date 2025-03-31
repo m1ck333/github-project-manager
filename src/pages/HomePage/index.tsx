@@ -7,11 +7,11 @@ import GitHubTokenWarning from "../../components/features/github/GitHubTokenWarn
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 import { useAppInitialization } from "../../hooks/useAppInitialization";
-import { userStore } from "../../store";
+import { userStore, projectStore, repositoryStore } from "../../store";
 
 import styles from "./HomePage.module.scss";
 
-const Home: React.FC = observer(() => {
+const HomePage: React.FC = observer(() => {
   const navigate = useNavigate();
   useAppInitialization();
 
@@ -21,6 +21,8 @@ const Home: React.FC = observer(() => {
   }, []);
 
   const hasToken = userStore.hasToken();
+  const projectCount = projectStore.projects.length;
+  const repositoryCount = repositoryStore.repositories.length;
 
   return (
     <Container className={styles.homePage}>
@@ -38,6 +40,7 @@ const Home: React.FC = observer(() => {
             className={styles.button}
           >
             <FiFolder className={styles.buttonIcon} /> View Projects
+            {projectCount > 0 && <span className={styles.counter}>{projectCount}</span>}
           </Button>
           <Button
             variant="secondary"
@@ -46,6 +49,7 @@ const Home: React.FC = observer(() => {
             className={styles.button}
           >
             <FiGithub className={styles.buttonIcon} /> View Repositories
+            {repositoryCount > 0 && <span className={styles.counter}>{repositoryCount}</span>}
           </Button>
         </div>
       </div>
@@ -53,4 +57,4 @@ const Home: React.FC = observer(() => {
   );
 });
 
-export default Home;
+export default HomePage;

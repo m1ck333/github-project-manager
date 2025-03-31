@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import { GitHubUserProfile, TokenValidationResult, userService } from "../graphql/services";
+import { UserProfile } from "../types";
 
 export class UserStore {
   userProfile: GitHubUserProfile | null = null;
@@ -10,6 +11,20 @@ export class UserStore {
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  /**
+   * Set user profile from the app initialization data
+   */
+  setUserProfile(profile: UserProfile) {
+    // Create a GitHub user profile from the GraphQL profile
+    this.userProfile = {
+      id: profile.login, // Using login as ID if ID is not available
+      login: profile.login,
+      avatarUrl: profile.avatarUrl,
+      url: `https://github.com/${profile.login}`,
+    };
+    this.isInitialized = true;
   }
 
   getToken(): string | undefined {

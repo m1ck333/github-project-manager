@@ -133,8 +133,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .buttonIcon {
   margin-right: 8px;
+}
+
+.counter {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: $danger-color;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

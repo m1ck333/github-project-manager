@@ -1,0 +1,13 @@
+@import "../../../../styles/variables.scss";
+
+.githubLink {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $primary-600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -28,15 +28,11 @@ const Projects: React.FC = observer(() => {
 
   useEffect(() => {
     document.title = "Projects | Project Manager";
-
-    // Only fetch projects if they aren't already loaded and not currently loading
-    if (projects.length === 0 && !loading) {
-      projectStore.fetchProjects().catch(console.error);
-    }
+    // Projects are already loaded during app initialization, no need to fetch again
   }, []);
 
   const handleRetry = () => {
-    projectStore.fetchProjects();
+    projectStore.fetchProjects().catch(console.error);
   };
 
   const handleRefresh = () => {

@@ -1,7 +1,19 @@
 /**
- * Services Export File
+ * Service exports
  *
- * This file exports all services to provide a clean API for the rest of the application.
+ * NOTE: We should gradually transition from these services to using
+ * generated GraphQL hooks directly in our MobX stores.
+ *
+ * Benefits of using generated hooks:
+ * 1. Type safety with auto-generated types
+ * 2. Less code maintenance (no need to manually sync with GraphQL schema)
+ * 3. Better integration with React's rendering lifecycle
+ * 4. Automatic caching and state management
+ *
+ * Steps for transition:
+ * 1. Use AppInitializationService to load initial data
+ * 2. Import hooks from generated GraphQL files for mutations
+ * 3. Move business logic to MobX stores
  */
 
 // Export service classes
@@ -13,10 +25,9 @@ export { RepositoryService } from "./RepositoryService";
 export { UserService } from "./UserService";
 export type { GitHubUserProfile, TokenValidationResult } from "./UserService";
 export { LabelService } from "./LabelService";
-// These would be implemented and exported as the application grows
-// export { LabelService } from "./LabelService";
 
 // Create service instances
+import { appInitializationService } from "./AppInitializationService";
 import { CollaboratorService } from "./CollaboratorService";
 import { ColumnService } from "./ColumnService";
 import { IssueService } from "./IssueService";
@@ -32,7 +43,7 @@ export const issueService = new IssueService();
 export const collaboratorService = new CollaboratorService();
 export const repositoryService = new RepositoryService();
 export const labelService = new LabelService();
-export { userService };
+export { userService, appInitializationService };
 
 // These would be instantiated as the services are implemented
 // export const labelService = new LabelService();

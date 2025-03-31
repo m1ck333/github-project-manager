@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { FiGithub, FiTrash2, FiPlus } from "react-icons/fi";
 
 import { projectStore } from "../../../../store";
@@ -16,29 +16,16 @@ interface ProjectRepositoriesProps {
 }
 
 const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ projectId }) => {
-  const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [owner, setOwner] = useState("");
   const [repoName, setRepoName] = useState("");
 
-  const loadRepositories = useCallback(async () => {
-    setLoading(true);
-    try {
-      const repos = await projectStore.getProjectRepositories(projectId);
-      setRepositories(repos);
-      setError(null);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [projectId]);
-
-  useEffect(() => {
-    loadRepositories();
-  }, [loadRepositories]);
+  // Get the current project from the store
+  const project = projectStore.projects.find((p) => p.id === projectId);
+  // Use the repositories from the project
+  const repositories = project?.repositories || [];
 
   const handleAddRepository = async () => {
     if (!owner || !repoName) return;
@@ -47,7 +34,6 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
     try {
       const success = await projectStore.linkRepositoryToProject(projectId, owner, repoName);
       if (success) {
-        await loadRepositories();
         setOwner("");
         setRepoName("");
         setShowAddModal(false);
@@ -65,7 +51,6 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
     setLoading(true);
     try {
       await projectStore.unlinkRepositoryFromProject(projectId, repositoryId);
-      await loadRepositories();
     } catch (err) {
       setError((err as Error).message);
     } finally {

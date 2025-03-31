@@ -1,14 +1,21 @@
 /**
  * Project Service
  *
- * Service class to handle all project-related operations.
- * Uses the GraphQL generated hooks and handles data transformation.
+ * Handles all interactions with GitHub Projects V2
  */
 import { gql } from "urql";
 
 import { OPERATIONS } from "../../constants/operations";
-import { Project, ProjectFormData, Repository } from "../../types";
+import { Project, ProjectFormData } from "../../types";
 import { client } from "../client";
+import {
+  CreateProjectDocument,
+  UpdateProjectDocument,
+  DeleteProjectDocument,
+  LinkRepositoryToProjectDocument,
+} from "../operations/operation-names";
+
+import { appInitializationService } from "./AppInitializationService";
 
 // Define GraphQL document constants
 const GetProjectDocument = gql`
@@ -65,40 +72,195 @@ const GetProjectsDocument = gql`
   }
 `;
 
-const CreateProjectDocument = gql`
-  mutation CreateProject($input: CreateProjectV2Input!) {
-    createProjectV2(input: $input) {
-      projectV2 {
+// Import the new GetProjectDetails query
+const GetProjectDetailsDocument = gql`
+  query GetProjectDetails($projectId: ID!) {
+    node(id: $projectId) {
+      ... on ProjectV2 {
         id
         title
         shortDescription
         url
         createdAt
         updatedAt
+
+        # Project Fields including Status Field (columns)
+        fields(first: 20) {
+          nodes {
+            ... on ProjectV2Field {
+              id
+              name
+              dataType
+            }
+            ... on ProjectV2SingleSelectField {
+              id
+              name
+              dataType
+              options {
+                id
+                name
+                color
+              }
+            }
+          }
+        }
+
+        # Project Items (issues, PRs, etc.)
+        items(first: 100) {
+          nodes {
+            id
+            fieldValues(first: 20) {
+              nodes {
+                ... on ProjectV2ItemFieldTextValue {
+                  text
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldDateValue {
+                  date
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                }
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                  optionId
+                }
+              }
+            }
+            content {
+              ... on Issue {
+                id
+                title
+                number
+                body
+                url
+                repository {
+                  id
+                  name
+                }
+                labels(first: 10) {
+                  nodes {
+                    id
+                    name
+                    color
+                  }
+                }
+                assignees(first: 5) {
+                  nodes {
+                    login
+                    avatarUrl
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # Project Repositories
+        repositories(first: 10) {
+          nodes {
+            id
+            name
+            url
+            owner {
+              login
+              avatarUrl
+            }
+            # Repository Labels
+            labels(first: 50) {
+              nodes {
+                id
+                name
+                color
+                description
+              }
+            }
+            collaborators(first: 10) {
+              edges {
+                permission
+                node {
+                  login
+                  avatarUrl
+                  name
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 `;
 
-const UpdateProjectDocument = gql`
-  mutation UpdateProject($input: UpdateProjectV2Input!) {
-    updateProjectV2(input: $input) {
-      projectV2 {
+// Add the new simplified query
+const GetProjectColumnsAndIssuesDocument = gql`
+  query GetProjectColumnsAndIssues($projectId: ID!) {
+    node(id: $projectId) {
+      ... on ProjectV2 {
         id
         title
-        shortDescription
-        url
-        createdAt
-        updatedAt
-      }
-    }
-  }
-`;
 
-const DeleteProjectDocument = gql`
-  mutation DeleteProject($input: DeleteProjectV2Input!) {
-    deleteProjectV2(input: $input) {
-      clientMutationId
+        # Get Status field (which contains the columns)
+        field(name: "Status") {
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options {
+              id
+              name
+            }
+          }
+        }
+
+        # Get project items (issues)
+        items(first: 100) {
+          nodes {
+            id
+            # Get field values including the status value
+            fieldValues(first: 20) {
+              nodes {
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                    }
+                  }
+                  optionId
+                }
+              }
+            }
+            # Get the issue content
+            content {
+              ... on Issue {
+                id
+                title
+                number
+                body
+                url
+                labels(first: 10) {
+                  nodes {
+                    id
+                    name
+                    color
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
@@ -108,68 +270,26 @@ const DeleteProjectDocument = gql`
  */
 export class ProjectService {
   private client = client;
-  // Add a cache variable for projects
-  private projectsCache: Project[] | null = null;
-  private lastProjectsFetch: number = 0;
-  private CACHE_TTL = 60000; // 1 minute cache TTL in milliseconds
 
   /**
-   * Get a project by ID
+   * Get a project by ID - uses appInitializationService
    */
   async getProject(id: string): Promise<Project | null> {
-    const { data, error } = await this.client
-      .query(GetProjectDocument, { id }, { name: OPERATIONS.GET_PROJECT(id) })
-      .toPromise();
-
-    if (error || !data?.node) {
-      console.error("Error getting project by ID:", error);
-      return null;
+    const project = appInitializationService.getProjectById(id);
+    if (project) {
+      return project;
     }
 
-    const project = transformProjectData(data.node);
-    return transformProjectV2ToProject(project);
+    // If we couldn't find the project, return null
+    console.warn(`Project with ID ${id} not found in initialized data`);
+    return null;
   }
 
   /**
-   * Get all projects for the authenticated user
-   * Using cache to avoid refetching within the TTL
+   * Get all projects for the authenticated user - uses appInitializationService
    */
-  async getProjects(skipCache = false): Promise<Project[]> {
-    // Check if we have a valid cache
-    const now = Date.now();
-    if (!skipCache && this.projectsCache && now - this.lastProjectsFetch < this.CACHE_TTL) {
-      return this.projectsCache;
-    }
-
-    // Fetch projects if cache is invalid or skipCache is true
-    try {
-      const { data, error } = await this.client
-        .query(GetProjectsDocument, {}, { name: OPERATIONS.GET_PROJECTS })
-        .toPromise();
-
-      if (error) {
-        console.error("Error getting projects:", error);
-        return [];
-      }
-
-      // Process projects data
-      const projects =
-        data?.viewer?.projectsV2?.nodes
-          ?.filter((node: unknown) => node !== null)
-          .map((projectV2: Record<string, unknown>) => {
-            const project = transformProjectData(projectV2 as Record<string, unknown>);
-            return transformProjectV2ToProject(project);
-          }) || [];
-
-      // Update cache
-      this.projectsCache = projects;
-      this.lastProjectsFetch = now;
-
-      return projects;
-    } catch (error) {
-      console.error("Error in getProjects:", error);
-      return [];
-    }
+  async getProjects(_skipCache = false): Promise<Project[]> {
+    return appInitializationService.getProjects();
   }
 
   /**
@@ -289,77 +409,85 @@ export class ProjectService {
 
   /**
    * Link a repository to a project
+   * @param projectId The ID of the project
+   * @param repositoryOwner The owner of the repository
+   * @param repositoryName The name of the repository
+   * @returns A boolean indicating success
    */
-  async linkRepositoryToProject(projectId: string, owner: string, name: string): Promise<boolean> {
+  async linkRepositoryToProject(
+    projectId: string,
+    repositoryOwner: string,
+    repositoryName: string
+  ): Promise<boolean> {
     try {
-      // Define the mutation if not imported
-      const LinkRepositoryToProjectDocument = gql`
-        mutation LinkRepositoryToProject($projectId: ID!, $repositoryId: ID!) {
-          linkProjectV2ToRepository(input: { projectId: $projectId, repositoryId: $repositoryId }) {
-            clientMutationId
-            repository {
-              id
-              name
-              url
-            }
-          }
-        }
-      `;
-
-      // Need to lookup repo ID first by owner/name since API requires ID not string
-      const RepoIdLookupQuery = gql`
-        query GetRepoId($owner: String!, $name: String!) {
-          repository(owner: $owner, name: $name) {
-            id
-          }
-        }
-      `;
-
-      // First, get the repository's node ID (GraphQL ID)
-      const { data: repoData, error: repoError } = await this.client
-        .query(RepoIdLookupQuery, { owner, name }, { name: OPERATIONS.GET_REPO_ID(owner, name) })
-        .toPromise();
-
-      if (repoError || !repoData?.repository?.id) {
-        console.error("Error fetching repository ID:", repoError);
-        return false;
-      }
-
-      const repositoryId = repoData.repository.id;
-
-      // Now perform the link mutation with the correct ID
       const { data, error } = await this.client
-        .mutation(
-          LinkRepositoryToProjectDocument,
-          {
-            projectId,
-            repositoryId,
-          },
-          { name: OPERATIONS.LINK_REPOSITORY_TO_PROJECT(projectId, owner + "/" + name) }
-        )
+        .mutation(LinkRepositoryToProjectDocument, {
+          projectId,
+          repositoryName,
+          repositoryOwner,
+        })
         .toPromise();
 
-      if (error) {
-        console.error("Error linking repository to project:", error);
+      if (error || !data?.linkProjectV2ToRepository) {
         return false;
       }
 
-      // Check if the mutation was successful
-      if (data?.linkProjectV2ToRepository?.repository) {
-        console.log("Successfully linked repository to project:", data);
+      // Clear the projects cache to ensure fresh data next time
+      this.projectsCache = null;
 
-        // Invalidate projects cache to force refresh
-        this.projectsCache = null;
-
-        return true;
-      } else {
-        console.error("Failed to link repository to project:", data);
-        return false;
-      }
-    } catch (error: unknown) {
-      console.error("Error linking repository to project:", error);
+      return true;
+    } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Get project details - uses appInitializationService
+   */
+  async getProjectDetails(id: string): Promise<Project | null> {
+    const project = appInitializationService.getProjectById(id);
+    if (project) {
+      return project;
+    }
+
+    console.warn(`Project details for ID ${id} not found in initialized data`);
+    return null;
+  }
+
+  /**
+   * Get project columns and issues - uses appInitializationService
+   */
+  async getProjectColumnsAndIssues(id: string): Promise<{ columns: any[]; issues: any[] }> {
+    const project = appInitializationService.getProjectById(id);
+    if (project) {
+      return {
+        columns: project.columns || [],
+        issues: project.issues || [],
+      };
+    }
+
+    console.warn(`Project columns and issues for ID ${id} not found in initialized data`);
+    return {
+      columns: [],
+      issues: [],
+    };
+  }
+
+  /**
+   * Map column name to column type
+   */
+  private mapColumnTypeFromName(name: string): string {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes("todo") || lowerName.includes("to do")) {
+      return "TODO";
+    } else if (lowerName.includes("progress")) {
+      return "IN_PROGRESS";
+    } else if (lowerName.includes("done") || lowerName.includes("complete")) {
+      return "DONE";
+    } else if (lowerName.includes("backlog")) {
+      return "BACKLOG";
+    }
+    return "TODO"; // Default type
   }
 }
 

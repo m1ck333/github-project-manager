@@ -345,4 +345,13 @@ export class RepositoryStore {
   clearError() {
     this.error = null;
   }
+
+  /**
+   * Set repositories directly from app initialization data
+   */
+  setRepositories(repositories: Repository[]) {
+    this.repositories = repositories;
+    this.loading = false;
+    this.error = null;
+  }
 }

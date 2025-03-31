@@ -13,6 +13,7 @@ import { RepositoryCollaboratorFormData, Repository, RepositoryCollaborator } fr
 import { client } from "../client";
 import { Repository as GraphQLRepository } from "../generated/graphql";
 
+import { appInitializationService } from "./AppInitializationService";
 import { userService } from "./UserService";
 
 // Define GraphQL document constants manually
@@ -91,124 +92,21 @@ const CreateRepositoryDocument = gql`
 `;
 
 /**
- * Service for managing GitHub repositories and their collaborators
+ * Service for interacting with GitHub repositories
  */
 export class RepositoryService {
-  private client = client;
-
-  // Helper for token validation
-  private get token(): string {
-    return userService.getToken() || "";
-  }
-
-  private async ensureValidToken(): Promise<void> {
-    return userService.ensureValidToken();
-  }
-
-  /**
-   * Map GraphQL repository to Repository type
-   */
-  private mapGraphQLRepositoryToRepository(repo: GraphQLRepository): Repository {
-    // Extract collaborators if they exist in the response
-    let collaborators: RepositoryCollaborator[] | undefined = undefined;
-
-    if (repo.collaborators?.nodes && repo.collaborators?.edges) {
-      const nodes = repo.collaborators.nodes.filter((node) => node !== null);
-      const edges = repo.collaborators.edges;
-
-      if (nodes.length > 0) {
-        collaborators = nodes.map((node, index) => ({
-          id: node.id,
-          login: node.login,
-          avatarUrl: node.avatarUrl,
-          permission: edges[index]?.permission || "read",
-        }));
-        console.log(`Mapped ${collaborators.length} collaborators for ${repo.name}`);
-      }
-    }
-
-    // Log linked projects if they exist, but don't add to returned object
-    // as the Property type doesn't include this yet
-    if (repo.projectsV2?.nodes && repo.projectsV2.nodes.length > 0) {
-      const linkedProjects = repo.projectsV2.nodes
-        .filter((node) => node !== null)
-        .map((node) => ({
-          id: node.id,
-          title: node.title,
-          number: node.number,
-          url: node.url,
-        }));
-
-      console.log(
-        `Repository ${repo.name} is linked to ${linkedProjects.length} projects:`,
-        linkedProjects.map((p) => p.title).join(", ")
-      );
-    }
-
-    return {
-      id: repo.id,
-      name: repo.name,
-      description: repo.description || undefined,
-      html_url: repo.url,
-      owner: {
-        login: repo.owner.login,
-        avatar_url: repo.owner.avatarUrl,
-      },
-      createdAt: repo.createdAt,
-      collaborators: collaborators,
-    };
-  }
-
   /**
    * Get a repository by owner and name
    */
-  async getRepository(owner: string, name: string): Promise<Repository | undefined> {
-    try {
-      // Validate token before proceeding
-      await this.ensureValidToken();
+  async getRepository(owner: string, name: string): Promise<Repository | null> {
+    return appInitializationService.getRepository(owner, name);
+  }
 
-      const result = await this.client.query(
-        GetRepositoryDocument,
-        {
-          owner,
-          name,
-        },
-        {
-          name: OPERATIONS.GET_REPOSITORY(owner, name),
-        }
-      );
-
-      // Check for client level errors
-      if (result.error) {
-        // Check if it's a NOT_FOUND error
-        if (
-          result.error.message.includes("NOT_FOUND") ||
-          result.error.message.includes("Could not resolve to a Repository")
-        ) {
-          return undefined;
-        }
-        throw new Error(result.error.message);
-      }
-
-      if (!result.data?.repository) {
-        return undefined;
-      }
-
-      return this.mapGraphQLRepositoryToRepository(result.data.repository as GraphQLRepository);
-    } catch (error) {
-      console.error("Error fetching repository:", error);
-
-      // Handle client level errors that might have NOT_FOUND info
-      if (
-        error instanceof Error &&
-        (error.message.includes("NOT_FOUND") ||
-          error.message.includes("Could not resolve to a Repository"))
-      ) {
-        return undefined;
-      }
-
-      throw error;
-    }
+  /**
+   * Get all repositories for the authenticated user
+   */
+  async getRepositories(): Promise<Repository[]> {
+    return appInitializationService.getRepositories();
   }
 
   /**
@@ -216,7 +114,7 @@ export class RepositoryService {
    */
   async getRepositoryCollaborators(owner: string, name: string): Promise<RepositoryCollaborator[]> {
     try {
-      await this.ensureValidToken();
+      await userService.ensureValidToken();
 
       // Define GetRepoCollaborators as a GraphQL query
       const GetRepoCollaboratorsDocument = gql`
@@ -248,7 +146,7 @@ export class RepositoryService {
       }
 
       // Use GraphQL for collaborators to maintain consistency with other operations
-      const { data, error } = await this.client
+      const { data, error } = await client
         .query(
           GetRepoCollaboratorsDocument,
           { owner, name },
@@ -297,7 +195,7 @@ export class RepositoryService {
     collaboratorData: RepositoryCollaboratorFormData
   ): Promise<boolean> {
     try {
-      await this.ensureValidToken();
+      await userService.ensureValidToken();
 
       // First, get the repository ID
       const repository = await this.getRepository(repositoryOwner, repositoryName);
@@ -312,7 +210,7 @@ export class RepositoryService {
       const response = await fetch(url, {
         method: "PUT",
         headers: {
-          Authorization: `token ${this.token}`,
+          Authorization: `token ${userService.getToken() || ""}`,
           Accept: "application/vnd.github.v3+json",
         },
         body: JSON.stringify({ permission }),
@@ -335,58 +233,6 @@ export class RepositoryService {
   }
 
   /**
-   * Get repositories for the current user
-   */
-  async getUserRepositories(): Promise<Repository[]> {
-    try {
-      await this.ensureValidToken();
-
-      const { data, error } = await this.client
-        .query(GetUserRepositoriesDocument, {}, { name: OPERATIONS.GET_USER_REPOSITORIES })
-        .toPromise();
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data || !data.viewer || !data.viewer.repositories || !data.viewer.repositories.nodes) {
-        return [];
-      }
-
-      // Repository node type for type-safety
-      interface RepoNode {
-        id: string;
-        name: string;
-        description: string | null;
-        url: string;
-        createdAt: string;
-        owner: {
-          login: string;
-          avatarUrl: string;
-        };
-      }
-
-      // Map GraphQL data to our app's Repository type
-      return data.viewer.repositories.nodes
-        .filter((node: RepoNode | null): node is RepoNode => node !== null)
-        .map((repo: RepoNode) => ({
-          id: repo.id,
-          name: repo.name,
-          description: repo.description || undefined,
-          html_url: repo.url,
-          owner: {
-            login: repo.owner.login,
-            avatar_url: repo.owner.avatarUrl,
-          },
-          createdAt: repo.createdAt,
-        }));
-    } catch (error) {
-      console.error("Error fetching user repositories:", error);
-      throw error;
-    }
-  }
-
-  /**
    * Create a new repository
    */
   async createRepository(
@@ -395,13 +241,13 @@ export class RepositoryService {
     visibility: "PUBLIC" | "PRIVATE" = "PRIVATE"
   ): Promise<Repository | undefined> {
     try {
-      await this.ensureValidToken();
+      await userService.ensureValidToken();
 
       // Map visibility strings to GraphQL enum values
       const visibilityValue = visibility === "PRIVATE" ? "PRIVATE" : "PUBLIC";
 
       // Use GraphQL mutation to create repository
-      const { data, error } = await this.client
+      const { data, error } = await client
         .mutation(
           CreateRepositoryDocument,
           {
@@ -449,14 +295,14 @@ export class RepositoryService {
     username: string
   ): Promise<boolean> {
     try {
-      await this.ensureValidToken();
+      await userService.ensureValidToken();
 
       const url = `${GITHUB_API_URL}/repos/${repositoryOwner}/${repositoryName}/collaborators/${username}`;
 
       const response = await fetch(url, {
         method: "DELETE",
         headers: {
-          Authorization: `token ${this.token}`,
+          Authorization: `token ${userService.getToken() || ""}`,
           Accept: "application/vnd.github.v3+json",
         },
       });
@@ -477,7 +323,7 @@ export class RepositoryService {
    */
   async deleteRepository(owner: string, name: string): Promise<boolean> {
     try {
-      await this.ensureValidToken();
+      await userService.ensureValidToken();
 
       // Use the REST API to delete the repository
       const url = `${GITHUB_API_URL}/repos/${owner}/${name}`;
@@ -485,7 +331,7 @@ export class RepositoryService {
       const response = await fetch(url, {
         method: "DELETE",
         headers: {
-          Authorization: `token ${this.token}`,
+          Authorization: `token ${userService.getToken() || ""}`,
           Accept: "application/vnd.github.v3+json",
         },
       });

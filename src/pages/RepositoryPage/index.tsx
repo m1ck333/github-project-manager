@@ -11,6 +11,8 @@ import {
 } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
+import ViewOnGithub from "@/components/features/github/ViewOnGithubLink";
+
 import Container from "../../components/layout/Container";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -60,34 +62,34 @@ const RepositoryPage: React.FC = observer(() => {
 
   useEffect(() => {
     if (owner && name) {
-      // Use a single loading operation
-      repositoryStore.loading = true;
+      // Only fetch the repository if it's not already in the store
+      const existingRepo = repositoryStore.repositories.find(
+        (r) => r.owner.login === owner && r.name === name
+      );
 
-      // Fetch repository with collaborators in a single request
-      repositoryStore
-        .fetchRepository(owner, name)
-        .catch((error) => console.error("Error loading repository data:", error))
-        .finally(() => {
-          repositoryStore.loading = false;
-        });
+      if (!existingRepo) {
+        // Only fetch if we don't have the repository
+        repositoryStore.loading = true;
+        repositoryStore
+          .fetchRepository(owner, name)
+          .catch((error) => console.error("Error loading repository data:", error))
+          .finally(() => {
+            repositoryStore.loading = false;
+          });
+      } else {
+        // Update selected repository in store for consistent UI
+        repositoryStore.selectRepository(existingRepo);
+      }
     }
   }, [owner, name]);
 
-  // Separate effect to fetch projects only when modal is opened
+  // Separate effect to handle project selection for the modal
   useEffect(() => {
-    if (showLinkProjectModal) {
-      projectStore
-        .fetchProjects()
-        .then((projects) => {
-          // Auto-select the first project if available and none selected
-          if (projects && projects.length > 0) {
-            // Always select the first project when modal opens for better UX
-            setSelectedProjectId(projects[0].id);
-          }
-        })
-        .catch((error) => console.error("Error fetching projects:", error));
+    if (showLinkProjectModal && projectStore.projects.length > 0) {
+      // Select the first project by default
+      setSelectedProjectId(projectStore.projects[0].id);
     }
-  }, [showLinkProjectModal]); // Remove selectedProjectId dependency to prevent circular updates
+  }, [showLinkProjectModal, projectStore.projects]);
 
   useEffect(() => {
     document.title = `${name} | Repository`;
@@ -156,9 +158,6 @@ const RepositoryPage: React.FC = observer(() => {
         // Close modal and reset
         setShowLinkProjectModal(false);
         setSelectedProjectId("");
-
-        // Force project refresh (to ensure persistence)
-        await projectStore.fetchProjects();
       } else {
         showToast("Failed to link repository to project", "error");
       }
@@ -232,14 +231,7 @@ const RepositoryPage: React.FC = observer(() => {
             >
               <FiLink /> Link to Project
             </Button>
-            <a
-              href={repository.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.githubLink}
-            >
-              <FiGithub /> View on GitHub <FiExternalLink size={14} />
-            </a>
+            <ViewOnGithub link={repository.html_url} />
           </div>
         </div>
 

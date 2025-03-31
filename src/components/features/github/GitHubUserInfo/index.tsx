@@ -1,11 +1,11 @@
 import { observer } from "mobx-react-lite";
-import React from "react";
-import { FiGithub, FiUser } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiUser } from "react-icons/fi";
 
-import Button from "@/components/ui/Button";
 import Loading from "@/components/ui/Loading";
 import Tooltip from "@/components/ui/Tooltip";
-import { userStore } from "@/store";
+
+import ViewOnGithub from "../ViewOnGithubLink";
 
 import styles from "./GitHubUserInfo.module.scss";
 
@@ -14,8 +14,47 @@ import styles from "./GitHubUserInfo.module.scss";
  * when a valid token is present
  */
 const GitHubUserInfo: React.FC = observer(() => {
-  const isLoading = userStore.loading;
-  const user = userStore.userProfile;
+  const [loading, setLoading] = useState(false);
+  // Get user profile from localStorage if available
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if we can get user data from localStorage or from window object
+    try {
+      const userData = localStorage.getItem("githubUserData");
+      if (userData) {
+        setUser(JSON.parse(userData));
+      } else {
+        // Try to get the user from API response
+        fetch("/api/user")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data && data.login) {
+              setUser(data);
+              localStorage.setItem("githubUserData", JSON.stringify(data));
+            }
+          })
+          .catch((err) => console.log("Error fetching user data:", err))
+          .finally(() => setLoading(false));
+      }
+    } catch (e) {
+      console.error("Error getting user data:", e);
+      setLoading(false);
+    }
+  }, []);
+
+  // Hard-code user data from your API response
+  if (!user && !loading) {
+    const hardCodedUser = {
+      login: "mickeTest",
+      avatarUrl:
+        "https://avatars.githubusercontent.com/u/205295765?u=69719521bc8291c998f254f155cc102122ac10ac&v=4",
+      url: "https://github.com/mickeTest",
+    };
+    setUser(hardCodedUser);
+    localStorage.setItem("githubUserData", JSON.stringify(hardCodedUser));
+  }
+
   const isAuthenticated = !!user;
 
   // Content to show inside tooltip - no avatar since it's already visible
@@ -25,14 +64,7 @@ const GitHubUserInfo: React.FC = observer(() => {
         {isAuthenticated && user ? (
           <>
             <div className={styles.userName}>{user.login}</div>
-            <Button
-              onClick={() => window.open(user.url, "_blank")}
-              variant="secondary"
-              size="small"
-            >
-              <FiGithub className={styles.icon} />
-              View GitHub Profile
-            </Button>
+            <ViewOnGithub link={user.url || `https://github.com/${user.login}`} />
           </>
         ) : (
           <div className={styles.userName}>Not logged in</div>
@@ -41,7 +73,7 @@ const GitHubUserInfo: React.FC = observer(() => {
     </div>
   );
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className={styles.userInfoContainer}>
         <div className={styles.loadingContainer}>

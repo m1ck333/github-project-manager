@@ -15,6 +15,7 @@ export interface Project {
     avatar_url: string;
   };
   columns?: Column[];
+  issues?: BoardIssue[];
   collaborators?: Collaborator[];
   repositories?: Repository[];
 }
@@ -30,6 +31,8 @@ export interface Column {
   id: string;
   name: string;
   type: ColumnType;
+  fieldId?: string;
+  fieldName?: string;
   options?: Array<{
     id: string;
     name: string;
@@ -141,3 +144,6 @@ export interface RepositoryCollaboratorFormData {
   username: string;
   permission: "read" | "triage" | "write" | "maintain" | "admin";
 }
+
+// Export app initialization types
+export * from "./app-initialization";

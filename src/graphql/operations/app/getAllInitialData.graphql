@@ -1,0 +1,187 @@
+query GetAllInitialData {
+  # Get current user profile
+  viewer {
+    login
+    name
+    avatarUrl
+    bio
+    location
+    company
+    email
+    websiteUrl
+    twitterUsername
+
+    # Get all repositories owned by the user
+    repositories(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        name
+        nameWithOwner
+        description
+        url
+        visibility
+        isPrivate
+        isArchived
+        createdAt
+        updatedAt
+        owner {
+          login
+          avatarUrl
+        }
+        # Repository Labels
+        labels(first: 100) {
+          nodes {
+            id
+            name
+            color
+            description
+          }
+        }
+        # Repository Collaborators
+        collaborators(first: 20) {
+          edges {
+            permission
+            node {
+              id
+              login
+              name
+              avatarUrl
+            }
+          }
+        }
+      }
+    }
+
+    # Get all projects owned by the user
+    projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        title
+        number
+        shortDescription
+        closed
+        url
+        createdAt
+        updatedAt
+
+        # Project Fields including Status Field (columns)
+        fields(first: 50) {
+          nodes {
+            # All fields
+            ... on ProjectV2FieldCommon {
+              id
+              name
+              dataType
+            }
+            # Specifically for columns (Status field)
+            ... on ProjectV2SingleSelectField {
+              id
+              name
+              dataType
+              options {
+                id
+                name
+                color
+              }
+            }
+          }
+        }
+
+        # Project Items (issues, PRs, etc.)
+        items(first: 100) {
+          nodes {
+            id
+            fieldValues(first: 50) {
+              nodes {
+                # Text values (descriptions, etc.)
+                ... on ProjectV2ItemFieldTextValue {
+                  text
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                      id
+                    }
+                  }
+                }
+                # Date values
+                ... on ProjectV2ItemFieldDateValue {
+                  date
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                      id
+                    }
+                  }
+                }
+                # Column values - this represents which column an item is in
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  optionId
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+            content {
+              ... on Issue {
+                id
+                title
+                number
+                body
+                state
+                url
+                createdAt
+                updatedAt
+                author {
+                  login
+                  avatarUrl
+                  url
+                }
+                repository {
+                  id
+                  name
+                  owner {
+                    login
+                  }
+                }
+                labels(first: 10) {
+                  nodes {
+                    id
+                    name
+                    color
+                    description
+                  }
+                }
+                assignees(first: 5) {
+                  nodes {
+                    id
+                    login
+                    avatarUrl
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # Project Repositories
+        repositories(first: 20) {
+          nodes {
+            id
+            name
+            nameWithOwner
+            url
+            owner {
+              login
+              avatarUrl
+            }
+          }
+        }
+      }
+    }
+  }
+}

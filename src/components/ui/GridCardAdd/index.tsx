@@ -7,13 +7,19 @@ interface GridCardAddProps {
   label: string;
   onClick: () => void;
   className?: string;
+  size?: "default" | "small";
 }
 
-const GridCardAdd: React.FC<GridCardAddProps> = ({ label, onClick, className }) => {
+const GridCardAdd: React.FC<GridCardAddProps> = ({
+  label,
+  onClick,
+  className,
+  size = "default",
+}) => {
   return (
-    <div className={`${styles.addCard} ${className || ""}`} onClick={onClick}>
+    <div className={`${styles.addCard} ${styles[size]} ${className || ""}`} onClick={onClick}>
       <div className={styles.addIcon}>
-        <FiPlus size={24} />
+        <FiPlus size={size === "small" ? 16 : 24} />
       </div>
       <p>{label}</p>
     </div>

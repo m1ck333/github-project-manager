@@ -1,47 +1,51 @@
 /**
- * This file maps old document constant names to new ones
- * to help with the refactoring transition.
+ * This file maps GraphQL document constants from the generated file
+ * to provide a clean API for the rest of the application.
  */
 import {
-  GetColumnsDocument,
-  GetProjectDocument,
-  GetProjectIssuesDocument,
-  GetProjectsDocument,
-  GetViewerDocument,
-  ProjectV2Roles,
-  ProjectV2FieldType,
+  GetAllInitialDataDocument,
+  UpdateProjectCollaboratorsDocument,
+  AddColumnToProjectDocument,
+  DeleteColumnDocument,
+  UpdateColumnDocument,
+  CreateIssueDocument,
   UpdateIssueStatusDocument,
-  UpdateProjectDocument,
   CreateProjectDocument,
   DeleteProjectDocument,
-  CreateIssueDocument,
-  UpdateProjectCollaboratorsDocument,
+  LinkRepositoryToProjectDocument,
+  UpdateProjectDocument,
+  AddRepositoryCollaboratorDocument,
+  CreateRepositoryDocument,
+  ProjectV2Roles,
+  ProjectV2FieldType,
 } from "../generated/graphql";
+
+// Export app document - keep only this GET operation
+export { GetAllInitialDataDocument };
 
 // Export project documents
 export {
-  GetProjectDocument,
-  GetProjectsDocument,
   CreateProjectDocument,
   UpdateProjectDocument,
   DeleteProjectDocument,
+  LinkRepositoryToProjectDocument,
 };
 
 // Export column documents
-export { GetColumnsDocument };
+export {
+  AddColumnToProjectDocument as AddColumnDocument,
+  DeleteColumnDocument,
+  UpdateColumnDocument,
+};
 
 // Export issue documents
-export { GetProjectIssuesDocument, UpdateIssueStatusDocument, CreateIssueDocument };
+export { CreateIssueDocument, UpdateIssueStatusDocument };
 
 // Export collaborator documents
-export { UpdateProjectCollaboratorsDocument };
+export { UpdateProjectCollaboratorsDocument, AddRepositoryCollaboratorDocument };
 
-// Export viewer document
-export { GetViewerDocument };
+// Export repository documents
+export { CreateRepositoryDocument };
 
 // Export enums
 export { ProjectV2Roles, ProjectV2FieldType };
-
-// Column Fields Fragment and Document Placeholders
-export const ColumnFieldsFragmentDoc = null;
-export const IssueFieldsFragmentDoc = null;
