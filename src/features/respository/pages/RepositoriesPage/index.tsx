@@ -3,17 +3,18 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
+import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
+import GridContainer from "@/common/components/composed/grid/GridContainer";
 import Container from "@/common/components/layout/Container";
 import Button from "@/common/components/ui/Button";
 import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
-import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
-import GridContainer from "@/common/components/composed/grid/GridContainer";
 import Input from "@/common/components/ui/Input";
 import Modal from "@/common/components/ui/Modal";
 import { useToast } from "@/common/components/ui/Toast";
 import RepositoryCard from "@/features/respository/components/RepositoryCard";
 import { repositoryStore } from "@/stores";
-import { Repository } from "@/types";
+
+import { Repository } from "../../../../core/types";
 
 import styles from "./RepositoriesPage.module.scss";
 

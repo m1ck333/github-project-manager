@@ -3,8 +3,8 @@ import { FiUsers, FiEdit, FiPower } from "react-icons/fi";
 
 import GridCard from "../../../../common/components/composed/grid/GridCard";
 import Loading from "../../../../common/components/ui/Loading";
+import { Repository } from "../../../../core/types";
 import { repositoryStore } from "../../../../stores";
-import { Repository } from "../../../../types";
 
 import styles from "./RepositoryCard.module.scss";
 

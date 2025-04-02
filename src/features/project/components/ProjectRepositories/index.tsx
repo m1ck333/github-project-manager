@@ -61,7 +61,7 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
       const { owner, name } = repository;
 
       // Call the actual method with owner and name
-      await projectStore.linkRepositoryToProject(projectId, owner.login, name);
+      await projectStore.linkRepositoryToProject(projectId, owner?.login || "", name);
 
       // Refresh project data
       await projectStore.fetchProjects();
@@ -97,14 +97,17 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
           repositories.map((repo) => (
             <div key={repo.id} className={styles.repositoryItem}>
               <div className={styles.repoInfo}>
-                <img
-                  src={repo.owner.avatar_url}
-                  alt={repo.owner.login}
-                  className={styles.ownerAvatar}
-                />
+                <div className={styles.repositoryAvatar}>
+                  {repo.owner && (
+                    <img
+                      src={`https://github.com/${repo.owner.login}.png`}
+                      alt={repo.owner.login}
+                    />
+                  )}
+                </div>
                 <div className={styles.repoDetails}>
                   <h4>
-                    {repo.owner.login}/{repo.name}
+                    {repo.owner?.login}/{repo.name}
                   </h4>
                   {repo.description && <p>{repo.description}</p>}
                 </div>

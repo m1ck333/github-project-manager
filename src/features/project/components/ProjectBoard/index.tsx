@@ -13,15 +13,15 @@ import {
 import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
 import { projectStore } from "@/stores";
 
-import Button from "../../../../common/components/ui/Button";
-import ErrorBanner from "../../../../common/components/ui/ErrorBanner";
 import GridCard from "../../../../common/components/composed/grid/GridCard";
 import GridCardAdd from "../../../../common/components/composed/grid/GridCardAdd";
+import Button from "../../../../common/components/ui/Button";
+import ErrorBanner from "../../../../common/components/ui/ErrorBanner";
 import InfoBox from "../../../../common/components/ui/InfoBox";
 import Loading from "../../../../common/components/ui/Loading";
 import Modal from "../../../../common/components/ui/Modal";
 import { useToast } from "../../../../common/components/ui/Toast";
-import { Project, Label, BoardIssue } from "../../../../types";
+import { Project, Label, BoardIssue } from "../../../../core/types";
 import MoveIssueModal from "../MoveIssueModal";
 
 import styles from "./ProjectBoard.module.scss";

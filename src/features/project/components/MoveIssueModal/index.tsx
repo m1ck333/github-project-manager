@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import Button from "../../../../common/components/ui/Button";
 import Modal from "../../../../common/components/ui/Modal";
-import { Column } from "../../../../types";
+import { Column } from "../../../../core/types";
 
 interface MoveIssueModalProps {
   isOpen: boolean;

@@ -1,4 +1,4 @@
-import { Project, Column, ColumnType, BoardIssue } from "../../../types";
+import { Project, Column, ColumnType, BoardIssue } from "../../types";
 
 // GraphQL response interfaces
 export interface GithubProjectData {
@@ -94,7 +94,7 @@ export function mapToProject(projectData: GithubProjectData, viewer: GithubViewe
     },
     owner: {
       login: viewer.login,
-      avatar_url: viewer.avatarUrl,
+      avatarUrl: viewer.avatarUrl,
     },
     columns,
     issues,

@@ -7,7 +7,7 @@ import {
   RemoveCollaboratorDocument,
   ProjectV2Collaborator,
 } from "../api/generated/graphql";
-import { CollaboratorFormData, CollaboratorRole, Project } from "../types";
+import { CollaboratorFormData, CollaboratorRole, Project } from "../core/types";
 
 import { appInitializationService } from "./app-init.service";
 

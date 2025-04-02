@@ -3,14 +3,15 @@ import React, { useEffect, useState } from "react";
 import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiLink } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
+import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import Container from "@/common/components/layout/Container";
 import Button from "@/common/components/ui/Button";
 import Input from "@/common/components/ui/Input";
 import Modal from "@/common/components/ui/Modal";
 import { useToast } from "@/common/components/ui/Toast";
-import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import { repositoryStore, projectStore } from "@/stores";
-import { Project } from "@/types";
+
+import { Project } from "../../../../core/types";
 
 import styles from "./RepositoryPage.module.scss";
 

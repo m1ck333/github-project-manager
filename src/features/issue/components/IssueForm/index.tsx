@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Button from "../../../../common/components/ui/Button";
 import Input from "../../../../common/components/ui/Input";
 import { useToast } from "../../../../common/components/ui/Toast";
+import { Label } from "../../../../core/types";
 import { projectStore } from "../../../../stores";
-import { Label } from "../../../../types";
 
 import styles from "./IssueForm.module.scss";
 

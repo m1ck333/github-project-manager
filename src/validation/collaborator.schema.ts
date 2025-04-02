@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CollaboratorRole } from "../types";
+import { CollaboratorRole } from "../core/types";
 
 /**
  * Validation schema for collaborator operations

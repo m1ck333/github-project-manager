@@ -2,7 +2,7 @@ import React from "react";
 import { FiGithub, FiEdit, FiTrash2 } from "react-icons/fi";
 
 import GridCard from "../../../../common/components/composed/grid/GridCard";
-import { Project } from "../../../../types";
+import { Project } from "../../../../core/types";
 
 import styles from "./ProjectCard.module.scss";
 
@@ -39,11 +39,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onD
   return (
     <GridCard
       title={project.name}
-      subtitle={project.owner.login}
+      subtitle={project.owner?.login || ""}
       description={project.description || "No description provided"}
       avatar={{
-        src: project.owner.avatar_url,
-        alt: project.owner.login,
+        src:
+          project.owner?.avatarUrl || `https://github.com/${project.owner?.login || "github"}.png`,
+        alt: project.owner?.login || "Owner",
       }}
       stats={[
         {

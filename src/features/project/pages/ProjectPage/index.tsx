@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { FiArrowLeft, FiUsers } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
+import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import Container from "@/common/components/layout/Container";
 import Button from "@/common/components/ui/Button";
-import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import { ProjectBoard } from "@/features/project/components/ProjectBoard";
 import ProjectRepositories from "@/features/project/components/ProjectRepositories";
 import { projectStore } from "@/stores";
@@ -84,7 +84,7 @@ const ProjectPage: React.FC = observer(() => {
             <FiArrowLeft /> Back to Projects
           </button>
           <div className={styles.actions}>
-            <ViewOnGithub link={project.url} />
+            <ViewOnGithub link={project.url || ""} />
             <Button
               variant="secondary"
               onClick={() => navigate(`/projects/${project.id}/collaborators`)}

@@ -1,8 +1,8 @@
 import React from "react";
 
-import { BoardIssue } from "../../../../types";
 import Button from "../../../../common/components/ui/Button";
 import ConfirmationDialog from "../../../../common/components/ui/ConfirmationDialog";
+import { BoardIssue } from "../../../../core/types";
 
 interface DeleteIssueConfirmationProps {
   isOpen: boolean;

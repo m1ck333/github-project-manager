@@ -1,6 +1,6 @@
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
 import { GithubRepositoryData, mapToRepository } from "../core/mappers/github/repository.mapper";
-import { Repository } from "../types";
+import { Repository } from "../core/types";
 
 import { graphQLClientService } from "./graphql-client.service";
 

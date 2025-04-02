@@ -14,8 +14,15 @@ import {
   AddProjectItemDocument,
   DeleteIssueDocument,
 } from "../api/operations/operation-names";
+import {
+  ColumnFormData,
+  Project,
+  ProjectFormData,
+  BoardIssue,
+  Label,
+  ColumnType,
+} from "../core/types";
 import { appInitializationService } from "../services/app-init.service";
-import { ColumnFormData, Project, ProjectFormData, BoardIssue, Label, ColumnType } from "../types";
 import { projectSchema, issueSchema, labelSchema, validateAndExecute } from "../validation";
 
 import { repositoryStore } from "./index";
@@ -129,7 +136,7 @@ export class ProjectStore {
           },
           owner: {
             login: userData?.login || "",
-            avatar_url: userData?.avatarUrl || "",
+            avatarUrl: userData?.avatarUrl || "",
           },
           columns: [],
           issues: [],

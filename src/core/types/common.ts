@@ -82,3 +82,20 @@ export interface ColumnFormData {
   name: string;
   type: ColumnType;
 }
+
+/**
+ * Collaborator role types
+ */
+export enum CollaboratorRole {
+  READ = "READ",
+  WRITE = "WRITE",
+  ADMIN = "ADMIN",
+}
+
+/**
+ * Form data for adding collaborators
+ */
+export interface CollaboratorFormData {
+  username: string;
+  role: CollaboratorRole;
+}

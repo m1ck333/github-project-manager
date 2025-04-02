@@ -28,8 +28,11 @@ export type { Repository, RepositoryCollaboratorFormData } from "./repository";
 export type {
   BoardIssue,
   Column,
-  ColumnType,
   ColumnFormData,
   Label,
   RepositoryCollaborator,
+  CollaboratorFormData,
 } from "./common";
+
+// Export enums directly (not as types)
+export { ColumnType, CollaboratorRole } from "./common";

@@ -80,7 +80,7 @@ const Projects: React.FC = observer(() => {
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (project.description &&
         project.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      project.owner.login.toLowerCase().includes(searchQuery.toLowerCase())
+      project.owner?.login.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
 

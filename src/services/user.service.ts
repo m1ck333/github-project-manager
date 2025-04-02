@@ -1,5 +1,5 @@
 import { GetViewerDocument } from "../api/operations/operation-names";
-import { UserProfile } from "../types";
+import { UserProfile } from "../core/types";
 
 import { graphQLClientService } from "./graphql-client.service";
 

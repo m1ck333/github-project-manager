@@ -11,9 +11,37 @@ import Modal from "@/common/components/ui/Modal";
 import { useToast } from "@/common/components/ui/Toast";
 import { collaboratorService } from "@/services";
 import { projectStore } from "@/stores";
-import { Collaborator, CollaboratorRole, CollaboratorFormData } from "@/types";
+
+import {
+  CollaboratorRole,
+  CollaboratorFormData,
+  RepositoryCollaborator,
+} from "../../../../core/types";
 
 import styles from "./CollaboratorsPage.module.scss";
+
+// Define Collaborator interface for this component
+interface Collaborator {
+  id: string;
+  username: string;
+  avatar: string;
+  role: CollaboratorRole;
+  isOrganization?: boolean;
+  isNote?: boolean;
+  isCurrentUser?: boolean;
+  isTeam?: boolean;
+}
+
+// Convert RepositoryCollaborator to Collaborator
+function mapToCollaborator(repoCollab: RepositoryCollaborator): Collaborator {
+  return {
+    id: repoCollab.id,
+    username: repoCollab.login,
+    avatar: repoCollab.avatarUrl,
+    role: repoCollab.permission.toUpperCase() as CollaboratorRole,
+    isCurrentUser: repoCollab.isCurrentUser,
+  };
+}
 
 const CollaboratorsPage: React.FC = observer(() => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -35,7 +63,7 @@ const CollaboratorsPage: React.FC = observer(() => {
 
       // Get collaborators
       if (projectStore.selectedProject?.collaborators) {
-        setCollaborators(projectStore.selectedProject.collaborators);
+        setCollaborators(projectStore.selectedProject.collaborators.map(mapToCollaborator));
       }
 
       setIsLoading(false);
@@ -57,7 +85,7 @@ const CollaboratorsPage: React.FC = observer(() => {
 
       // Refresh collaborators
       if (projectStore.selectedProject?.collaborators) {
-        setCollaborators(projectStore.selectedProject.collaborators);
+        setCollaborators(projectStore.selectedProject.collaborators.map(mapToCollaborator));
       }
 
       showToast(`Added ${data.username} as collaborator`, "success");
@@ -76,7 +104,7 @@ const CollaboratorsPage: React.FC = observer(() => {
 
         // Refresh collaborators
         if (projectStore.selectedProject?.collaborators) {
-          setCollaborators(projectStore.selectedProject.collaborators);
+          setCollaborators(projectStore.selectedProject.collaborators.map(mapToCollaborator));
         }
 
         showToast(`Removed ${username} from project`, "success");

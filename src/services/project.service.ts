@@ -4,7 +4,7 @@ import {
   GithubViewerData,
   mapToProject,
 } from "../core/mappers/github/project.mapper";
-import { Project, BoardIssue, Column } from "../types";
+import { Project, BoardIssue, Column } from "../core/types";
 
 import { graphQLClientService } from "./graphql-client.service";
 

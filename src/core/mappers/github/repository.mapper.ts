@@ -1,4 +1,4 @@
-import { Repository, RepositoryCollaborator } from "../../../types";
+import { Repository, RepositoryCollaborator } from "../../types";
 
 // GraphQL response interfaces
 export interface GithubRepositoryData {

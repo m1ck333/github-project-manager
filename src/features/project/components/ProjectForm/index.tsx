@@ -2,10 +2,10 @@ import React, { useState } from "react";
 
 import Input from "@/common/components/ui/Input";
 
-import { projectStore } from "../../../../stores";
-import { Project, ProjectFormData } from "../../../../types";
 import Button from "../../../../common/components/ui/Button";
 import { useToast } from "../../../../common/components/ui/Toast";
+import { Project, ProjectFormData } from "../../../../core/types";
+import { projectStore } from "../../../../stores";
 
 import styles from "./ProjectForm.module.scss";
 

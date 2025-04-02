@@ -1,8 +1,8 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import { env } from "../config/env";
+import { UserProfile } from "../core/types";
 import { userService } from "../services";
-import { UserProfile } from "../types";
 
 export interface TokenValidationResult {
   isValid: boolean;

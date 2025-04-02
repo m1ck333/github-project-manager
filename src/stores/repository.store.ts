@@ -7,8 +7,8 @@ import {
   AddRepositoryCollaboratorDocument,
   DeleteRepositoryDocument,
 } from "../api/operations/operation-names";
+import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../core/types";
 import { repositoryService } from "../services";
-import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../types";
 
 export class RepositoryStore {
   repositories: Repository[] = [];
