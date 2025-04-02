@@ -1,12 +1,12 @@
 import { ZodSchema } from "zod";
 
 /**
- * Validates data against a Zod schema before executing a GraphQL mutation
+ * Validates data against a Zod schema before executing a function
  *
  * @param schema The Zod schema to validate against
  * @param data The data to validate
- * @param mutationFn The mutation function to execute if validation passes
- * @returns The result of the mutation function, or throws a validation error
+ * @param mutationFn The function to execute if validation passes
+ * @returns The result of the function, or throws a validation error
  */
 export async function validateAndExecute<T, R>(
   schema: ZodSchema<T>,
@@ -23,6 +23,6 @@ export async function validateAndExecute<T, R>(
     throw new Error(JSON.stringify(formattedErrors));
   }
 
-  // If validation passes, execute the mutation
+  // If validation passes, execute the function
   return mutationFn(validationResult.data);
 }

@@ -1,4 +1,5 @@
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
+import { GithubRepositoryData, mapToRepository } from "../mappers/repositoryMapper";
 import { Repository } from "../types";
 
 import { graphQLClientService } from "./GraphQLClientService";
@@ -44,34 +45,7 @@ export class RepositoryService {
       .filter(Boolean)
       .map((repo) => {
         if (!repo) return null;
-
-        // Transform repository collaborators
-        const collaborators = (repo.collaborators?.edges || [])
-          .filter(Boolean)
-          .map((edge) => {
-            if (!edge || !edge.node) return null;
-            return {
-              id: edge.node.id,
-              login: edge.node.login,
-              avatarUrl: edge.node.avatarUrl,
-              permission: edge.permission || "READ",
-              isCurrentUser: edge.node.login === data.viewer.login,
-            };
-          })
-          .filter(Boolean);
-
-        return {
-          id: repo.id,
-          name: repo.name,
-          owner: {
-            login: repo.owner.login,
-            avatar_url: repo.owner.avatarUrl,
-          },
-          description: repo.description || undefined,
-          html_url: repo.url,
-          createdAt: repo.createdAt,
-          collaborators,
-        };
+        return mapToRepository(repo as unknown as GithubRepositoryData);
       })
       .filter(Boolean) as Repository[];
 

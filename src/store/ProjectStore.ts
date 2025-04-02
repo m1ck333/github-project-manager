@@ -16,8 +16,7 @@ import {
 } from "../api/operations/operation-names";
 import { appInitializationService } from "../services/AppInitializationService";
 import { ColumnFormData, Project, ProjectFormData, BoardIssue, Label, ColumnType } from "../types";
-import { projectSchema, issueSchema, labelSchema } from "../utils/validation";
-import { validateAndExecute } from "../utils/validationUtils";
+import { projectSchema, issueSchema, labelSchema, validateAndExecute } from "../validation";
 
 import { repositoryStore } from "./index";
 

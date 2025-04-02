@@ -1,48 +1,14 @@
 import { client } from "../api/client";
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import { Project, BoardIssue, Column, Repository } from "../types";
+import { GithubProjectData, GithubViewerData, mapToProject } from "../mappers/projectMapper";
+import { GithubRepositoryData, mapToRepository } from "../mappers/repositoryMapper";
+import { mapToUserProfile } from "../mappers/userMapper";
+import { Project, BoardIssue, Column } from "../types";
 import { AllAppData, UserProfile } from "../types/app-initialization";
 
 import { projectService } from "./ProjectService";
 import { repositoryService } from "./RepositoryService";
 import { userService } from "./UserService";
-
-// GraphQL response interfaces
-interface GithubRepositoryData {
-  id: string;
-  name: string;
-  owner: {
-    login: string;
-    avatarUrl: string;
-  };
-  description?: string | null;
-  url: string;
-  createdAt: string;
-  collaborators?: {
-    edges?: Array<{
-      node: {
-        id: string;
-        login: string;
-        avatarUrl: string;
-      };
-      permission?: string;
-    } | null> | null;
-  } | null;
-}
-
-interface GithubProjectData {
-  id: string;
-  title: string;
-  shortDescription?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  url: string;
-}
-
-interface GithubViewerData {
-  login: string;
-  avatarUrl: string;
-}
 
 /**
  * Service responsible for orchestrating the initialization of all application data
@@ -97,33 +63,25 @@ export class AppInitializationService {
       // Extract data from the viewer object which contains everything
       const viewer = data.viewer;
       if (viewer) {
-        // Set user profile
-        const userProfile: UserProfile = {
-          login: viewer.login,
-          name: viewer.name || null,
-          avatarUrl: viewer.avatarUrl,
-          bio: viewer.bio || null,
-          location: viewer.location || null,
-          company: viewer.company || null,
-          email: viewer.email || null,
-          websiteUrl: viewer.websiteUrl || null,
-          twitterUsername: viewer.twitterUsername || null,
-        };
+        // Set user profile using mapToUserProfile from userMapper
+        const userProfile = mapToUserProfile(viewer as GithubViewerData);
         userService.setUserProfile(userProfile);
 
-        // Set repositories - filter out null values and transform to Repository type
+        // Set repositories using mapToRepository from repositoryMapper
         if (viewer.repositories?.nodes) {
           const repositories = viewer.repositories.nodes
             .filter((node) => node !== null)
-            .map((node) => this.transformToRepository(node));
+            .map((node) => mapToRepository(node as unknown as GithubRepositoryData));
           repositoryService.setRepositories(repositories);
         }
 
-        // Set projects - filter out null values and transform to Project type
+        // Set projects using mapToProject from projectMapper
         if (viewer.projectsV2?.nodes) {
           const projects = viewer.projectsV2.nodes
             .filter((node) => node !== null)
-            .map((node) => this.transformToProject(node, viewer));
+            .map((node) =>
+              mapToProject(node as unknown as GithubProjectData, viewer as GithubViewerData)
+            );
           projectService.setProjects(projects);
         }
       }
@@ -136,58 +94,6 @@ export class AppInitializationService {
     } finally {
       this.isInitializing = false;
     }
-  }
-
-  /**
-   * Helper method to transform GitHub repository data to our Repository type
-   */
-  private transformToRepository(repoData: GithubRepositoryData): Repository {
-    return {
-      id: repoData.id,
-      name: repoData.name,
-      owner: {
-        login: repoData.owner.login,
-        avatar_url: repoData.owner.avatarUrl,
-      },
-      description: repoData.description || "",
-      html_url: repoData.url,
-      createdAt: repoData.createdAt,
-      collaborators:
-        repoData.collaborators?.edges?.filter(Boolean).map((edge) => ({
-          id: edge!.node.id,
-          login: edge!.node.login,
-          avatarUrl: edge!.node.avatarUrl,
-          permission: edge!.permission || "READ",
-        })) || [],
-    };
-  }
-
-  /**
-   * Helper method to transform GitHub project data to our Project type
-   */
-  private transformToProject(projectData: GithubProjectData, viewer: GithubViewerData): Project {
-    // Basic project data
-    return {
-      id: projectData.id,
-      name: projectData.title,
-      description: projectData.shortDescription || "",
-      createdAt: projectData.createdAt,
-      updatedAt: projectData.updatedAt,
-      url: projectData.url,
-      html_url: projectData.url,
-      createdBy: {
-        login: viewer.login,
-        avatarUrl: viewer.avatarUrl,
-      },
-      owner: {
-        login: viewer.login,
-        avatar_url: viewer.avatarUrl,
-      },
-      columns: [],
-      issues: [],
-      repositories: [],
-      collaborators: [],
-    };
   }
 
   /**
