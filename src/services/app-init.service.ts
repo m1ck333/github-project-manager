@@ -1,14 +1,17 @@
 import { client } from "../api/client";
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import { GithubProjectData, GithubViewerData, mapToProject } from "../mappers/projectMapper";
-import { GithubRepositoryData, mapToRepository } from "../mappers/repositoryMapper";
-import { mapToUserProfile } from "../mappers/userMapper";
-import { Project, BoardIssue, Column } from "../types";
-import { AllAppData, UserProfile } from "../core/types/app-initialization";
+import {
+  GithubProjectData,
+  GithubViewerData,
+  mapToProject,
+} from "../core/mappers/github/project.mapper";
+import { GithubRepositoryData, mapToRepository } from "../core/mappers/github/repository.mapper";
+import { mapToUserProfile } from "../core/mappers/github/user.mapper";
+import { AllAppData, UserProfile, Project, BoardIssue, Column } from "../core/types";
 
-import { projectService } from "./ProjectService";
-import { repositoryService } from "./RepositoryService";
-import { userService } from "./UserService";
+import { projectService } from "./project.service";
+import { repositoryService } from "./repository.service";
+import { userService } from "./user.service";
 
 /**
  * Service responsible for orchestrating the initialization of all application data

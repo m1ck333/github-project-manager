@@ -1,17 +1,13 @@
-import * as path from "path";
-
 import { CodegenConfig } from "@graphql-codegen/cli";
-import * as dotenv from "dotenv";
 
-import { GITHUB_GRAPHQL_API_URL } from "../constants/github";
+import { GITHUB_GRAPHQL_API_URL } from "@/common/constants/github";
+import { env } from "@/config/env";
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env.development") });
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+const token = env.githubToken;
 
-const token = process.env.VITE_GITHUB_TOKEN;
 if (!token) {
   console.warn(
-    "Warning: VITE_GITHUB_TOKEN environment variable is not set. Schema generation will likely fail."
+    "Warning: GitHub token environment variable is not set. Schema generation will likely fail."
   );
 }
 
@@ -30,7 +26,7 @@ const config: CodegenConfig = {
     "./src/api/operations/**/mutations/*.graphql",
   ],
   generates: {
-    "./src/types/github-schema.ts": {
+    "./src/api/schema/github-schema.ts": {
       plugins: ["typescript"],
       config: {
         skipTypename: false,

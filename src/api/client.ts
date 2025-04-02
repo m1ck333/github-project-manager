@@ -7,8 +7,8 @@
  */
 import { Client, fetchExchange } from "@urql/core";
 
+import { GITHUB_GRAPHQL_API_URL } from "../common/constants/github";
 import { env } from "../config/env";
-import { GITHUB_GRAPHQL_API_URL } from "../constants/github";
 
 // Create the client instance
 export const client = new Client({

@@ -1,5 +1,4 @@
 # Auto-generated files
-src/types/github-schema.ts
 src/graphql/generated/**/*
 
 # Build output
