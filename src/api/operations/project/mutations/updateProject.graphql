@@ -1,0 +1,12 @@
+mutation UpdateProject($input: UpdateProjectV2Input!) {
+  updateProjectV2(input: $input) {
+    projectV2 {
+      id
+      title
+      number
+      url
+      createdAt
+      updatedAt
+    }
+  }
+}

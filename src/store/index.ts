@@ -1,5 +1,7 @@
 import { createContext, useContext } from "react";
 
+import { appInitializationService } from "../services";
+
 import { ProjectStore } from "./ProjectStore";
 import { RepositoryStore } from "./RepositoryStore";
 import { UserStore } from "./UserStore";
@@ -29,11 +31,13 @@ const storeContext = createContext<RootStore>(rootStore);
 // Initialize all stores
 export const initializeStores = async (): Promise<void> => {
   try {
-    // Initialize user store first for authentication
-    await userStore.validateToken();
+    // Initialize all data through the app initialization service
+    const data = await appInitializationService.initialize();
 
-    // Then initialize other stores
-    await Promise.all([repositoryStore.fetchUserRepositories(), projectStore.fetchProjects()]);
+    // Update stores with the fetched data
+    userStore.setUserProfile(data.user);
+    repositoryStore.setRepositories(data.repositories);
+    projectStore.setProjects(data.projects);
   } catch (error) {
     console.error("Failed to initialize stores:", error);
   }

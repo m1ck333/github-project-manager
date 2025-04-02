@@ -1,49 +1,30 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-import { appInitializationService } from "../graphql/services/AppInitializationService";
-import { useStore } from "../store";
-
-// Track initialization across renders
-let globalInitialized = false;
+import { appInitializationService } from "../services";
+import { initializeStores } from "../store";
 
 /**
  * Hook to initialize all application data in a single request
  * This loads user profile, repositories, projects, and all related data
  */
 export function useAppInitialization() {
-  const [loading, setLoading] = useState(!globalInitialized);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(globalInitialized);
-
-  // Use a ref to track initialization state across renders
-  const initStartedRef = useRef(false);
-
-  // Get store references
-  const { userStore, repositoryStore, projectStore } = useStore();
+  const [initialized, setInitialized] = useState(false);
 
   // Initialize the application on mount
   useEffect(() => {
     const initialize = async () => {
       if (initialized) return;
 
-      // Set loading state
       setLoading(true);
+      setError(null);
 
       try {
-        // Only initialize if we have a token
-        if (!userStore.hasToken()) {
-          setLoading(false);
-          return;
-        }
+        // Initialize all stores via the service
+        await initializeStores();
 
-        // Fetch initialization data
-        const data = await appInitializationService.getAllInitialData();
-
-        // Set repositories and projects in their respective stores
-        repositoryStore.setRepositories(data.repositories);
-        projectStore.setProjects(data.projects);
-
-        // Set initialized flag
+        // If initialization is successful, mark as initialized
         setInitialized(true);
         setLoading(false);
       } catch (error) {
@@ -53,12 +34,9 @@ export function useAppInitialization() {
     };
 
     initialize();
-  }, [initialized, userStore]);
+  }, [initialized]);
 
   const retry = () => {
-    // Reset both local and global state
-    globalInitialized = false;
-    initStartedRef.current = false;
     setInitialized(false);
   };
 

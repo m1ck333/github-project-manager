@@ -1,13 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { client } from "../graphql/client";
-import { RepositoryPermission, RepositoryVisibility } from "../graphql/generated/graphql";
+import { client } from "../api/client";
+import { RepositoryPermission, RepositoryVisibility } from "../api/generated/graphql";
 import {
   CreateRepositoryDocument,
   AddRepositoryCollaboratorDocument,
   DeleteRepositoryDocument,
-} from "../graphql/operations/operation-names";
-import { appInitializationService } from "../graphql/services/AppInitializationService";
+} from "../api/operations/operation-names";
+import { appInitializationService, repositoryService } from "../services";
 import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../types";
 
 export class RepositoryStore {
@@ -28,9 +28,8 @@ export class RepositoryStore {
     this.error = null;
 
     try {
-      // Get repositories from appInitializationService
-      await appInitializationService.getAllInitialData();
-      const repositories = appInitializationService.getRepositories();
+      // Get repositories from repositoryService
+      const repositories = await repositoryService.fetchRepositories();
 
       runInAction(() => {
         this.repositories = repositories;
@@ -52,17 +51,16 @@ export class RepositoryStore {
     this.error = null;
 
     try {
-      // Always refresh data from API to ensure we have latest
-      await appInitializationService.getAllInitialData();
-      const repositories = appInitializationService.getRepositories();
+      // Fetch repositories using the repositoryService
+      await repositoryService.fetchRepositories();
 
       // Find the repository in the fetched repositories
-      const repository = repositories.find((r) => r.owner.login === owner && r.name === name);
+      const repository = repositoryService.getRepositoryByOwnerAndName(owner, name);
 
       if (repository) {
         runInAction(() => {
           // Update our local repositories with the refreshed list
-          this.repositories = repositories;
+          this.repositories = repositoryService.getRepositories();
 
           // Also update the selected repository
           this.selectRepository(repository);
@@ -119,12 +117,31 @@ export class RepositoryStore {
         .mutation(CreateRepositoryDocument, { input })
         .toPromise();
 
-      if (error || !data?.createRepository?.repository) {
+      interface CreateRepositoryResponse {
+        createRepository: {
+          repository: {
+            id: string;
+            name: string;
+            description: string | null;
+            url: string;
+            createdAt: string;
+            owner: {
+              login: string;
+              avatarUrl: string;
+            };
+          };
+        };
+      }
+
+      // Safe type assertion
+      const typedData = data as unknown as CreateRepositoryResponse;
+
+      if (error || !typedData?.createRepository?.repository) {
         throw new Error(error?.message || "Failed to create repository");
       }
 
       // Create repository directly from the mutation response data
-      const repoData = data.createRepository.repository;
+      const repoData = typedData.createRepository.repository;
       const newRepo: Repository = {
         id: repoData.id,
         name: repoData.name,
@@ -146,7 +163,7 @@ export class RepositoryStore {
 
       // Refresh all data from GitHub in the background
       // but don't wait for it or rely on it for the repository data
-      appInitializationService.getAllInitialData().catch(console.error);
+      repositoryService.fetchRepositories().catch(console.error);
 
       return newRepo;
     } catch (error) {
@@ -195,7 +212,7 @@ export class RepositoryStore {
       }
 
       // Refresh data to ensure our state is in sync
-      await appInitializationService.getAllInitialData();
+      await repositoryService.fetchRepositories();
 
       runInAction(() => {
         this.loading = false;
@@ -232,7 +249,7 @@ export class RepositoryStore {
     const fetchPromise = (async () => {
       try {
         // Ensure we have the latest data
-        await appInitializationService.getAllInitialData();
+        await repositoryService.fetchRepositories();
 
         // Find the repository in our store
         const repository = this.repositories.find(
@@ -248,8 +265,8 @@ export class RepositoryStore {
           return repository.collaborators;
         }
 
-        // Get the repositories from appInitializationService to get the collaborators
-        const repos = appInitializationService.getRepositories();
+        // Get the repositories from repositoryService to get the collaborators
+        const repos = repositoryService.getRepositories();
         const repoWithCollaborators = repos.find((r) => r.owner.login === owner && r.name === name);
 
         if (!repoWithCollaborators) {
@@ -382,10 +399,10 @@ export class RepositoryStore {
       });
 
       // Refresh all data to get the actual updated collaborators
-      await appInitializationService.getAllInitialData();
+      await repositoryService.fetchRepositories();
 
       // Get the updated repository
-      const updatedRepo = appInitializationService
+      const updatedRepo = repositoryService
         .getRepositories()
         .find((r) => r.owner.login === owner && r.name === repoName);
 
@@ -474,7 +491,7 @@ export class RepositoryStore {
       });
 
       // Refresh data to sync with server state
-      await appInitializationService.getAllInitialData();
+      await repositoryService.fetchRepositories();
       this.loading = false;
 
       return true;

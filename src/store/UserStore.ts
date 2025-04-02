@@ -1,9 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import { env } from "../config/env";
-import { client } from "../graphql/client";
-import { GetViewerDocument } from "../graphql/operations/operation-names";
-import { appInitializationService } from "../graphql/services/AppInitializationService";
+import { userService } from "../services";
 import { UserProfile } from "../types";
 
 export interface TokenValidationResult {
@@ -25,17 +23,23 @@ export class UserStore {
   }
 
   /**
-   * Set user profile from the app initialization data
+   * Set user profile data
    */
   setUserProfile(profile: UserProfile) {
     this.userProfile = profile;
     this.isInitialized = true;
   }
 
+  /**
+   * Get the current auth token
+   */
   getToken(): string | null {
     return env.githubToken;
   }
 
+  /**
+   * Check if the user has a token
+   */
   hasToken(): boolean {
     return !!env.githubToken;
   }
@@ -55,27 +59,22 @@ export class UserStore {
   }
 
   /**
-   * Fetch user profile directly from AppInitializationService
+   * Fetch user profile via userService
    */
-  async fetchUserProfile(forceRefresh = false) {
+  async fetchUserProfile() {
     this.loading = true;
     this.error = null;
 
     try {
-      // If we need to force refresh, we'll clear the cached data
-      if (forceRefresh) {
-        await appInitializationService.getAllInitialData();
-      }
-
-      const userData = appInitializationService.getUserProfile();
+      const userProfile = await userService.fetchBasicProfile();
 
       runInAction(() => {
-        this.userProfile = userData;
+        this.userProfile = userProfile;
         this.isInitialized = true;
         this.loading = false;
       });
 
-      return userData;
+      return userProfile;
     } catch (error) {
       runInAction(() => {
         this.error = error instanceof Error ? error.message : String(error);
@@ -116,13 +115,13 @@ export class UserStore {
     }
 
     try {
-      const { data, error } = await client.query(GetViewerDocument, {}).toPromise();
+      const isValid = await userService.verifyToken();
 
-      if (error) {
+      if (!isValid) {
         const result = {
           isValid: false,
           hasToken: true,
-          errorMessage: `GraphQL error: ${error.message}`,
+          errorMessage: "Token validation failed",
         };
 
         runInAction(() => {
@@ -133,23 +132,8 @@ export class UserStore {
         return result;
       }
 
-      if (!data || !data.viewer) {
-        const result = {
-          isValid: false,
-          hasToken: true,
-          errorMessage: "Token may not have correct permissions",
-        };
-
-        runInAction(() => {
-          this.validationResult = result;
-          this.loading = false;
-        });
-
-        return result;
-      }
-
-      // Get the complete user profile from app initialization service
-      await this.fetchUserProfile(forceRefresh);
+      // Fetch the complete user profile
+      await this.fetchUserProfile();
 
       const result = {
         isValid: true,

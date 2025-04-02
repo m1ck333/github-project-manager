@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { client } from "../graphql/client";
-import { ProjectV2SingleSelectFieldOptionColor } from "../graphql/generated/graphql";
+import { client } from "../api/client";
+import { ProjectV2SingleSelectFieldOptionColor } from "../api/generated/graphql";
 import {
   CreateProjectDocument,
   UpdateProjectDocument,
@@ -13,8 +13,8 @@ import {
   CreateLabelDocument,
   AddProjectItemDocument,
   DeleteIssueDocument,
-} from "../graphql/operations/operation-names";
-import { appInitializationService } from "../graphql/services/AppInitializationService";
+} from "../api/operations/operation-names";
+import { appInitializationService } from "../services/AppInitializationService";
 import { ColumnFormData, Project, ProjectFormData, BoardIssue, Label, ColumnType } from "../types";
 import { projectSchema, issueSchema, labelSchema } from "../utils/validation";
 import { validateAndExecute } from "../utils/validationUtils";
@@ -177,11 +177,24 @@ export class ProjectStore {
         // Use the generated mutation document
         const { data, error } = await client.mutation(UpdateProjectDocument, { input }).toPromise();
 
-        if (error || !data?.updateProjectV2?.projectV2) {
+        interface UpdateProjectResponse {
+          updateProjectV2: {
+            projectV2: {
+              id: string;
+              title: string;
+              updatedAt: string;
+              url: string;
+            };
+          };
+        }
+
+        const typedData = data as unknown as UpdateProjectResponse;
+
+        if (error || !typedData?.updateProjectV2?.projectV2) {
           throw new Error(error?.message || "Failed to update project");
         }
 
-        const projectData = data.updateProjectV2.projectV2;
+        const projectData = typedData.updateProjectV2.projectV2;
 
         // Find the existing project to preserve its relationships
         const existingProject = this.projects.find((p) => p.id === projectId);
@@ -439,11 +452,22 @@ export class ProjectStore {
             })
             .toPromise();
 
-          if (error || !data?.createIssue?.issue) {
+          interface CreateIssueResponse {
+            createIssue: {
+              issue: {
+                id: string;
+                number: number;
+              };
+            };
+          }
+
+          const typedIssueData = data as unknown as CreateIssueResponse;
+
+          if (error || !typedIssueData?.createIssue?.issue) {
             throw new Error(error?.message || "Failed to create issue");
           }
 
-          const issueId = data.createIssue.issue.id;
+          const issueId = typedIssueData.createIssue.issue.id;
 
           // Add the issue to the project
           const addInput = {
@@ -456,11 +480,21 @@ export class ProjectStore {
             .mutation(AddProjectItemDocument, { input: addInput })
             .toPromise();
 
-          if (addItemError || !addItemData?.addProjectV2ItemById?.item) {
+          interface AddItemResponse {
+            addProjectV2ItemById: {
+              item: {
+                id: string;
+              };
+            };
+          }
+
+          const typedAddItemData = addItemData as unknown as AddItemResponse;
+
+          if (addItemError || !typedAddItemData?.addProjectV2ItemById?.item) {
             throw new Error(addItemError?.message || "Failed to add issue to project");
           }
 
-          const projectItemId = addItemData.addProjectV2ItemById.item.id;
+          const projectItemId = typedAddItemData.addProjectV2ItemById.item.id;
 
           // If columnId is provided, update the issue status
           if (columnId) {
@@ -481,7 +515,7 @@ export class ProjectStore {
             issueId,
             title: validData.title,
             body: validData.description || "",
-            number: data.createIssue.issue.number,
+            number: typedIssueData.createIssue.issue.number,
             status: columnId ? this.getColumnNameById(columnId) : "TODO", // Default status for new issues
             columnId: columnId || "no-status",
             labels: [],
@@ -558,7 +592,17 @@ export class ProjectStore {
         })
         .toPromise();
 
-      if (error || !data?.updateProjectV2ItemFieldValue?.projectV2Item) {
+      interface UpdateIssueStatusResponse {
+        updateProjectV2ItemFieldValue: {
+          projectV2Item: {
+            id: string;
+          };
+        };
+      }
+
+      const typedStatusData = data as unknown as UpdateIssueStatusResponse;
+
+      if (error || !typedStatusData?.updateProjectV2ItemFieldValue?.projectV2Item) {
         throw new Error(error?.message || "Failed to update issue status");
       }
 
@@ -622,11 +666,24 @@ export class ProjectStore {
 
         const { data, error } = await client.mutation(CreateLabelDocument, { input }).toPromise();
 
-        if (error || !data?.createLabel?.label) {
+        interface CreateLabelResponse {
+          createLabel: {
+            label: {
+              id: string;
+              name: string;
+              color: string;
+              description: string | null;
+            };
+          };
+        }
+
+        const typedLabelData = data as unknown as CreateLabelResponse;
+
+        if (error || !typedLabelData?.createLabel?.label) {
           throw new Error(error?.message || "Failed to create label");
         }
 
-        const labelData = data.createLabel.label;
+        const labelData = typedLabelData.createLabel.label;
         const newLabel: Label = {
           id: labelData.id,
           name: labelData.name,

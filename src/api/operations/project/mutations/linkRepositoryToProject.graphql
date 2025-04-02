@@ -1,0 +1,5 @@
+mutation LinkRepositoryToProject($input: LinkProjectV2ToRepositoryInput!) {
+  linkProjectV2ToRepository(input: $input) {
+    clientMutationId
+  }
+}

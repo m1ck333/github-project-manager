@@ -1,0 +1,14 @@
+query GetUserProfile {
+  viewer {
+    id
+    login
+    name
+    avatarUrl
+    bio
+    location
+    company
+    email
+    websiteUrl
+    twitterUsername
+  }
+}

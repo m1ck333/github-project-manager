@@ -1,5 +1,0 @@
-mutation DeleteColumn($fieldId: ID!) {
-  deleteProjectV2Field(input: { fieldId: $fieldId }) {
-    clientMutationId
-  }
-}

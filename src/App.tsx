@@ -5,17 +5,11 @@ import { AppInitializer } from "./components/layout/AppInitializer";
 import ErrorBoundaryRoutes from "./components/layout/ErrorBoundaryRoutes";
 import Layout from "./components/layout/Layout";
 import { ToastProvider } from "./components/ui/Toast";
-import { StoreProvider, projectStore, repositoryStore, userStore } from "./store";
+import { StoreProvider, rootStore } from "./store";
 
 const App: React.FC = () => {
-  const stores = {
-    projectStore,
-    repositoryStore,
-    userStore,
-  };
-
   return (
-    <StoreProvider value={stores}>
+    <StoreProvider value={rootStore}>
       <BrowserRouter>
         <ToastProvider>
           <AppInitializer>

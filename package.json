@@ -16,8 +16,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss}\"",
     "fix": "npm run format && npm run lint:fix",
     "// ----------------- GraphQL -----------------": "",
-    "codegen": "graphql-codegen --config codegen.ts",
-    "codegen:watch": "graphql-codegen --config codegen.ts --watch",
+    "codegen": "graphql-codegen --config src/api/codegen.ts",
+    "codegen:watch": "graphql-codegen --config src/api/codegen.ts --watch",
     "// ----------------- Git Hooks -----------------": "",
     "prepare": "husky",
     "pre-commit": "lint-staged"

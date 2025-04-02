@@ -1,14 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import {
-  FiArrowLeft,
-  FiUser,
-  FiUserX,
-  FiUserPlus,
-  FiGithub,
-  FiExternalLink,
-  FiLink,
-} from "react-icons/fi";
+import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiLink } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
 import ViewOnGithub from "@/components/features/github/ViewOnGithubLink";
