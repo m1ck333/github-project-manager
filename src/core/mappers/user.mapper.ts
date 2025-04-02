@@ -1,4 +1,4 @@
-import { UserProfile } from "../../types/user";
+import { UserProfile } from "../types";
 
 export interface GithubViewerData {
   id?: string;

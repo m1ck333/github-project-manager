@@ -96,11 +96,6 @@ export class UserStore {
       return this.validationResult;
     }
 
-    // Initialize token from environment variable if it exists
-    if (env.githubToken && !localStorage.getItem("github_token")) {
-      localStorage.setItem("github_token", env.githubToken);
-    }
-
     const token = this.getToken();
 
     // No token to validate

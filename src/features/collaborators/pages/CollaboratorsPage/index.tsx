@@ -3,12 +3,15 @@ import React, { useEffect, useState } from "react";
 import { FiArrowLeft, FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
-import Container from "@/common/components/layout/Container";
+import BackButton from "@/common/components/composed/BackButton";
+import PageContainer from "@/common/components/layout/PageContainer";
 import Button from "@/common/components/ui/Button";
 import Input from "@/common/components/ui/Input";
 import Loading from "@/common/components/ui/Loading";
 import Modal from "@/common/components/ui/Modal";
 import { useToast } from "@/common/components/ui/Toast";
+import { ROUTES } from "@/common/constants/routes";
+import { EmptyCollaboratorsList } from "@/features/collaborators/components";
 import { collaboratorService } from "@/services";
 import { projectStore } from "@/stores";
 
@@ -74,7 +77,7 @@ const CollaboratorsPage: React.FC = observer(() => {
   }, [projectId]);
 
   const handleBack = () => {
-    navigate(`/projects/${projectId}`);
+    navigate(ROUTES.PROJECT_DETAIL(projectId));
   };
 
   const handleAddCollaborator = async (data: CollaboratorFormData) => {
@@ -114,133 +117,139 @@ const CollaboratorsPage: React.FC = observer(() => {
     }
   };
 
+  const project = projectStore.selectedProject;
+
+  // Define title actions for PageContainer
+  const titleActions = project && (
+    <Button variant="primary" onClick={() => setIsAddingCollaborator(true)}>
+      <FiPlus /> Add Collaborator
+    </Button>
+  );
+
   if (isLoading) {
     return (
-      <Container size="large" withPadding title="Collaborators">
-        <Loading size="large" fullPage text="Loading collaborators..." />
-      </Container>
+      <PageContainer
+        fluid={false}
+        title="Collaborators"
+        isLoading={true}
+        loadingMessage="Loading collaborators..."
+        backDestination="project"
+      >
+        <div />
+      </PageContainer>
     );
   }
 
   if (error) {
     return (
-      <Container size="large" withPadding title="Error">
-        <div className={styles.error}>{error}</div>
-      </Container>
+      <PageContainer fluid={false} title="Error" error={error} backDestination="project">
+        <div />
+      </PageContainer>
     );
   }
 
-  const project = projectStore.selectedProject;
   if (!project) {
     return (
-      <Container size="large" withPadding title="Not Found">
-        <div className={styles.error}>Project not found</div>
-      </Container>
+      <PageContainer
+        fluid={false}
+        title="Not Found"
+        error="Project not found"
+        backDestination="project"
+      >
+        <div />
+      </PageContainer>
     );
   }
 
   return (
-    <Container size="large" withPadding title={`${project.name} - Collaborators`}>
-      <div className={styles.pageContent}>
-        <div className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack}>
-            <FiArrowLeft /> Back to Project
-          </button>
-          <div className={styles.actions}>
-            <Button variant="primary" onClick={() => setIsAddingCollaborator(true)}>
-              <FiPlus /> Add Collaborator
-            </Button>
-          </div>
-        </div>
+    <PageContainer
+      fluid={false}
+      title={`${project.name} - Collaborators`}
+      backDestination="project"
+      titleActions={titleActions}
+    >
+      <div className={styles.collaboratorsList}>
+        {collaborators.filter((c) => !c.isNote).length === 0 ? (
+          <EmptyCollaboratorsList entityType="project" className={styles.emptyState} />
+        ) : (
+          collaborators.map((collaborator, index) => {
+            // Skip note items in the main list
+            if (collaborator.isNote) return null;
 
-        <div className={styles.collaboratorsList}>
-          {collaborators.filter((c) => !c.isNote).length === 0 ? (
-            <div className={styles.emptyState}>
-              <FiUsers size={48} />
-              <p>No collaborators yet. Add collaborators to work together on this project.</p>
-            </div>
-          ) : (
-            collaborators.map((collaborator, index) => {
-              // Skip note items in the main list
-              if (collaborator.isNote) return null;
+            const collaboratorKey = `collaborator-${index}-${collaborator.id || ""}-${collaborator.username}`;
 
-              const collaboratorKey = `collaborator-${index}-${collaborator.id || ""}-${collaborator.username}`;
-
-              return (
-                <div key={collaboratorKey} className={styles.collaboratorCard}>
-                  <div className={styles.collaboratorAvatar}>
-                    {collaborator.isTeam ? (
-                      <div className={styles.teamIcon}>
-                        <FiUsers size={20} />
-                      </div>
-                    ) : (
-                      <img
-                        src={
-                          collaborator.avatar ||
-                          `https://avatars.githubusercontent.com/${collaborator.username}`
-                        }
-                        alt={collaborator.username}
-                      />
-                    )}
-                  </div>
-                  <div className={styles.collaboratorInfo}>
-                    <h3>
-                      {collaborator.username} {collaborator.isCurrentUser ? "(You)" : ""}
-                    </h3>
-                    <div className={styles.roleInfo}>
-                      <span className={styles.role}>{collaborator.role}</span>
-                      {collaborator.isOrganization && (
-                        <span className={styles.badge}>Organization</span>
-                      )}
-                      {collaborator.isTeam && <span className={styles.badge}>Team</span>}
+            return (
+              <div key={collaboratorKey} className={styles.collaboratorCard}>
+                <div className={styles.collaboratorAvatar}>
+                  {collaborator.isTeam ? (
+                    <div className={styles.teamIcon}>
+                      <FiUsers size={20} />
                     </div>
-                  </div>
-                  {!collaborator.isCurrentUser && (
-                    <Button
-                      variant="danger"
-                      size="small"
-                      iconOnly
-                      onClick={() =>
-                        handleRemoveCollaborator(collaborator.id, collaborator.username)
+                  ) : (
+                    <img
+                      src={
+                        collaborator.avatar ||
+                        `https://avatars.githubusercontent.com/${collaborator.username}`
                       }
-                      className={styles.removeButton}
-                    >
-                      <FiTrash2 />
-                    </Button>
+                      alt={collaborator.username}
+                    />
                   )}
                 </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Display notes about API limitations at the bottom */}
-        <div className={styles.notesSection}>
-          {collaborators
-            .filter((c) => c.isNote)
-            .map((note, index) => (
-              <div
-                key={`note-${index}`}
-                className={`${styles.noteCard} ${note.username.includes("GitHub API Limitations") ? styles.headerNote : ""}`}
-              >
-                <p>{note.username}</p>
+                <div className={styles.collaboratorInfo}>
+                  <h3>
+                    {collaborator.username} {collaborator.isCurrentUser ? "(You)" : ""}
+                  </h3>
+                  <div className={styles.roleInfo}>
+                    <span className={styles.role}>{collaborator.role}</span>
+                    {collaborator.isOrganization && (
+                      <span className={styles.badge}>Organization</span>
+                    )}
+                    {collaborator.isTeam && <span className={styles.badge}>Team</span>}
+                  </div>
+                </div>
+                {!collaborator.isCurrentUser && (
+                  <Button
+                    variant="danger"
+                    size="small"
+                    iconOnly
+                    onClick={() => handleRemoveCollaborator(collaborator.id, collaborator.username)}
+                    className={styles.removeButton}
+                  >
+                    <FiTrash2 />
+                  </Button>
+                )}
               </div>
-            ))}
-        </div>
-
-        {/* Add Collaborator Modal */}
-        <Modal
-          isOpen={isAddingCollaborator}
-          onClose={() => setIsAddingCollaborator(false)}
-          title="Add Collaborator"
-        >
-          <AddCollaboratorForm
-            onSubmit={handleAddCollaborator}
-            onCancel={() => setIsAddingCollaborator(false)}
-          />
-        </Modal>
+            );
+          })
+        )}
       </div>
-    </Container>
+
+      {/* Display notes about API limitations at the bottom */}
+      <div className={styles.notesSection}>
+        {collaborators
+          .filter((c) => c.isNote)
+          .map((note, index) => (
+            <div
+              key={`note-${index}`}
+              className={`${styles.noteCard} ${note.username.includes("GitHub API Limitations") ? styles.headerNote : ""}`}
+            >
+              <p>{note.username}</p>
+            </div>
+          ))}
+      </div>
+
+      {/* Add Collaborator Modal */}
+      <Modal
+        isOpen={isAddingCollaborator}
+        onClose={() => setIsAddingCollaborator(false)}
+        title="Add Collaborator"
+      >
+        <AddCollaboratorForm
+          onSubmit={handleAddCollaborator}
+          onCancel={() => setIsAddingCollaborator(false)}
+        />
+      </Modal>
+    </PageContainer>
   );
 });
 

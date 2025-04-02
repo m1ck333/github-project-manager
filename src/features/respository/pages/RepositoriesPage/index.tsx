@@ -1,11 +1,11 @@
 import { observer } from "mobx-react-lite";
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import GridContainer from "@/common/components/composed/grid/GridContainer";
-import Container from "@/common/components/layout/Container";
+import PageContainer from "@/common/components/layout/PageContainer";
 import Button from "@/common/components/ui/Button";
 import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
 import Input from "@/common/components/ui/Input";
@@ -31,11 +31,6 @@ const RepositoriesPage: React.FC = observer(() => {
   const [isDisabling, setIsDisabling] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    document.title = "Repositories | GitHub Project Manager";
-    // No need to fetch repositories as they're already loaded during app initialization
-  }, []);
 
   const handleCreateRepository = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +111,13 @@ const RepositoriesPage: React.FC = observer(() => {
   };
 
   return (
-    <Container size="large" withPadding title="Repositories">
+    <PageContainer
+      fluid={true}
+      title="Repositories"
+      isLoading={loading}
+      error={error}
+      loadingMessage="Loading repositories..."
+    >
       <GridContainer
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
@@ -243,7 +244,7 @@ const RepositoriesPage: React.FC = observer(() => {
           />
         </Modal>
       )}
-    </Container>
+    </PageContainer>
   );
 });
 

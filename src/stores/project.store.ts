@@ -784,12 +784,31 @@ export class ProjectStore {
 
   // Helper methods
   /**
+   * Select a project by ID without triggering a data fetch
+   */
+  selectProjectWithoutFetch(projectId: string) {
+    const project = this.projects.find((p) => p.id === projectId);
+    if (project) {
+      this.selectedProject = project;
+    } else {
+      throw new Error(`Project with ID ${projectId} not found`);
+    }
+  }
+
+  /**
    * Select a project by ID
    */
   selectProject(projectId: string) {
     const project = this.projects.find((p) => p.id === projectId);
     if (project) {
       this.selectedProject = project;
+
+      // Fetch latest data for this project from appInitializationService
+      this.fetchProjects().catch((error) => {
+        console.error("Error refreshing project data:", error);
+      });
+    } else {
+      throw new Error(`Project with ID ${projectId} not found`);
     }
   }
 

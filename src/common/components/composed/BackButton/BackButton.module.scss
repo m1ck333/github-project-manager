@@ -1,0 +1,35 @@
+@use "../../../../styles/variables.scss" as *;
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: $gray-700;
+  background: none;
+  border: none;
+  padding: $spacing-xs $spacing-sm;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  border-radius: $border-radius-sm;
+
+  &:hover {
+    color: $primary-600;
+    background-color: $gray-100;
+  }
+
+  svg {
+    font-size: 1rem;
+  }
+}
+
+.buttonVariant {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  svg {
+    font-size: 1rem;
+  }
+}

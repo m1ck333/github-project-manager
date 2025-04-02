@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import Button from "@/common/components/ui/Button";
+import Error from "@/common/components/ui/Error";
 import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage";
 import Home from "@/features/home/pages/HomePage";
 import ProjectPage from "@/features/project/pages/ProjectPage";
-import Projects from "@/features/project/pages/ProjectsPage";
+import ProjectsPage from "@/features/project/pages/ProjectsPage";
 import RepositoriesPage from "@/features/respository/pages/RepositoriesPage";
 import RepositoryPage from "@/features/respository/pages/RepositoryPage";
 
-import { FullPageError } from "../../ui/ErrorBanner";
+import { ROUTES } from "../../../constants/routes";
 
 const ErrorBoundaryRoutes: React.FC = () => {
   const location = useLocation();
@@ -34,7 +35,11 @@ const ErrorBoundaryRoutes: React.FC = () => {
 
     // Handler for unhandled promise rejections
     const handleRejection = (event: PromiseRejectionEvent) => {
-      setError(event.reason || new Error("Unhandled Promise Rejection"));
+      setError(
+        event.reason instanceof Error
+          ? event.reason
+          : new Error(String(event.reason) || "Unhandled Promise Rejection")
+      );
     };
 
     // Override console.error to catch React errors
@@ -67,8 +72,10 @@ const ErrorBoundaryRoutes: React.FC = () => {
 
   if (error) {
     return (
-      <FullPageError
+      <Error
         error={error}
+        title="Application Error"
+        fullPage={true}
         onRetry={() => {
           setError(null);
           window.location.reload();
@@ -90,12 +97,12 @@ const ErrorBoundaryRoutes: React.FC = () => {
 
   return (
     <Routes key={location.pathname}>
-      <Route path="/" element={<Home />} />
-      <Route path="/projects" element={<Projects />} />
-      <Route path="/projects/:projectId" element={<ProjectPage />} />
-      <Route path="/projects/:projectId/collaborators" element={<CollaboratorsPage />} />
-      <Route path="/repositories" element={<RepositoriesPage />} />
-      <Route path="/repositories/:owner/:name" element={<RepositoryPage />} />
+      <Route path={ROUTES.HOME} element={<Home />} />
+      <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
+      <Route path={ROUTES.PROJECT_DETAIL()} element={<ProjectPage />} />
+      <Route path={ROUTES.PROJECT_COLLABORATORS()} element={<CollaboratorsPage />} />
+      <Route path={ROUTES.REPOSITORIES} element={<RepositoriesPage />} />
+      <Route path={ROUTES.REPOSITORY_DETAIL()} element={<RepositoryPage />} />
     </Routes>
   );
 };

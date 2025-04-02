@@ -1,8 +1,8 @@
-export * from "./github/repository.mapper";
+export * from "./repository.mapper";
 export {
   mapToProject,
   mapProjectColumns,
   mapProjectIssues,
   type GithubProjectData,
-} from "./github/project.mapper";
-export { mapToUserProfile, type GithubViewerData } from "./github/user.mapper";
+} from "./project.mapper";
+export { mapToUserProfile, type GithubViewerData } from "./user.mapper";

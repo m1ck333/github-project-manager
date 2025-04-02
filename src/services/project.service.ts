@@ -1,9 +1,5 @@
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import {
-  GithubProjectData,
-  GithubViewerData,
-  mapToProject,
-} from "../core/mappers/github/project.mapper";
+import { GithubProjectData, GithubViewerData, mapToProject } from "../core/mappers/project.mapper";
 import { Project, BoardIssue, Column } from "../core/types";
 
 import { graphQLClientService } from "./graphql-client.service";

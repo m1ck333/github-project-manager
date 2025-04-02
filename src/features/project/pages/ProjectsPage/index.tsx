@@ -1,11 +1,11 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import GridContainer from "@/common/components/composed/grid/GridContainer";
-import Container from "@/common/components/layout/Container";
+import PageContainer from "@/common/components/layout/PageContainer";
 import Button from "@/common/components/ui/Button";
 import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
 import Modal from "@/common/components/ui/Modal";
@@ -17,7 +17,7 @@ import { projectStore } from "@/stores";
 
 import styles from "./ProjectsPage.module.scss";
 
-const Projects: React.FC = observer(() => {
+const ProjectsPage: React.FC = observer(() => {
   const { projects, loading, error } = projectStore;
   const navigate = useNavigate();
   const toast = useToast();
@@ -26,11 +26,6 @@ const Projects: React.FC = observer(() => {
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [deleteProject, setDeleteProject] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    document.title = "Projects | Project Manager";
-    // Projects are already loaded during app initialization, no need to fetch again
-  }, []);
 
   const handleRetry = () => {
     projectStore.fetchProjects().catch(console.error);
@@ -85,7 +80,13 @@ const Projects: React.FC = observer(() => {
   });
 
   return (
-    <Container size="large" withPadding title="Projects">
+    <PageContainer
+      fluid={true}
+      title="Projects"
+      isLoading={loading}
+      error={error as string | null}
+      loadingMessage="Loading projects..."
+    >
       <GridContainer
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
@@ -159,8 +160,8 @@ const Projects: React.FC = observer(() => {
           />
         </Modal>
       )}
-    </Container>
+    </PageContainer>
   );
 });
 
-export default React.memo(Projects);
+export default React.memo(ProjectsPage);

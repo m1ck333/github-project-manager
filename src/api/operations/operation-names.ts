@@ -96,6 +96,11 @@ export const AddRepositoryCollaboratorDocument: MockDocument = {
   definitions: [],
 } as MockDocument;
 
+export const RemoveRepositoryCollaboratorDocument: MockDocument = {
+  kind: "Document",
+  definitions: [],
+} as MockDocument;
+
 export const DeleteRepositoryDocument: MockDocument = {
   kind: "Document",
   definitions: [],

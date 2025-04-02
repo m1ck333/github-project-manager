@@ -1,4 +1,4 @@
-import { Project, Column, ColumnType, BoardIssue } from "../../types";
+import { Project, Column, ColumnType, BoardIssue } from "../types";
 
 // GraphQL response interfaces
 export interface GithubProjectData {

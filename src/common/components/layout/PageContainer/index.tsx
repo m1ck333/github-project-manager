@@ -1,76 +1,83 @@
-import React, { ReactNode } from "react";
-import { FiRefreshCw } from "react-icons/fi";
+import React, { ReactNode, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
-import Button from "../../ui/Button";
-import InfoBox from "../../ui/InfoBox";
-import Input from "../../ui/Input";
-import Loading from "../../ui/Loading";
+import { env } from "../../../../config/env";
+import BackButton, { BackDestination } from "../../composed/BackButton";
+import Error from "../../ui/Error";
 import Container from "../Container";
 
 import styles from "./PageContainer.module.scss";
 
 interface PageContainerProps {
-  title: string;
   children: ReactNode;
-  searchQuery?: string;
-  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRefresh?: () => void;
-  loading?: boolean;
+  title?: string;
+  fluid?: boolean;
+  withBg?: boolean;
+  backDestination?: BackDestination;
+  titleActions?: ReactNode;
+  isLoading?: boolean;
   error?: string | null;
+  loadingMessage?: string;
+  className?: string;
   onRetry?: () => void;
-  loadingText?: string;
 }
 
+/**
+ * PageContainer provides a consistent layout for all pages
+ * with built-in support for titles, back buttons, and error states
+ */
 const PageContainer: React.FC<PageContainerProps> = ({
-  title,
   children,
-  searchQuery,
-  onSearchChange,
-  onRefresh,
-  loading,
-  error,
+  title,
+  fluid = false,
+  withBg = false,
+  backDestination,
+  titleActions,
+  isLoading = false,
+  error = null,
+  loadingMessage = "Loading...",
+  className = "",
   onRetry,
-  loadingText = "Loading...",
 }) => {
-  return (
-    <Container size="large" withPadding title={title}>
-      <div className={styles.pageContent}>
-        {!loading && !error && (
-          <div className={styles.toolbar}>
-            {onSearchChange && (
-              <div className={styles.search}>
-                <Input
-                  placeholder={`Search ${title.toLowerCase()}...`}
-                  value={searchQuery}
-                  onChange={onSearchChange}
-                />
-              </div>
-            )}
-            {onRefresh && (
-              <div className={styles.toolbarActions}>
-                <Button variant="secondary" onClick={onRefresh} title={`Refresh ${title}`}>
-                  <FiRefreshCw />
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+  const params = useParams();
+  const projectId = params.projectId || undefined;
 
-        {loading ? (
-          <Loading text={loadingText} />
-        ) : error ? (
-          <InfoBox variant="error" title={`Error Loading ${title}`} dismissible={false}>
-            <p>{error}</p>
-            {onRetry && (
-              <Button variant="primary" size="small" onClick={onRetry}>
-                Retry
-              </Button>
-            )}
-          </InfoBox>
-        ) : (
-          children
-        )}
-      </div>
+  // Set document title based on props
+  useEffect(() => {
+    document.title = title ? `${title} | ${env.appName}` : env.appName;
+  }, [title]);
+
+  // Helper to render loading state
+  const renderLoading = () => (
+    <div className={styles.loading}>
+      <p>{loadingMessage}</p>
+    </div>
+  );
+
+  return (
+    <Container
+      fluid={fluid}
+      withPadding
+      withBg={withBg}
+      title={title}
+      className={`${styles.pageContainer} ${className}`}
+    >
+      {backDestination && (
+        <div className={styles.backButtonContainer}>
+          <BackButton destination={backDestination} itemId={projectId} />
+        </div>
+      )}
+
+      {titleActions && <div className={styles.titleActions}>{titleActions}</div>}
+
+      {/* Main content based on state */}
+      {isLoading ? (
+        renderLoading()
+      ) : error ? (
+        <Error error={error} title={`Error - ${title || "Page"}`} onRetry={onRetry} />
+      ) : (
+        <div className={styles.pageContent}>{children}</div>
+      )}
     </Container>
   );
 };

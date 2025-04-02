@@ -1,31 +1,43 @@
-@use "@/styles/variables.scss" as *;
+@use "../../../../styles/variables.scss" as *;
 
-.pageContent {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-lg;
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+.pageContainer {
+  width: 100%;
+  position: relative;
 }
 
-.toolbar {
+.backButtonContainer {
+  margin-bottom: $spacing-md;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+}
 
-  .search {
-    flex: 1;
-    max-width: 500px;
-  }
+.titleActions {
+  position: absolute;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  display: flex;
+  gap: $spacing-sm;
+  z-index: 2;
+}
 
-  .toolbarActions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
+.pageContent {
+  width: 100%;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1rem;
+  color: $gray-600;
+}
+
+.error {
+  background-color: $error-50;
+  color: $error-700;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  border-left: 4px solid $error-600;
+  margin: $spacing-md 0;
 }

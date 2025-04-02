@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React from "react";
 import { FiFolder, FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-import Container from "@/common/components/layout/Container";
+import PageContainer from "@/common/components/layout/PageContainer";
 import Button from "@/common/components/ui/Button";
 import { useAppInitialization } from "@/common/hooks/useAppInitialization";
+import { env } from "@/config/env";
 import GitHubTokenWarning from "@/features/home/components/GitHubTokenWarning";
 import { userStore, projectStore, repositoryStore } from "@/stores";
 
@@ -15,19 +16,14 @@ const HomePage: React.FC = observer(() => {
   const navigate = useNavigate();
   useAppInitialization();
 
-  useEffect(() => {
-    // Set document title
-    document.title = "GitHub Project Manager";
-  }, []);
-
   const hasToken = userStore.hasToken();
   const projectCount = projectStore.projects.length;
   const repositoryCount = repositoryStore.repositories.length;
 
   return (
-    <Container className={styles.homePage}>
+    <PageContainer className={styles.homePage} fluid={true}>
       <div className={styles.hero}>
-        <h1 className={styles.title}>GitHub Project Manager</h1>
+        <h1 className={styles.title}>{env.appName}</h1>
         <p className={styles.subtitle}>Manage your GitHub repositories and projects in one place</p>
 
         {!hasToken && <GitHubTokenWarning />}
@@ -53,7 +49,7 @@ const HomePage: React.FC = observer(() => {
           </Button>
         </div>
       </div>
-    </Container>
+    </PageContainer>
   );
 });
 

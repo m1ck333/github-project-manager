@@ -3,12 +3,15 @@ import React, { useEffect, useState } from "react";
 import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiLink } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
+import BackButton from "@/common/components/composed/BackButton";
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
-import Container from "@/common/components/layout/Container";
+import PageContainer from "@/common/components/layout/PageContainer";
 import Button from "@/common/components/ui/Button";
 import Input from "@/common/components/ui/Input";
 import Modal from "@/common/components/ui/Modal";
 import { useToast } from "@/common/components/ui/Toast";
+import { ROUTES } from "@/common/constants/routes";
+import { EmptyCollaboratorsList } from "@/features/collaborators/components";
 import { repositoryStore, projectStore } from "@/stores";
 
 import { Project } from "../../../../core/types";
@@ -54,18 +57,23 @@ const RepositoryPage: React.FC = observer(() => {
 
   useEffect(() => {
     if (owner && name) {
-      // Always fetch the repository to ensure we have the latest data
-      repositoryStore.loading = true;
-      repositoryStore
-        .fetchRepository(owner, name)
-        .catch((error) => {
-          console.error("Error loading repository data:", error);
-          // Set the error in the store to display it to the user
-          repositoryStore.error = error instanceof Error ? error.message : String(error);
-        })
-        .finally(() => {
-          repositoryStore.loading = false;
-        });
+      // Get the repository from the store without triggering a data fetch
+      const repository = repositoryStore.selectRepositoryWithoutFetch(owner, name);
+
+      if (!repository) {
+        // Only if repository isn't already in the store, fetch it
+        repositoryStore.loading = true;
+        repositoryStore
+          .fetchRepository(owner, name)
+          .catch((error) => {
+            console.error("Error loading repository data:", error);
+            // Set the error in the store to display it to the user
+            repositoryStore.error = error instanceof Error ? error.message : String(error);
+          })
+          .finally(() => {
+            repositoryStore.loading = false;
+          });
+      }
     }
   }, [owner, name]);
 
@@ -76,10 +84,6 @@ const RepositoryPage: React.FC = observer(() => {
       setSelectedProjectId(projectStore.projects[0].id);
     }
   }, [showLinkProjectModal, projectStore.projects]);
-
-  useEffect(() => {
-    document.title = `${name} | Repository`;
-  }, [name]);
 
   const handleGoBack = () => {
     navigate("/repositories");
@@ -162,37 +166,57 @@ const RepositoryPage: React.FC = observer(() => {
     (r) => r.owner.login === owner && r.name === name
   );
 
+  // Define titleActions for PageContainer
+  const titleActions = repository && (
+    <div className={styles.headerActions}>
+      <Button
+        variant="secondary"
+        onClick={() => setShowLinkProjectModal(true)}
+        className={styles.linkButton}
+      >
+        <FiLink /> Link to Project
+      </Button>
+      <ViewOnGithub link={repository.html_url} />
+    </div>
+  );
+
   if (repositoryStore.loading && !repository) {
     return (
-      <Container size="medium" withPadding title="Loading Repository...">
-        <div className={styles.loading}>Loading repository details...</div>
-      </Container>
+      <PageContainer
+        title="Loading Repository..."
+        fluid={false}
+        isLoading={true}
+        loadingMessage="Loading repository details..."
+        backDestination="repositories"
+      >
+        <div />
+      </PageContainer>
     );
   }
 
   if (repositoryStore.error) {
     return (
-      <Container size="medium" withPadding title="Error">
-        <div className={styles.error}>
-          {repositoryStore.error}
-          <Button variant="secondary" onClick={handleGoBack}>
-            Go Back
-          </Button>
-        </div>
-      </Container>
+      <PageContainer
+        title="Error"
+        fluid={false}
+        error={repositoryStore.error}
+        backDestination="repositories"
+      >
+        <div />
+      </PageContainer>
     );
   }
 
   if (!repository) {
     return (
-      <Container size="medium" withPadding title="Repository Not Found">
-        <div className={styles.notFound}>
-          <p>The repository you're looking for doesn't exist or you don't have access to it.</p>
-          <Button variant="secondary" onClick={handleGoBack}>
-            Go Back to Repositories
-          </Button>
-        </div>
-      </Container>
+      <PageContainer
+        title="Repository Not Found"
+        fluid={false}
+        error="The repository you're looking for doesn't exist or you don't have access to it."
+        backDestination="repositories"
+      >
+        <div />
+      </PageContainer>
     );
   }
 
@@ -203,181 +227,162 @@ const RepositoryPage: React.FC = observer(() => {
   ];
 
   return (
-    <Container size="medium" withPadding title={repository.name}>
-      <div className={styles.pageContent}>
-        <div className={styles.header}>
-          <Button variant="secondary" onClick={handleGoBack} className={styles.backButton}>
-            <FiArrowLeft /> Back to Repositories
+    <PageContainer
+      fluid={false}
+      title={repository.name}
+      backDestination="repositories"
+      titleActions={titleActions}
+      className={styles.pageContent}
+    >
+      <div className={styles.repoInfo}>
+        <div className={styles.repoOwner}>
+          <img
+            src={repository.owner.avatar_url}
+            alt={repository.owner.login}
+            className={styles.ownerAvatar}
+          />
+          <span>{repository.owner.login}</span>
+        </div>
+
+        {repository.description && (
+          <div className={styles.description}>
+            <h3>Description</h3>
+            <p>{repository.description}</p>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.collaboratorsSection}>
+        <div className={styles.sectionHeader}>
+          <h2>Collaborators</h2>
+          <Button variant="primary" onClick={() => setShowAddForm(!showAddForm)}>
+            {showAddForm ? "Cancel" : "Add Collaborator"}
           </Button>
-          <div className={styles.headerActions}>
-            <Button
-              variant="secondary"
-              onClick={() => setShowLinkProjectModal(true)}
-              className={styles.linkButton}
-            >
-              <FiLink /> Link to Project
-            </Button>
-            <ViewOnGithub link={repository.html_url} />
-          </div>
         </div>
 
-        <div className={styles.repoInfo}>
-          <div className={styles.repoOwner}>
-            <img
-              src={repository.owner.avatar_url}
-              alt={repository.owner.login}
-              className={styles.ownerAvatar}
-            />
-            <span>{repository.owner.login}</span>
-          </div>
-
-          {repository.description && (
-            <div className={styles.description}>
-              <h3>Description</h3>
-              <p>{repository.description}</p>
+        {showAddForm && (
+          <form onSubmit={handleAddCollaborator} className={styles.addForm}>
+            <div className={styles.formGroup}>
+              <label htmlFor="username">GitHub Username</label>
+              <Input
+                id="username"
+                placeholder="e.g., octocat"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
-          )}
-        </div>
-
-        <div className={styles.collaboratorsSection}>
-          <div className={styles.sectionHeader}>
-            <h2>Collaborators</h2>
-            <Button variant="primary" onClick={() => setShowAddForm(!showAddForm)}>
-              {showAddForm ? "Cancel" : "Add Collaborator"}
+            <div className={styles.formGroup}>
+              <label htmlFor="permission">Permission Level</label>
+              <Select
+                id="permission"
+                value={permission}
+                onChange={(e) => setPermission(e.target.value as "read" | "write" | "admin")}
+                options={permissionOptions}
+              />
+            </div>
+            <Button type="submit" variant="primary" disabled={isSubmitting || !username}>
+              {isSubmitting ? "Adding..." : "Add Collaborator"}
             </Button>
-          </div>
+          </form>
+        )}
 
-          {showAddForm && (
-            <form onSubmit={handleAddCollaborator} className={styles.addForm}>
-              <div className={styles.formGroup}>
-                <label htmlFor="username">GitHub Username</label>
-                <Input
-                  id="username"
-                  placeholder="e.g., octocat"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="permission">Permission Level</label>
-                <Select
-                  id="permission"
-                  value={permission}
-                  onChange={(e) => setPermission(e.target.value as "read" | "write" | "admin")}
-                  options={permissionOptions}
-                />
-              </div>
-              <Button type="submit" variant="primary" disabled={isSubmitting || !username}>
-                {isSubmitting ? "Adding..." : "Add Collaborator"}
-              </Button>
-            </form>
-          )}
+        {repositoryStore.loading && <div className={styles.loading}>Loading collaborators...</div>}
 
-          {repositoryStore.loading && (
-            <div className={styles.loading}>Loading collaborators...</div>
-          )}
-
-          <div className={styles.collaboratorsList}>
-            {repository.collaborators && repository.collaborators.length > 0 ? (
-              repository.collaborators.map((collaborator) => (
-                <div key={collaborator.id} className={styles.collaboratorCard}>
-                  <div className={styles.collaboratorInfo}>
-                    <img
-                      src={collaborator.avatarUrl}
-                      alt={collaborator.login}
-                      className={styles.collaboratorAvatar}
-                    />
-                    <div className={styles.collaboratorDetails}>
-                      <div className={styles.collaboratorName}>
-                        <FiUser />
-                        <span>{collaborator.login}</span>
-                      </div>
-                      <div className={styles.collaboratorPermission}>{collaborator.permission}</div>
+        <div className={styles.collaboratorsList}>
+          {repository.collaborators && repository.collaborators.length > 0 ? (
+            repository.collaborators.map((collaborator) => (
+              <div key={collaborator.id} className={styles.collaboratorCard}>
+                <div className={styles.collaboratorInfo}>
+                  <img
+                    src={collaborator.avatarUrl}
+                    alt={collaborator.login}
+                    className={styles.collaboratorAvatar}
+                  />
+                  <div className={styles.collaboratorDetails}>
+                    <div className={styles.collaboratorName}>
+                      <FiUser />
+                      <span>{collaborator.login}</span>
                     </div>
+                    <div className={styles.collaboratorPermission}>{collaborator.permission}</div>
                   </div>
-                  <Button
-                    variant="danger"
-                    onClick={() => handleRemoveCollaborator(collaborator.id)}
-                    className={styles.removeButton}
-                  >
-                    <FiUserX /> Remove
-                  </Button>
                 </div>
-              ))
-            ) : (
-              <div className={styles.emptyCollaborators}>
-                <FiUserPlus size={32} />
-                <p>
-                  No collaborators found. Add collaborators to work together on this repository.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Project linking modal */}
-        <Modal
-          isOpen={showLinkProjectModal}
-          onClose={() => setShowLinkProjectModal(false)}
-          title="Link to Project"
-        >
-          <div className={styles.linkProjectForm}>
-            <p>Select a project to link this repository to:</p>
-
-            {projectStore.loading ? (
-              <div className={styles.loading}>Loading projects...</div>
-            ) : projectStore.projects.length === 0 ? (
-              <div className={styles.noProjects}>
-                <p>No projects found. Create a project first.</p>
                 <Button
-                  variant="primary"
-                  onClick={() => {
-                    setShowLinkProjectModal(false);
-                    navigate("/projects");
-                  }}
+                  variant="danger"
+                  onClick={() => handleRemoveCollaborator(collaborator.id)}
+                  className={styles.removeButton}
                 >
-                  Go to Projects
+                  <FiUserX /> Remove
                 </Button>
               </div>
-            ) : (
-              <>
-                <div className={styles.projectList}>
-                  {projectStore.projects.map((project: Project) => (
-                    <div
-                      key={project.id}
-                      className={`${styles.projectOption} ${selectedProjectId === project.id ? styles.selectedProject : ""}`}
-                      onClick={() => setSelectedProjectId(project.id)}
-                    >
-                      <strong>{project.name}</strong>
-                      <span>{project.id.substring(0, 8)}...</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className={styles.modalActions}>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setShowLinkProjectModal(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={handleLinkToProject}
-                    disabled={isLinkingProject || !selectedProjectId}
-                  >
-                    {isLinkingProject ? "Linking..." : "Link to Project"}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        </Modal>
+            ))
+          ) : (
+            <EmptyCollaboratorsList entityType="repository" className={styles.emptyCollaborators} />
+          )}
+        </div>
       </div>
-    </Container>
+
+      {/* Project linking modal */}
+      <Modal
+        isOpen={showLinkProjectModal}
+        onClose={() => setShowLinkProjectModal(false)}
+        title="Link to Project"
+      >
+        <div className={styles.linkProjectForm}>
+          <p>Select a project to link this repository to:</p>
+
+          {projectStore.loading ? (
+            <div className={styles.loading}>Loading projects...</div>
+          ) : projectStore.projects.length === 0 ? (
+            <div className={styles.noProjects}>
+              <p>No projects found. Create a project first.</p>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setShowLinkProjectModal(false);
+                  navigate("/projects");
+                }}
+              >
+                Go to Projects
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className={styles.projectList}>
+                {projectStore.projects.map((project: Project) => (
+                  <div
+                    key={project.id}
+                    className={`${styles.projectOption} ${selectedProjectId === project.id ? styles.selectedProject : ""}`}
+                    onClick={() => setSelectedProjectId(project.id)}
+                  >
+                    <strong>{project.name}</strong>
+                    <span>{project.id.substring(0, 8)}...</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.modalActions}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setShowLinkProjectModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleLinkToProject}
+                  disabled={isLinkingProject || !selectedProjectId}
+                >
+                  {isLinkingProject ? "Linking..." : "Link to Project"}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </Modal>
+    </PageContainer>
   );
 });
 

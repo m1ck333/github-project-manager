@@ -11,12 +11,12 @@ import {
 } from "react-icons/fi";
 
 import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
+import Error from "@/common/components/ui/Error";
 import { projectStore } from "@/stores";
 
 import GridCard from "../../../../common/components/composed/grid/GridCard";
 import GridCardAdd from "../../../../common/components/composed/grid/GridCardAdd";
 import Button from "../../../../common/components/ui/Button";
-import ErrorBanner from "../../../../common/components/ui/ErrorBanner";
 import InfoBox from "../../../../common/components/ui/InfoBox";
 import Loading from "../../../../common/components/ui/Loading";
 import Modal from "../../../../common/components/ui/Modal";
@@ -74,7 +74,7 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
     <form className={styles.form} onSubmit={handleSubmit}>
       {error && (
         <div className={styles.formError}>
-          <ErrorBanner error={error} onRetry={() => {}} />
+          <Error error={error} onRetry={() => {}} />
         </div>
       )}
 
@@ -434,11 +434,11 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) 
       );
     }
 
-    // Handle errors with our new ErrorBanner component
+    // Handle errors with our new Error component
     if (projectStore.error) {
       return (
         <div className={styles.errorContainer}>
-          <ErrorBanner error={projectStore.error} onRetry={() => window.location.reload()} />
+          <Error error={projectStore.error} onRetry={() => window.location.reload()} />
         </div>
       );
     }

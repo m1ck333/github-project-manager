@@ -130,14 +130,6 @@ code {
   background-color: $background-secondary;
 }
 
-.main-container {
-  flex: 1;
-  max-width: $breakpoint-xl;
-  width: 100%;
-  margin: 0 auto;
-  padding: $spacing-lg;
-}
-
 // Common content container
 .content-container {
   background-color: $background-primary;

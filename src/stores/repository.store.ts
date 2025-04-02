@@ -1,14 +1,34 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { client } from "../api/client";
-import { RepositoryPermission, RepositoryVisibility } from "../api/generated/graphql";
-import {
-  CreateRepositoryDocument,
-  AddRepositoryCollaboratorDocument,
-  DeleteRepositoryDocument,
-} from "../api/operations/operation-names";
 import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../core/types";
 import { repositoryService } from "../services";
+
+// GraphQL fragments for repository collaborator operations
+const COLLABORATOR_FRAGMENT = `
+  fragment CollaboratorFields on User {
+    id
+    login
+    avatarUrl
+  }
+`;
+
+// GraphQL query to get repository collaborators
+const REPOSITORY_COLLABORATORS_QUERY = `
+  ${COLLABORATOR_FRAGMENT}
+  query GetRepositoryCollaborators($owner: String!, $name: String!, $username: String) {
+    repository(owner: $owner, name: $name) {
+      id
+      collaborators(first: 100, query: $username) {
+        edges {
+          permission
+          node {
+            ...CollaboratorFields
+          }
+        }
+      }
+    }
+  }
+`;
 
 export class RepositoryStore {
   repositories: Repository[] = [];
@@ -91,69 +111,8 @@ export class RepositoryStore {
     this.error = null;
 
     try {
-      // Convert string visibility to RepositoryVisibility enum
-      let visibilityEnum: RepositoryVisibility;
-      switch (visibility) {
-        case "PRIVATE":
-          visibilityEnum = RepositoryVisibility.Private;
-          break;
-        case "PUBLIC":
-          visibilityEnum = RepositoryVisibility.Public;
-          break;
-        case "INTERNAL":
-          visibilityEnum = RepositoryVisibility.Internal;
-          break;
-        default:
-          visibilityEnum = RepositoryVisibility.Private;
-      }
-
-      const input = {
-        name,
-        description: description || undefined,
-        visibility: visibilityEnum,
-      };
-
-      const { data, error } = await client
-        .mutation(CreateRepositoryDocument, { input })
-        .toPromise();
-
-      interface CreateRepositoryResponse {
-        createRepository: {
-          repository: {
-            id: string;
-            name: string;
-            description: string | null;
-            url: string;
-            createdAt: string;
-            owner: {
-              login: string;
-              avatarUrl: string;
-            };
-          };
-        };
-      }
-
-      // Safe type assertion
-      const typedData = data as unknown as CreateRepositoryResponse;
-
-      if (error || !typedData?.createRepository?.repository) {
-        throw new Error(error?.message || "Failed to create repository");
-      }
-
-      // Create repository directly from the mutation response data
-      const repoData = typedData.createRepository.repository;
-      const newRepo: Repository = {
-        id: repoData.id,
-        name: repoData.name,
-        owner: {
-          login: repoData.owner.login,
-          avatar_url: repoData.owner.avatarUrl,
-        },
-        description: repoData.description || "",
-        html_url: repoData.url,
-        createdAt: repoData.createdAt,
-        collaborators: [],
-      };
+      // Call the repository service to create the repository
+      const newRepo = await repositoryService.createRepository(name, description, visibility);
 
       // Update our local repositories list
       runInAction(() => {
@@ -201,15 +160,8 @@ export class RepositoryStore {
         );
       });
 
-      // Use GraphQL to update the repository - this is a "soft delete"
-      // as GitHub's GraphQL API doesn't support real repository deletion
-      const { error } = await client
-        .mutation(DeleteRepositoryDocument, { repositoryId: repository.id })
-        .toPromise();
-
-      if (error) {
-        throw new Error(`Failed to disable repository: ${error.message}`);
-      }
+      // Call the repository service to disable the repository
+      await repositoryService.disableRepository(repository.id);
 
       // Refresh data to ensure our state is in sync
       await repositoryService.fetchRepositories();
@@ -311,6 +263,9 @@ export class RepositoryStore {
     return fetchPromise;
   }
 
+  /**
+   * Add a collaborator to a repository
+   */
   async addRepositoryCollaborator(
     owner: string,
     repoName: string,
@@ -327,60 +282,8 @@ export class RepositoryStore {
         throw new Error("Repository not found");
       }
 
-      // Convert permission string to the format expected by GitHub
-      const permission = collaboratorData.permission.toUpperCase();
-
-      // First step: Use GraphQL mutation as a simple check for API access
-      // Note: This will generate "variable not used" warnings for userLogin and permission
-      // These warnings are harmless - the variables are used in the REST API call
-      try {
-        const { error: apiAccessError } = await client
-          .mutation(AddRepositoryCollaboratorDocument, {
-            repositoryId: repository.id,
-            userLogin: collaboratorData.username,
-            permission: permission as RepositoryPermission,
-          })
-          .toPromise();
-
-        if (apiAccessError) {
-          throw new Error(`API access error: ${apiAccessError.message}`);
-        }
-      } catch (error) {
-        // Handle the specific case of variable not used warnings
-        if (error instanceof Error && error.message.includes("Variable")) {
-          console.warn("Ignoring GraphQL variable warnings as they're expected:", error.message);
-          // Continue execution - these warnings don't affect functionality
-        } else {
-          // It's a real error, rethrow it
-          throw error;
-        }
-      }
-
-      // Second step: Use REST API to actually add the collaborator
-      // Access token is needed for the REST API call
-      const token = localStorage.getItem("github_token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
-      // Use GitHub REST API to add the collaborator
-      const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/collaborators/${collaboratorData.username}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-          body: JSON.stringify({ permission: collaboratorData.permission }),
-        }
-      );
-
-      if (!response.ok) {
-        // If response is not OK, parse the error message
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Failed to add collaborator: ${response.statusText}`);
-      }
+      // Call the service to add the collaborator
+      await repositoryService.addRepositoryCollaborator(repository.id, collaboratorData);
 
       // Create a temporary collaborator for optimistic UI update
       const mockCollaborator: RepositoryCollaborator = {
@@ -441,6 +344,9 @@ export class RepositoryStore {
     }
   }
 
+  /**
+   * Remove a collaborator from a repository
+   */
   async removeRepositoryCollaborator(owner: string, repoName: string, collaboratorId: string) {
     this.loading = true;
     this.error = null;
@@ -459,31 +365,8 @@ export class RepositoryStore {
         throw new Error("Collaborator not found in repository");
       }
 
-      // Access token is needed for the REST API call
-      const token = localStorage.getItem("github_token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
-      // Use GitHub REST API to remove the collaborator
-      const response = await fetch(
-        `https://api.github.com/repos/${owner}/${repoName}/collaborators/${collaborator.login}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        // If response is not OK, parse the error message
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `Failed to remove collaborator: ${response.statusText}`
-        );
-      }
+      // Call the service to remove the collaborator
+      await repositoryService.removeRepositoryCollaborator(repository.id, collaborator.login);
 
       // Update the UI optimistically
       runInAction(() => {
@@ -504,7 +387,24 @@ export class RepositoryStore {
     }
   }
 
-  selectRepository(repository: Repository) {
+  /**
+   * Select a repository by owner and name without triggering a data fetch
+   */
+  selectRepositoryWithoutFetch(owner: string, name: string): Repository | undefined {
+    const repository = this.repositories.find((r) => r.owner.login === owner && r.name === name);
+
+    if (repository) {
+      this.selectedRepository = repository;
+      return repository;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Select a repository
+   */
+  selectRepository(repository: Repository): void {
     this.selectedRepository = repository;
   }
 

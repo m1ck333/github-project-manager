@@ -5,17 +5,21 @@ import styles from "./Container.module.scss";
 interface ContainerProps {
   children: ReactNode;
   className?: string;
-  size?: "small" | "medium" | "large"; // Different size options
+  fluid?: boolean;
   withPadding?: boolean;
   withBg?: boolean;
   title?: string;
   titleClassName?: string;
 }
 
+/**
+ * A simple container component similar to Bootstrap's container
+ * Provides basic layout containment with optional fluid behavior
+ */
 const Container: React.FC<ContainerProps> = ({
   children,
   className = "",
-  size = "medium",
+  fluid = false,
   withPadding = true,
   withBg = false,
   title,
@@ -25,7 +29,7 @@ const Container: React.FC<ContainerProps> = ({
     <div
       className={`
         ${styles.container} 
-        ${styles[size]} 
+        ${fluid ? styles.containerFluid : ""} 
         ${withPadding ? styles.withPadding : ""} 
         ${withBg ? styles.withBg : ""} 
         ${className}

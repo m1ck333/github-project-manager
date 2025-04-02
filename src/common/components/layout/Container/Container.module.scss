@@ -2,21 +2,15 @@
 
 .container {
   width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
+  padding: 0 $spacing-md;
 }
 
-// Size variants
-.small {
-  max-width: 800px;
-}
-
-.medium {
-  max-width: 1200px;
-}
-
-.large {
-  max-width: $breakpoint-xl;
+// Fluid variant
+.containerFluid {
+  max-width: 100%;
 }
 
 // Optional styles

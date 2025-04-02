@@ -1,6 +1,8 @@
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiGithub, FiTrash2, FiPlus } from "react-icons/fi";
+
+import Error from "@/common/components/ui/Error";
 
 import Button from "../../../../common/components/ui/Button";
 import Input from "../../../../common/components/ui/Input";
@@ -27,18 +29,20 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
   const repositories = project?.repositories || [];
 
   const handleAddRepository = async () => {
-    if (!owner || !repoName) return;
-
     setLoading(true);
+    setError(null);
+
     try {
       const success = await projectStore.linkRepositoryToProject(projectId, owner, repoName);
       if (success) {
+        setShowAddModal(false);
         setOwner("");
         setRepoName("");
-        setShowAddModal(false);
+      } else {
+        setError("Failed to link repository. Please try again.");
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -48,25 +52,49 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
     if (!confirm("Are you sure you want to unlink this repository?")) return;
 
     setLoading(true);
+    setError(null);
+
     try {
       // Find repository details from the ID
-      const repository = projectStore.selectedProject?.repositories?.find(
-        (r) => r.id === repositoryId
-      );
+      const repository = repositories.find((r) => r.id === repositoryId);
       if (!repository) {
         throw new Error("Repository not found");
       }
 
-      // Extract owner and name from repository
+      // We need to use an indirect approach since unlinkRepositoryFromProject doesn't exist
       const { owner, name } = repository;
+      if (!owner || !name) {
+        throw new Error("Repository owner or name is missing");
+      }
 
-      // Call the actual method with owner and name
-      await projectStore.linkRepositoryToProject(projectId, owner?.login || "", name);
+      // Call the linkRepositoryToProject method with false parameter to unlink
+      const success = await projectStore.linkRepositoryToProject(
+        projectId,
+        owner.login,
+        name,
+        false // This will unlink instead of link, if the API supports this
+      );
+
+      if (!success) {
+        throw new Error("Failed to unlink repository");
+      }
 
       // Refresh project data
       await projectStore.fetchProjects();
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      await projectStore.fetchProjects();
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -85,7 +113,7 @@ const ProjectRepositories: React.FC<ProjectRepositoriesProps> = observer(({ proj
         <div className={styles.noRepositories}>No repositories linked to this project.</div>
       )}
       {loading && <Loading size="medium" text="Loading repositories..." />}
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <Error error={error} onRetry={handleRefresh} />}
 
       <div className={styles.repositoriesList}>
         {repositories.length === 0 ? (

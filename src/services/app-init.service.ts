@@ -1,12 +1,8 @@
 import { client } from "../api/client";
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import {
-  GithubProjectData,
-  GithubViewerData,
-  mapToProject,
-} from "../core/mappers/github/project.mapper";
-import { GithubRepositoryData, mapToRepository } from "../core/mappers/github/repository.mapper";
-import { mapToUserProfile } from "../core/mappers/github/user.mapper";
+import { GithubProjectData, GithubViewerData, mapToProject } from "../core/mappers/project.mapper";
+import { GithubRepositoryData, mapToRepository } from "../core/mappers/repository.mapper";
+import { mapToUserProfile } from "../core/mappers/user.mapper";
 import { AllAppData, UserProfile, Project, BoardIssue, Column } from "../core/types";
 
 import { projectService } from "./project.service";
@@ -50,13 +46,8 @@ export class AppInitializationService {
       this.isInitializing = true;
       this.initializeCount++;
 
-      // Verify token is valid first
-      const isTokenValid = await userService.verifyToken();
-      if (!isTokenValid) {
-        throw new Error("GitHub token is invalid or missing");
-      }
-
       // Make a single GraphQL query to fetch ALL data at once
+      // This will also verify the token as a side effect since the query will fail with an invalid token
       const { data, error } = await client.query(GetAllInitialDataDocument, {}).toPromise();
 
       if (error || !data) {
