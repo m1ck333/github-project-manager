@@ -1,0 +1,10 @@
+query CheckRepositoryCollaborator($owner: String!, $name: String!, $username: String!) {
+  repository(owner: $owner, name: $name) {
+    id
+    collaborators(first: 1, query: $username) {
+      nodes {
+        ...CollaboratorFields
+      }
+    }
+  }
+}

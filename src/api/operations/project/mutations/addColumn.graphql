@@ -1,0 +1,17 @@
+mutation AddColumn(
+  $projectId: ID!
+  $name: String!
+  $color: ProjectV2SingleSelectFieldOptionColor!
+) {
+  createProjectV2Field(
+    input: {
+      projectId: $projectId
+      name: $name
+      dataType: SINGLE_SELECT
+      singleSelectOptions: [{ name: $name, color: $color, description: "" }]
+    }
+  ) {
+    # Just return the clientMutationId to confirm the mutation worked
+    clientMutationId
+  }
+}

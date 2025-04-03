@@ -2,106 +2,72 @@
  * This file maps GraphQL document constants from the generated file
  * to provide a clean API for the rest of the application.
  */
-import { TypedDocumentNode } from "@graphql-typed-document-node/core";
-
 import {
   GetAllInitialDataDocument,
   GetViewerDocument,
   CreateProjectDocument,
+  UpdateProjectDocument,
+  DeleteProjectDocument,
   AddCollaboratorDocument,
   RemoveCollaboratorDocument,
+  CreateRepositoryDocument,
+  CreateIssueDocument,
+  UpdateIssueStatusDocument,
+  DeleteIssueDocument,
+  AddProjectItemDocument,
+  CreateLabelDocument,
+  LinkRepositoryToProjectDocument,
   ProjectV2Roles,
   ProjectV2FieldType,
+  AddColumnDocument,
+  DisableRepositoryDocument,
 } from "../generated/graphql";
 
-// Export app document - keep only this GET operation
+// =============================================================================
+// Application Operations
+// =============================================================================
+
 export { GetAllInitialDataDocument, GetViewerDocument };
 
-// Export project documents
-export { CreateProjectDocument };
+// =============================================================================
+// Project Operations
+// =============================================================================
 
-// Export collaborator documents
+export {
+  CreateProjectDocument,
+  UpdateProjectDocument,
+  DeleteProjectDocument,
+  LinkRepositoryToProjectDocument,
+  AddColumnDocument,
+  AddProjectItemDocument,
+};
+
+// =============================================================================
+// Issue Operations
+// =============================================================================
+
+export { CreateIssueDocument, UpdateIssueStatusDocument, DeleteIssueDocument };
+
+// =============================================================================
+// Label Operations
+// =============================================================================
+
+export { CreateLabelDocument };
+
+// =============================================================================
+// Repository Operations
+// =============================================================================
+
+export { CreateRepositoryDocument, DisableRepositoryDocument };
+
+// =============================================================================
+// Collaborator Operations
+// =============================================================================
+
 export { AddCollaboratorDocument, RemoveCollaboratorDocument };
 
-// Export enums
+// =============================================================================
+// Enums
+// =============================================================================
+
 export { ProjectV2Roles, ProjectV2FieldType };
-
-// Helper type for mock documents
-type MockDocument = TypedDocumentNode<Record<string, unknown>, Record<string, unknown>>;
-
-// For compatibility with existing code, provide empty mock document functions
-// These will need to be replaced with real implementations
-export const UpdateProjectDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const DeleteProjectDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const LinkRepositoryToProjectDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const AddColumnDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const CreateIssueDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const UpdateIssueStatusDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const CreateLabelDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const AddProjectItemDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-export const DeleteIssueDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-
-// Create a correctly typed mock document for CreateRepository
-export const CreateRepositoryDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as TypedDocumentNode<
-  {
-    createRepository: {
-      repository: {
-        id: string;
-        name: string;
-        description: string | null;
-        url: string;
-        createdAt: string;
-        owner: {
-          login: string;
-          avatarUrl: string;
-        };
-      };
-    };
-  },
-  Record<string, unknown>
->;
-
-export const AddRepositoryCollaboratorDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-
-export const RemoveRepositoryCollaboratorDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;
-
-export const DeleteRepositoryDocument: MockDocument = {
-  kind: "Document",
-  definitions: [],
-} as MockDocument;

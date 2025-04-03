@@ -1,37 +1,16 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { client } from "../api/client";
-import { ProjectV2SingleSelectFieldOptionColor } from "../api/generated/graphql";
-import {
-  CreateProjectDocument,
-  UpdateProjectDocument,
-  DeleteProjectDocument,
-  LinkRepositoryToProjectDocument,
-  AddColumnDocument,
-  CreateIssueDocument,
-  UpdateIssueStatusDocument,
-  CreateLabelDocument,
-  AddProjectItemDocument,
-  DeleteIssueDocument,
-} from "../api/operations/operation-names";
-import {
-  ColumnFormData,
-  Project,
-  ProjectFormData,
-  BoardIssue,
-  Label,
-  ColumnType,
-} from "../core/types";
+import { ColumnFormData, Project, ProjectFormData, BoardIssue } from "../core/types";
 import { appInitializationService } from "../services/app-init.service";
+import { projectService } from "../services/project.service";
 import { projectSchema, issueSchema, labelSchema, validateAndExecute } from "../validation";
 
 import { repositoryStore } from "./index";
 
 /**
  * ProjectStore handles all project-related operations
- * This includes projects, issues, labels, columns, and collaborators
- * Mutations use the generated GraphQL hooks from codegen
- * Data fetching is handled by AppInitializationService
+ * Uses ProjectService for business logic and GraphQL operations
+ * Focuses on state management and UI updates
  */
 export class ProjectStore {
   projects: Project[] = [];
@@ -106,43 +85,23 @@ export class ProjectStore {
           throw new Error("User ID not found");
         }
 
-        const input = {
-          ownerId: ownerId,
-          title: validData.name,
-          ...(validData.description ? { description: validData.description } : {}),
-        };
-
-        const { data, error } = await client.mutation(CreateProjectDocument, { input }).toPromise();
-
-        if (error || !data?.createProjectV2?.projectV2) {
-          throw new Error(error?.message || "Failed to create project");
-        }
+        // Use projectService to create the project
+        const newProject = await projectService.createProject(validData, ownerId);
 
         // Get the user data from appInitializationService
         const userData = await appInitializationService.getCurrentUser();
 
-        // Create a well-formed project object from the response
-        const newProject: Project = {
-          id: data.createProjectV2.projectV2.id,
-          name: data.createProjectV2.projectV2.title,
-          description: projectData.description || "",
-          createdAt: data.createProjectV2.projectV2.createdAt,
-          updatedAt: data.createProjectV2.projectV2.updatedAt,
-          url: data.createProjectV2.projectV2.url,
-          html_url: data.createProjectV2.projectV2.url,
-          createdBy: {
-            login: userData?.login || "",
-            avatarUrl: userData?.avatarUrl || "",
-          },
-          owner: {
-            login: userData?.login || "",
-            avatarUrl: userData?.avatarUrl || "",
-          },
-          columns: [],
-          issues: [],
-          collaborators: [],
-          repositories: [],
-        };
+        // Update user information in the project
+        if (userData) {
+          newProject.createdBy = {
+            login: userData.login || "",
+            avatarUrl: userData.avatarUrl || "",
+          };
+          newProject.owner = {
+            login: userData.login || "",
+            avatarUrl: userData.avatarUrl || "",
+          };
+        }
 
         // Refresh data from appInitializationService to ensure consistent state
         await appInitializationService.getAllInitialData();
@@ -174,50 +133,8 @@ export class ProjectStore {
       this.clearValidationErrors();
 
       try {
-        const input = {
-          projectId: projectId,
-          title: validData.name,
-          ...(validData.description ? { shortDescription: validData.description } : {}),
-        };
-
-        // Use the generated mutation document
-        const { data, error } = await client.mutation(UpdateProjectDocument, { input }).toPromise();
-
-        interface UpdateProjectResponse {
-          updateProjectV2: {
-            projectV2: {
-              id: string;
-              title: string;
-              updatedAt: string;
-              url: string;
-            };
-          };
-        }
-
-        const typedData = data as unknown as UpdateProjectResponse;
-
-        if (error || !typedData?.updateProjectV2?.projectV2) {
-          throw new Error(error?.message || "Failed to update project");
-        }
-
-        const projectData = typedData.updateProjectV2.projectV2;
-
-        // Find the existing project to preserve its relationships
-        const existingProject = this.projects.find((p) => p.id === projectId);
-        if (!existingProject) {
-          throw new Error(`Project with ID ${projectId} not found`);
-        }
-
-        // Create an updated project object
-        const updatedProject: Project = {
-          ...existingProject,
-          id: projectData.id,
-          name: projectData.title,
-          description: projectData.title || "", // Using title as fallback since shortDescription isn't available
-          updatedAt: projectData.updatedAt,
-          url: projectData.url,
-          html_url: projectData.url,
-        };
+        // Use projectService to update the project
+        const updatedProject = await projectService.updateProject(projectId, validData);
 
         // Update the state
         runInAction(() => {
@@ -247,16 +164,8 @@ export class ProjectStore {
     this.error = null;
 
     try {
-      const input = {
-        projectId: projectId,
-      };
-
-      // Use the generated mutation document
-      const { data, error } = await client.mutation(DeleteProjectDocument, { input }).toPromise();
-
-      // The GraphQL mutation returns {data: {deleteProjectV2: {clientMutationId: null}}}
-      // which indicates a successful deletion even with null clientMutationId
-      const success = error ? false : Boolean(data?.deleteProjectV2);
+      // Use projectService to delete the project
+      const success = await projectService.deleteProject(projectId);
 
       runInAction(() => {
         if (success) {
@@ -334,33 +243,16 @@ export class ProjectStore {
         throw new Error("Status field not found in project");
       }
 
-      // Use the generated mutation document
-      const { data, error } = await client
-        .mutation(AddColumnDocument, {
-          fieldId: statusFieldId,
-          name: columnData.name,
-          color:
-            ProjectV2SingleSelectFieldOptionColor[
-              this.getColorForColumnType(
-                columnData.type
-              ) as keyof typeof ProjectV2SingleSelectFieldOptionColor
-            ],
-        })
-        .toPromise();
+      // Use projectService to add the column
+      const newColumn = await projectService.addColumn(projectId, columnData, statusFieldId);
 
-      if (error || !data) {
-        throw new Error(error?.message || "Failed to add column");
+      if (!newColumn) {
+        throw new Error("Failed to add column");
       }
 
       // Refresh project data from appInitializationService
       await appInitializationService.getAllInitialData();
       const updatedColumns = appInitializationService.getProjectColumns(projectId);
-
-      // Find the newly added column by name
-      const newColumn = updatedColumns.find((col) => col.name === columnData.name);
-      if (!newColumn) {
-        throw new Error("Failed to find the new column");
-      }
 
       // Update the state
       runInAction(() => {
@@ -449,58 +341,18 @@ export class ProjectStore {
           // Use the first repository as the target
           const repositoryId = repositoryStore.repositories[0].id;
 
-          // Create the issue
-          const { data, error } = await client
-            .mutation(CreateIssueDocument, {
-              repositoryId,
-              title: validData.title,
-              body: validData.description || "",
-            })
-            .toPromise();
-
-          interface CreateIssueResponse {
-            createIssue: {
-              issue: {
-                id: string;
-                number: number;
-              };
-            };
-          }
-
-          const typedIssueData = data as unknown as CreateIssueResponse;
-
-          if (error || !typedIssueData?.createIssue?.issue) {
-            throw new Error(error?.message || "Failed to create issue");
-          }
-
-          const issueId = typedIssueData.createIssue.issue.id;
+          // Create the issue using projectService
+          const issueResult = await projectService.createIssue(
+            repositoryId,
+            validData.title,
+            validData.description || ""
+          );
 
           // Add the issue to the project
-          const addInput = {
+          const projectItemId = await projectService.addIssueToProject(
             projectId,
-            contentId: issueId,
-          };
-
-          // Use the generated document from operation-names
-          const { data: addItemData, error: addItemError } = await client
-            .mutation(AddProjectItemDocument, { input: addInput })
-            .toPromise();
-
-          interface AddItemResponse {
-            addProjectV2ItemById: {
-              item: {
-                id: string;
-              };
-            };
-          }
-
-          const typedAddItemData = addItemData as unknown as AddItemResponse;
-
-          if (addItemError || !typedAddItemData?.addProjectV2ItemById?.item) {
-            throw new Error(addItemError?.message || "Failed to add issue to project");
-          }
-
-          const projectItemId = typedAddItemData.addProjectV2ItemById.item.id;
+            issueResult.issueId
+          );
 
           // If columnId is provided, update the issue status
           if (columnId) {
@@ -518,10 +370,10 @@ export class ProjectStore {
           // Create a BoardIssue object from the response
           const newIssue: BoardIssue = {
             id: projectItemId,
-            issueId,
+            issueId: issueResult.issueId,
             title: validData.title,
             body: validData.description || "",
-            number: typedIssueData.createIssue.issue.number,
+            number: issueResult.number,
             status: columnId ? this.getColumnNameById(columnId) : "TODO", // Default status for new issues
             columnId: columnId || "no-status",
             labels: [],
@@ -588,29 +440,13 @@ export class ProjectStore {
       const column = columns.find((col) => col.id === statusOptionId);
       const statusName = column?.name || "TODO";
 
-      // Use the generated mutation document
-      const { data, error } = await client
-        .mutation(UpdateIssueStatusDocument, {
-          projectId,
-          itemId,
-          fieldId: statusField,
-          valueId: statusOptionId,
-        })
-        .toPromise();
-
-      interface UpdateIssueStatusResponse {
-        updateProjectV2ItemFieldValue: {
-          projectV2Item: {
-            id: string;
-          };
-        };
-      }
-
-      const typedStatusData = data as unknown as UpdateIssueStatusResponse;
-
-      if (error || !typedStatusData?.updateProjectV2ItemFieldValue?.projectV2Item) {
-        throw new Error(error?.message || "Failed to update issue status");
-      }
+      // Use projectService to update the issue status
+      const success = await projectService.updateIssueStatus(
+        projectId,
+        itemId,
+        statusField,
+        statusOptionId
+      );
 
       // Update the local issue
       runInAction(() => {
@@ -625,7 +461,7 @@ export class ProjectStore {
         this.loading = false;
       });
 
-      return true;
+      return success;
     } catch (error) {
       runInAction(() => {
         this.setError(error);
@@ -657,45 +493,13 @@ export class ProjectStore {
         // Use the first repository as the target
         const repositoryId = repositoryStore.repositories[0].id;
 
-        // GitHub expects hex colors without the # prefix
-        const colorHex = validData.color.startsWith("#")
-          ? validData.color.substring(1)
-          : validData.color;
-
-        // Use the generated CreateLabelDocument
-        const input = {
+        // Use projectService to create the label
+        const newLabel = await projectService.createLabel(
           repositoryId,
-          name: validData.name,
-          color: colorHex,
-          description: validData.description || "",
-        };
-
-        const { data, error } = await client.mutation(CreateLabelDocument, { input }).toPromise();
-
-        interface CreateLabelResponse {
-          createLabel: {
-            label: {
-              id: string;
-              name: string;
-              color: string;
-              description: string | null;
-            };
-          };
-        }
-
-        const typedLabelData = data as unknown as CreateLabelResponse;
-
-        if (error || !typedLabelData?.createLabel?.label) {
-          throw new Error(error?.message || "Failed to create label");
-        }
-
-        const labelData = typedLabelData.createLabel.label;
-        const newLabel: Label = {
-          id: labelData.id,
-          name: labelData.name,
-          color: `#${labelData.color}`,
-          description: labelData.description || "",
-        };
+          validData.name,
+          validData.color,
+          validData.description
+        );
 
         // Refresh data from appInitializationService
         await appInitializationService.getAllInitialData();
@@ -736,19 +540,11 @@ export class ProjectStore {
     this.error = null;
 
     try {
-      const input = {
-        projectId,
-        repositoryId: `${repositoryOwner}/${repositoryName}`,
-      };
+      // Construct the repository ID
+      const repositoryId = `${repositoryOwner}/${repositoryName}`;
 
-      // Use the generated mutation document
-      const { data, error } = await client
-        .mutation(LinkRepositoryToProjectDocument, { input })
-        .toPromise();
-
-      if (error || !data?.linkProjectV2ToRepository) {
-        throw new Error(error?.message || "Failed to link repository to project");
-      }
+      // Use projectService to link the repository
+      const success = await projectService.linkRepositoryToProject(projectId, repositoryId);
 
       // Refresh data from appInitializationService
       await appInitializationService.getAllInitialData();
@@ -772,7 +568,7 @@ export class ProjectStore {
         });
       }
 
-      return true;
+      return success;
     } catch (error) {
       runInAction(() => {
         this.setError(error);
@@ -824,24 +620,6 @@ export class ProjectStore {
    */
   clearError() {
     this.error = null;
-  }
-
-  /**
-   * Helper method to get a color for a column type
-   */
-  private getColorForColumnType(type: ColumnType): string {
-    switch (type) {
-      case ColumnType.TODO:
-        return "Blue";
-      case ColumnType.IN_PROGRESS:
-        return "Yellow";
-      case ColumnType.DONE:
-        return "Green";
-      case ColumnType.BACKLOG:
-        return "Purple";
-      default:
-        return "Gray";
-    }
   }
 
   /**
@@ -967,12 +745,8 @@ export class ProjectStore {
         }
       });
 
-      // Now perform the actual deletion
-      const { error } = await client.mutation(DeleteIssueDocument, { issueId }).toPromise();
-
-      if (error) {
-        throw new Error(error.message || "Failed to delete issue");
-      }
+      // Use projectService to delete the issue
+      await projectService.deleteIssue(issueId);
 
       // Refresh project data to ensure we're in sync with the server
       await appInitializationService.getAllInitialData();

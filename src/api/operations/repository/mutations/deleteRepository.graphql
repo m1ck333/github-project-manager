@@ -1,0 +1,17 @@
+mutation DisableRepository($repositoryId: ID!) {
+  # GitHub doesn't have a deleteRepository mutation
+  # Using updateRepository to disable it instead
+  updateRepository(
+    input: {
+      repositoryId: $repositoryId
+      hasIssuesEnabled: false
+      hasProjectsEnabled: false
+      hasWikiEnabled: false
+    }
+  ) {
+    repository {
+      id
+      name
+    }
+  }
+}

@@ -3,33 +3,6 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Repository, RepositoryCollaborator, RepositoryCollaboratorFormData } from "../core/types";
 import { repositoryService } from "../services";
 
-// GraphQL fragments for repository collaborator operations
-const COLLABORATOR_FRAGMENT = `
-  fragment CollaboratorFields on User {
-    id
-    login
-    avatarUrl
-  }
-`;
-
-// GraphQL query to get repository collaborators
-const REPOSITORY_COLLABORATORS_QUERY = `
-  ${COLLABORATOR_FRAGMENT}
-  query GetRepositoryCollaborators($owner: String!, $name: String!, $username: String) {
-    repository(owner: $owner, name: $name) {
-      id
-      collaborators(first: 100, query: $username) {
-        edges {
-          permission
-          node {
-            ...CollaboratorFields
-          }
-        }
-      }
-    }
-  }
-`;
-
 export class RepositoryStore {
   repositories: Repository[] = [];
   loading = false;
@@ -200,32 +173,7 @@ export class RepositoryStore {
     // Create the promise for this fetch
     const fetchPromise = (async () => {
       try {
-        // Ensure we have the latest data
-        await repositoryService.fetchRepositories();
-
-        // Find the repository in our store
-        const repository = this.repositories.find(
-          (r) => r.owner.login === owner && r.name === name
-        );
-
-        if (!repository) {
-          throw new Error(`Repository ${owner}/${name} not found in store`);
-        }
-
-        // Skip if collaborators are already fetched
-        if (repository.collaborators && repository.collaborators.length > 0) {
-          return repository.collaborators;
-        }
-
-        // Get the repositories from repositoryService to get the collaborators
-        const repos = repositoryService.getRepositories();
-        const repoWithCollaborators = repos.find((r) => r.owner.login === owner && r.name === name);
-
-        if (!repoWithCollaborators) {
-          throw new Error(`Repository ${owner}/${name} not found in app data`);
-        }
-
-        const collaborators = repoWithCollaborators.collaborators || [];
+        const collaborators = await repositoryService.getRepositoryCollaborators(owner, name);
 
         // Update the store
         runInAction(() => {
