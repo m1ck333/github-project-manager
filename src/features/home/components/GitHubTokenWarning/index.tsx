@@ -3,8 +3,8 @@ import React, { useState } from "react";
 
 import { userStore } from "@/stores";
 
-import InfoBox from "../../../../common/components/ui/InfoBox";
-import Loading from "../../../../common/components/ui/Loading";
+import InfoBox from "../../../../common/components/ui/feedback/InfoBox";
+import Loading from "../../../../common/components/ui/feedback/Loading";
 
 import styles from "./GitHubTokenWarning.module.scss";
 
@@ -16,7 +16,7 @@ const GitHubTokenWarning: React.FC = observer(() => {
   const errorMessage = userStore.error;
 
   if (isLoading) {
-    return <Loading size="small" text="Checking GitHub configuration..." fixedHeight />;
+    return <Loading size="small" text="Checking GitHub configuration..." />;
   }
 
   if ((hasToken && isAuthenticated) || dismissed) {

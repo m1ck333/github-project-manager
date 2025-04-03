@@ -2,9 +2,7 @@ import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 
-import Button from "@/common/components/ui/Button";
-import Input from "@/common/components/ui/Input";
-import { useToast } from "@/common/components/ui/Toast";
+import { Button, Input, useToast } from "@/common/components/ui";
 import { projectStore } from "@/stores";
 
 import styles from "./LabelForm.module.scss";

@@ -1,16 +1,11 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { FiArrowLeft, FiUser, FiUserX, FiUserPlus, FiLink } from "react-icons/fi";
+import { FiUser, FiUserX, FiLink } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
-import BackButton from "@/common/components/composed/BackButton";
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import PageContainer from "@/common/components/layout/PageContainer";
-import Button from "@/common/components/ui/Button";
-import Input from "@/common/components/ui/Input";
-import Modal from "@/common/components/ui/Modal";
-import { useToast } from "@/common/components/ui/Toast";
-import { ROUTES } from "@/common/constants/routes";
+import { Button, Input, Modal, useToast } from "@/common/components/ui";
 import { EmptyCollaboratorsList } from "@/features/collaborators/components";
 import { repositoryStore, projectStore } from "@/stores";
 
@@ -84,10 +79,6 @@ const RepositoryPage: React.FC = observer(() => {
       setSelectedProjectId(projectStore.projects[0].id);
     }
   }, [showLinkProjectModal, projectStore.projects]);
-
-  const handleGoBack = () => {
-    navigate("/repositories");
-  };
 
   const handleAddCollaborator = async (e: React.FormEvent) => {
     e.preventDefault();

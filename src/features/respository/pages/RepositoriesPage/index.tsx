@@ -6,11 +6,7 @@ import { useNavigate } from "react-router-dom";
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import GridContainer from "@/common/components/composed/grid/GridContainer";
 import PageContainer from "@/common/components/layout/PageContainer";
-import Button from "@/common/components/ui/Button";
-import ConfirmationDialog from "@/common/components/ui/ConfirmationDialog";
-import Input from "@/common/components/ui/Input";
-import Modal from "@/common/components/ui/Modal";
-import { useToast } from "@/common/components/ui/Toast";
+import { Button, ConfirmationDialog, Input, Modal, useToast } from "@/common/components/ui";
 import RepositoryCard from "@/features/respository/components/RepositoryCard";
 import { repositoryStore } from "@/stores";
 

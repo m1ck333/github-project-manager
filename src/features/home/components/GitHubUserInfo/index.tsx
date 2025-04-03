@@ -2,8 +2,7 @@ import { observer } from "mobx-react-lite";
 import React from "react";
 import { FiUser } from "react-icons/fi";
 
-import Loading from "@/common/components/ui/Loading";
-import Tooltip from "@/common/components/ui/Tooltip";
+import { Loading, Tooltip } from "@/common/components/ui";
 import { GITHUB_URL } from "@/common/constants/github";
 import { userStore } from "@/stores";
 

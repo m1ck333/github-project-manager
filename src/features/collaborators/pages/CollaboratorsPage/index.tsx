@@ -1,16 +1,10 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { FiArrowLeft, FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
-import { useParams, useNavigate } from "react-router-dom";
+import { FiPlus, FiUsers, FiTrash2 } from "react-icons/fi";
+import { useParams } from "react-router-dom";
 
-import BackButton from "@/common/components/composed/BackButton";
 import PageContainer from "@/common/components/layout/PageContainer";
-import Button from "@/common/components/ui/Button";
-import Input from "@/common/components/ui/Input";
-import Loading from "@/common/components/ui/Loading";
-import Modal from "@/common/components/ui/Modal";
-import { useToast } from "@/common/components/ui/Toast";
-import { ROUTES } from "@/common/constants/routes";
+import { Button, Input, Modal, useToast } from "@/common/components/ui";
 import { EmptyCollaboratorsList } from "@/features/collaborators/components";
 import { collaboratorService } from "@/services";
 import { projectStore } from "@/stores";
@@ -48,7 +42,6 @@ function mapToCollaborator(repoCollab: RepositoryCollaborator): Collaborator {
 
 const CollaboratorsPage: React.FC = observer(() => {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
   const [isAddingCollaborator, setIsAddingCollaborator] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,10 +68,6 @@ const CollaboratorsPage: React.FC = observer(() => {
       setIsLoading(false);
     }
   }, [projectId]);
-
-  const handleBack = () => {
-    navigate(ROUTES.PROJECT_DETAIL(projectId));
-  };
 
   const handleAddCollaborator = async (data: CollaboratorFormData) => {
     if (!projectId) return;

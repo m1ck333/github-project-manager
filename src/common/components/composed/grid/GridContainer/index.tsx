@@ -1,10 +1,10 @@
 import React, { ReactNode } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 
-import Button from "../../../ui/Button";
-import InfoBox from "../../../ui/InfoBox";
-import Input from "../../../ui/Input";
-import Loading from "../../../ui/Loading";
+import Button from "../../../ui/display/Button";
+import InfoBox from "../../../ui/feedback/InfoBox";
+import Loading from "../../../ui/feedback/Loading";
+import Input from "../../../ui/form/Input";
 
 import styles from "./GridContainer.module.scss";
 

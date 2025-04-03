@@ -1,11 +1,15 @@
 import { client } from "../api/client";
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import { GithubProjectData, GithubViewerData, mapToProject } from "../core/mappers/project.mapper";
 import { GithubRepositoryData, mapToRepository } from "../core/mappers/repository.mapper";
 import { mapToUserProfile } from "../core/mappers/user.mapper";
 import { AllAppData, UserProfile, Project, BoardIssue, Column } from "../core/types";
+import { Projects } from "../features/projects";
+import {
+  GithubProjectData,
+  GithubViewerData,
+  mapToProject,
+} from "../features/projects/lib/mappers";
 
-import { projectService } from "./project.service";
 import { repositoryService } from "./repository.service";
 import { userService } from "./user.service";
 
@@ -76,7 +80,7 @@ export class AppInitializationService {
             .map((node) =>
               mapToProject(node as unknown as GithubProjectData, viewer as GithubViewerData)
             );
-          projectService.setProjects(projects);
+          Projects.services.crud.setProjects(projects);
         }
       }
 
@@ -107,7 +111,7 @@ export class AppInitializationService {
         twitterUsername: null,
       },
       repositories: repositoryService.getRepositories(),
-      projects: projectService.getProjects(),
+      projects: Projects.services.crud.getProjects(),
     };
   }
 
@@ -144,17 +148,19 @@ export class AppInitializationService {
   }
 
   /**
-   * Get project columns by project ID
+   * Get columns for a specific project
    */
   getProjectColumns(projectId: string): Column[] {
+    // Get the project first to ensure we have access to columns
     const project = this.getProjectById(projectId);
     return project?.columns || [];
   }
 
   /**
-   * Get project issues by project ID
+   * Get issues for a specific project
    */
   getProjectIssues(projectId: string): BoardIssue[] {
+    // Get the project first to ensure we have access to issues
     const project = this.getProjectById(projectId);
     return project?.issues || [];
   }
@@ -163,7 +169,16 @@ export class AppInitializationService {
    * Get project by ID
    */
   getProjectById(projectId: string): Project | undefined {
-    return projectService.getProjectById(projectId);
+    return Projects.services.crud.getProjectById(projectId);
+  }
+
+  /**
+   * Get labels for a specific project
+   */
+  getProjectLabels(projectId: string) {
+    // Get the project first to ensure we have access to labels
+    const project = this.getProjectById(projectId);
+    return project?.labels || [];
   }
 
   /**

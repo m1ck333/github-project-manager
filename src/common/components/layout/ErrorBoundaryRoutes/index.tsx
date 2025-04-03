@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-import Button from "@/common/components/ui/Button";
-import Error from "@/common/components/ui/Error";
+import Button from "@/common/components/ui/display/Button";
+import Error from "@/common/components/ui/feedback/Error";
+import { getErrorMessage } from "@/common/utils/errors";
 import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage";
 import Home from "@/features/home/pages/HomePage";
-import ProjectPage from "@/features/project/pages/ProjectPage";
-import ProjectsPage from "@/features/project/pages/ProjectsPage";
+import ProjectPage from "@/features/projects/pages/ProjectPage";
+import ProjectsPage from "@/features/projects/pages/ProjectsPage";
 import RepositoriesPage from "@/features/respository/pages/RepositoriesPage";
 import RepositoryPage from "@/features/respository/pages/RepositoryPage";
 
@@ -15,7 +16,7 @@ import { ROUTES } from "../../../constants/routes";
 const ErrorBoundaryRoutes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Reset error when location changes
   useEffect(() => {
@@ -29,7 +30,9 @@ const ErrorBoundaryRoutes: React.FC = () => {
 
     // Create error handler
     const handleError = (event: ErrorEvent) => {
-      setError(event.error || new Error("An unexpected application error occurred"));
+      setError(
+        event.error ? getErrorMessage(event.error) : "An unexpected application error occurred"
+      );
       event.preventDefault();
     };
 
@@ -37,8 +40,8 @@ const ErrorBoundaryRoutes: React.FC = () => {
     const handleRejection = (event: PromiseRejectionEvent) => {
       setError(
         event.reason instanceof Error
-          ? event.reason
-          : new Error(String(event.reason) || "Unhandled Promise Rejection")
+          ? getErrorMessage(event.reason)
+          : String(event.reason) || "Unhandled Promise Rejection"
       );
     };
 
@@ -54,7 +57,7 @@ const ErrorBoundaryRoutes: React.FC = () => {
         errorMessage.includes("Error") ||
         errorMessage.includes("Exception")
       ) {
-        setError(new Error(errorMessage));
+        setError(errorMessage);
       }
     };
 

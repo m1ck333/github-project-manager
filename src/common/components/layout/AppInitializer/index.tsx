@@ -3,9 +3,9 @@ import { FC, ReactNode } from "react";
 import { FiRefreshCcw } from "react-icons/fi";
 
 import { useAppInitialization } from "../../../hooks/useAppInitialization";
-import Button from "../../ui/Button";
-import InfoBox from "../../ui/InfoBox";
-import Loading from "../../ui/Loading";
+import { Button } from "../../ui";
+import InfoBox from "../../ui/feedback/InfoBox";
+import Loading from "../../ui/feedback/Loading";
 
 import styles from "./AppInitializer.module.scss";
 
@@ -24,7 +24,7 @@ export const AppInitializer: FC<AppInitializerProps> = observer(({ children }) =
     return (
       <div className={styles.errorContainer}>
         {loading ? (
-          <Loading text="Initializing application..." />
+          <Loading text="Initializing application..." size="large" fullPage={true} />
         ) : (
           <InfoBox variant="error">
             <h2>Error loading data</h2>

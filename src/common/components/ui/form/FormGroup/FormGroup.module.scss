@@ -1,0 +1,19 @@
+@use "@/styles/variables" as *;
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+
+  label {
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+  }
+
+  .error {
+    color: $danger-color;
+    font-size: $font-size-small;
+    margin-top: $spacing-xs;
+  }
+}

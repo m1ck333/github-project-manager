@@ -1,0 +1,33 @@
+@use "@/styles/variables" as *;
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  text-align: center;
+  border: 2px dashed $gray-200;
+  border-radius: $border-radius-md;
+  min-height: 200px;
+
+  .icon {
+    margin-bottom: $spacing-md;
+    color: $gray-400;
+  }
+
+  .title {
+    margin: $spacing-sm 0;
+    color: $text-primary;
+    font-weight: $font-weight-semibold;
+  }
+
+  .description {
+    color: $text-secondary;
+    margin: 0 0 $spacing-md;
+  }
+
+  .action {
+    margin-top: $spacing-md;
+  }
+}

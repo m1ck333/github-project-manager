@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiUsers, FiEdit, FiPower } from "react-icons/fi";
 
 import GridCard from "../../../../common/components/composed/grid/GridCard";
-import Loading from "../../../../common/components/ui/Loading";
+import Loading from "../../../../common/components/ui/feedback/Loading";
 import { Repository } from "../../../../core/types";
 import { repositoryStore } from "../../../../stores";
 

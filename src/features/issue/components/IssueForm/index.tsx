@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
 import React, { useState, useEffect } from "react";
 
-import Button from "../../../../common/components/ui/Button";
-import Input from "../../../../common/components/ui/Input";
-import { useToast } from "../../../../common/components/ui/Toast";
+import Button from "../../../../common/components/ui/display/Button";
+import { useToast } from "../../../../common/components/ui/feedback/Toast";
+import Input from "../../../../common/components/ui/form/Input";
 import { Label } from "../../../../core/types";
 import { projectStore } from "../../../../stores";
 

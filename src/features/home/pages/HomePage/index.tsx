@@ -4,7 +4,7 @@ import { FiFolder, FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from "@/common/components/layout/PageContainer";
-import Button from "@/common/components/ui/Button";
+import { Button } from "@/common/components/ui";
 import { useAppInitialization } from "@/common/hooks/useAppInitialization";
 import { env } from "@/config/env";
 import GitHubTokenWarning from "@/features/home/components/GitHubTokenWarning";

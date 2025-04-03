@@ -2,8 +2,8 @@ import React from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-import Button from "../../../components/ui/Button";
 import { ROUTES } from "../../../constants/routes";
+import Button from "../../ui/display/Button";
 
 import styles from "./BackButton.module.scss";
 

@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AppInitializer } from "./common/components/layout/AppInitializer";
 import ErrorBoundaryRoutes from "./common/components/layout/ErrorBoundaryRoutes";
 import Layout from "./common/components/layout/Layout";
-import { ToastProvider } from "./common/components/ui/Toast";
+import { ToastProvider } from "./common/components/ui/feedback/Toast";
 import { StoreProvider, rootStore } from "./stores";
 
 const App: React.FC = () => {

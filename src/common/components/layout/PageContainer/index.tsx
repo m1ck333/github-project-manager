@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { env } from "../../../../config/env";
 import BackButton, { BackDestination } from "../../composed/BackButton";
-import Error from "../../ui/Error";
+import Error from "../../ui/feedback/Error";
 import Container from "../Container";
 
 import styles from "./PageContainer.module.scss";

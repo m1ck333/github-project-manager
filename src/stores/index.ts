@@ -1,19 +1,21 @@
 import { createContext, useContext } from "react";
 
+import { Projects } from "../features/projects";
+// TODO: Move this import of ProjectStore is only temporary, until refactoring is complete
+import { ProjectStore as FeatureProjectStore } from "../features/projects/stores";
 import { appInitializationService } from "../services";
 
-import { ProjectStore } from "./project.store";
 import { RepositoryStore } from "./repository.store";
 import { UserStore } from "./user.store";
 
 // Create the store instances
-export const projectStore = new ProjectStore();
+export const projectStore = Projects.store;
 export const repositoryStore = new RepositoryStore();
 export const userStore = new UserStore();
 
 // Define a store context type
 export interface RootStore {
-  projectStore: ProjectStore;
+  projectStore: FeatureProjectStore;
   repositoryStore: RepositoryStore;
   userStore: UserStore;
 }
@@ -37,7 +39,7 @@ export const initializeStores = async (): Promise<void> => {
     // Update stores with the fetched data
     userStore.setUserProfile(data.user);
     repositoryStore.setRepositories(data.repositories);
-    projectStore.setProjects(data.projects);
+    projectStore.crud.setProjects(data.projects);
   } catch (error) {
     console.error("Failed to initialize stores:", error);
   }
@@ -47,7 +49,7 @@ export const initializeStores = async (): Promise<void> => {
 export const useStore = (): RootStore => useContext(storeContext);
 
 // Create a hook to use a specific store
-export const useProjectStore = (): ProjectStore => useContext(storeContext).projectStore;
+export const useProjectStore = (): FeatureProjectStore => useContext(storeContext).projectStore;
 export const useRepositoryStore = (): RepositoryStore => useContext(storeContext).repositoryStore;
 export const useUserStore = (): UserStore => useContext(storeContext).userStore;
 
