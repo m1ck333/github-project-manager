@@ -1,11 +1,4 @@
-@use "src/styles/variables.scss" as *;
-
-// Size classes that can be directly referenced
-.small,
-.medium,
-.large {
-  // These are empty but help with CSS Modules class mapping
-}
+@use "@/styles/variables" as *;
 
 .loading {
   display: flex;
@@ -15,7 +8,7 @@
   padding: $spacing-md;
 
   &.fixedHeight {
-    min-height: 40px; // Default minimum height
+    min-height: 40px;
 
     &.small {
       min-height: 30px;

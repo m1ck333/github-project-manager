@@ -46,7 +46,7 @@ const ProjectPage: React.FC = observer(() => {
     } else {
       setError(null);
     }
-  }, [projectStore.error]);
+  }, []);
 
   const project = projectStore.selectedProject;
 
@@ -67,7 +67,7 @@ const ProjectPage: React.FC = observer(() => {
     <PageContainer
       title={project?.name || "Project"}
       backDestination="projects"
-      isLoading={false} // No loading state needed since data is already loaded
+      isLoading={false}
       error={error}
       loadingMessage="Loading project..."
       titleActions={titleActions}

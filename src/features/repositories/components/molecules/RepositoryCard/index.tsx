@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FiUsers, FiEdit, FiPower } from "react-icons/fi";
 
-import GridCard from "../../../../common/components/composed/grid/GridCard";
-import Loading from "../../../../common/components/ui/feedback/Loading";
-import { Repository } from "../../../../core/types";
-import { repositoryStore } from "../../../../stores";
+import GridCard from "@/common/components/composed/grid/GridCard";
+import Loading from "@/common/components/ui/feedback/Loading";
+import { Repository, Repositories } from "@/features/repositories";
 
 import styles from "./RepositoryCard.module.scss";
 
@@ -25,17 +24,19 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
 
   // Fetch collaborators on mount if not already loaded
   useEffect(() => {
-    if (repository.collaborators === undefined && !isLoadingCollaborators) {
+    const { collaborators, name, owner } = repository;
+
+    if (collaborators === undefined && !isLoadingCollaborators) {
       setIsLoadingCollaborators(true);
-      repositoryStore
-        .fetchRepositoryCollaborators(repository.owner.login, repository.name)
+      Repositories.store
+        .fetchRepositoryCollaborators(owner.login, name)
         .then(() => setIsLoadingCollaborators(false))
-        .catch((error) => {
+        .catch((error: Error) => {
           console.error("Error fetching collaborators:", error);
           setIsLoadingCollaborators(false);
         });
     }
-  }, [repository.id, repository.collaborators]);
+  }, [repository, isLoadingCollaborators]);
 
   // Handle collaborators - might be undefined or empty array
   const collaboratorCount = repository.collaborators?.length || 0;

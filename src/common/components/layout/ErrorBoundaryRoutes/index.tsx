@@ -8,8 +8,8 @@ import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage"
 import Home from "@/features/home/pages/HomePage";
 import ProjectPage from "@/features/projects/pages/ProjectPage";
 import ProjectsPage from "@/features/projects/pages/ProjectsPage";
-import RepositoriesPage from "@/features/respository/pages/RepositoriesPage";
-import RepositoryPage from "@/features/respository/pages/RepositoryPage";
+import RepositoriesPage from "@/features/repositories/pages/RepositoriesPage";
+import RepositoryPage from "@/features/repositories/pages/RepositoryPage";
 
 import { ROUTES } from "../../../constants/routes";
 

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
@@ -7,14 +7,13 @@ import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import GridContainer from "@/common/components/composed/grid/GridContainer";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, ConfirmationDialog, Input, Modal, useToast } from "@/common/components/ui";
-import RepositoryCard from "@/features/respository/components/RepositoryCard";
-import { repositoryStore } from "@/stores";
-
-import { Repository } from "../../../../core/types";
+import { Repositories, Repository } from "@/features/repositories";
+import RepositoryCard from "@/features/repositories/components/molecules/RepositoryCard";
 
 import styles from "./RepositoriesPage.module.scss";
 
 const RepositoriesPage: React.FC = observer(() => {
+  const repositoryStore = Repositories.store;
   const { repositories, loading, error } = repositoryStore;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +27,13 @@ const RepositoriesPage: React.FC = observer(() => {
   const toast = useToast();
   const navigate = useNavigate();
 
+  // Load repositories when component mounts
+  useEffect(() => {
+    if (repositories.length === 0 && !loading && !error) {
+      Repositories.services.crud.fetchRepositories();
+    }
+  }, [repositories.length, loading, error]);
+
   const handleCreateRepository = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -39,7 +45,11 @@ const RepositoriesPage: React.FC = observer(() => {
     setIsSubmitting(true);
 
     try {
-      await repositoryStore.createRepository(repoName.trim(), repoDesc.trim(), visibility);
+      await Repositories.services.crud.createRepository(
+        repoName.trim(),
+        repoDesc.trim(),
+        visibility
+      );
 
       setIsModalOpen(false);
       resetForm();
@@ -58,12 +68,12 @@ const RepositoriesPage: React.FC = observer(() => {
   };
 
   const handleRefresh = () => {
-    repositoryStore.fetchUserRepositories();
+    Repositories.services.crud.fetchRepositories();
   };
 
   const handleRetry = () => {
     repositoryStore.clearError();
-    repositoryStore.fetchUserRepositories();
+    Repositories.services.crud.fetchRepositories();
   };
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -71,12 +81,7 @@ const RepositoriesPage: React.FC = observer(() => {
   };
 
   // Filter repositories based on search query
-  const filteredRepositories = repositories.filter(
-    (repo: Repository) =>
-      repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      repo.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      false
-  );
+  const filteredRepositories = Repositories.services.search.searchRepositories(searchQuery);
 
   // Handle repository disabling
   const handleDisableRepository = (repository: Repository) => {
@@ -91,11 +96,8 @@ const RepositoriesPage: React.FC = observer(() => {
     if (disableRepository) {
       try {
         setIsDisabling(true);
-        // Implement the actual disabling using updateRepository mutation
-        await repositoryStore.disableRepository(
-          disableRepository.owner.login,
-          disableRepository.name
-        );
+        // Use the CRUD service to disable the repository
+        await Repositories.services.crud.disableRepository(disableRepository.id);
         toast.toast.success(`Repository "${disableRepository.name}" disabled successfully`);
         setDisableRepository(null);
       } catch (error) {

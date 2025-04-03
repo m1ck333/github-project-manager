@@ -7,7 +7,8 @@ import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, Input, Modal, useToast } from "@/common/components/ui";
 import { EmptyCollaboratorsList } from "@/features/collaborators/components";
-import { repositoryStore, projectStore } from "@/stores";
+import { Repositories } from "@/features/repositories";
+import { projectStore } from "@/stores";
 
 import { Project } from "../../../../core/types";
 
@@ -49,24 +50,25 @@ const RepositoryPage: React.FC = observer(() => {
   const [showLinkProjectModal, setShowLinkProjectModal] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [isLinkingProject, setIsLinkingProject] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (owner && name) {
-      // Get the repository from the store without triggering a data fetch
-      const repository = repositoryStore.selectRepositoryWithoutFetch(owner, name);
+      // Get the repository using the CombinedRepositoryStore method
+      const repository = Repositories.store.selectRepositoryWithoutFetch(owner, name);
 
       if (!repository) {
         // Only if repository isn't already in the store, fetch it
-        repositoryStore.loading = true;
-        repositoryStore
+        setIsLoading(true);
+        Repositories.store
           .fetchRepository(owner, name)
-          .catch((error) => {
-            console.error("Error loading repository data:", error);
-            // Set the error in the store to display it to the user
-            repositoryStore.error = error instanceof Error ? error.message : String(error);
+          .catch((err: Error) => {
+            console.error("Error loading repository data:", err);
+            setError(err instanceof Error ? err.message : String(err));
           })
           .finally(() => {
-            repositoryStore.loading = false;
+            setIsLoading(false);
           });
       }
     }
@@ -86,7 +88,11 @@ const RepositoryPage: React.FC = observer(() => {
 
     setIsSubmitting(true);
     try {
-      await repositoryStore.addRepositoryCollaborator(owner, name, { username, permission });
+      // Use the addRepositoryCollaborator method from the CombinedRepositoryStore
+      await Repositories.store.addRepositoryCollaborator(
+        `${owner}/${name}`, // Use repo name as ID since we don't have the actual ID
+        { username, permission }
+      );
       setUsername("");
       setPermission("read");
       setShowAddForm(false);
@@ -106,7 +112,8 @@ const RepositoryPage: React.FC = observer(() => {
     if (!owner || !name) return;
 
     try {
-      await repositoryStore.removeRepositoryCollaborator(owner, name, collaboratorId);
+      // Use the removeRepositoryCollaborator method from the CombinedRepositoryStore
+      await Repositories.store.removeRepositoryCollaborator(owner, name, collaboratorId);
       showToast("Collaborator removed successfully", "success");
     } catch (error) {
       console.error("Error removing collaborator:", error);
@@ -153,7 +160,8 @@ const RepositoryPage: React.FC = observer(() => {
     }
   };
 
-  const repository = repositoryStore.repositories.find(
+  // Find the repository in the repositories array
+  const repository = Repositories.store.repositories.find(
     (r) => r.owner.login === owner && r.name === name
   );
 
@@ -167,11 +175,11 @@ const RepositoryPage: React.FC = observer(() => {
       >
         <FiLink /> Link to Project
       </Button>
-      <ViewOnGithub link={repository.html_url} />
+      <ViewOnGithub link={repository.html_url || ""} />
     </div>
   );
 
-  if (repositoryStore.loading && !repository) {
+  if (isLoading && !repository) {
     return (
       <PageContainer
         title="Loading Repository..."
@@ -185,14 +193,9 @@ const RepositoryPage: React.FC = observer(() => {
     );
   }
 
-  if (repositoryStore.error) {
+  if (error) {
     return (
-      <PageContainer
-        title="Error"
-        fluid={false}
-        error={repositoryStore.error}
-        backDestination="repositories"
-      >
+      <PageContainer title="Error" fluid={false} error={error} backDestination="repositories">
         <div />
       </PageContainer>
     );
@@ -278,7 +281,7 @@ const RepositoryPage: React.FC = observer(() => {
           </form>
         )}
 
-        {repositoryStore.loading && <div className={styles.loading}>Loading collaborators...</div>}
+        {isLoading && <div className={styles.loading}>Loading collaborators...</div>}
 
         <div className={styles.collaboratorsList}>
           {repository.collaborators && repository.collaborators.length > 0 ? (

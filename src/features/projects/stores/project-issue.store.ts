@@ -1,8 +1,9 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
+import { Repositories } from "@/features/repositories";
+
 import { validateAndExecute } from "../../../common/utils/validation";
 import { appInitializationService } from "../../../services/app-init.service";
-import { repositoryStore } from "../../../stores";
 import { projectIssueService } from "../services";
 import { BoardIssue, Label } from "../types";
 import { issueSchema } from "../validation";
@@ -94,17 +95,21 @@ export class ProjectIssueStore {
         this.clearValidationErrors();
 
         try {
-          // Get a repository for this project from the repositories store
-          if (!repositoryStore.repositories.length) {
-            await repositoryStore.fetchUserRepositories();
-          }
+          this.loading = true;
+          this.validationErrors = null;
+          this.error = null;
 
-          if (!repositoryStore.repositories.length) {
+          // Ensure we have current repositories for selection
+          await Repositories.services.crud.fetchRepositories();
+
+          // Get available repositories
+          const availableRepositories = Repositories.store.repositories;
+          if (!availableRepositories.length) {
             throw new Error("No repositories available");
           }
 
           // Use the first repository as the target
-          const repositoryId = repositoryStore.repositories[0].id;
+          const repositoryId = availableRepositories[0].id;
 
           // Create the issue using projectService
           const issueResult = await projectIssueService.createIssue(
@@ -298,27 +303,27 @@ export class ProjectIssueStore {
   }
 
   /**
-   * Create a label for a repository
+   * Create a new label for a project
    */
   async createLabel(_projectId: string, name: string, color: string, description?: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      // Get a repository for this project
-      if (!repositoryStore.repositories.length) {
-        await repositoryStore.fetchUserRepositories();
-      }
+      // Ensure we have current repositories for selection
+      await Repositories.services.crud.fetchRepositories();
 
-      if (!repositoryStore.repositories.length) {
+      // Get available repositories
+      const availableRepositories = Repositories.store.repositories;
+      if (!availableRepositories.length) {
         throw new Error("No repositories available");
       }
 
-      // Use the first repository as the target
-      const repositoryId = repositoryStore.repositories[0].id;
+      // Use the first repository
+      const repository = availableRepositories[0];
 
       // Create the label
-      const label = await projectIssueService.createLabel(repositoryId, name, color, description);
+      const label = await projectIssueService.createLabel(repository.id, name, color, description);
 
       // Refresh project data
       await appInitializationService.getAllInitialData();

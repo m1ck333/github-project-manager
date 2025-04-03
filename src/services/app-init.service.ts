@@ -1,17 +1,22 @@
 import { client } from "../api/client";
 import { GetAllInitialDataDocument } from "../api/operations/operation-names";
-import { GithubRepositoryData, mapToRepository } from "../core/mappers/repository.mapper";
 import { mapToUserProfile } from "../core/mappers/user.mapper";
 import { AllAppData, UserProfile, Project, BoardIssue, Column } from "../core/types";
 import { Projects } from "../features/projects";
-import {
-  GithubProjectData,
-  GithubViewerData,
-  mapToProject,
-} from "../features/projects/lib/mappers";
+import { GithubViewerData, mapToProject } from "../features/projects/lib/mappers";
+import { Repositories } from "../features/repositories";
+import { RepositoryApiModel } from "../features/repositories/api";
+import { mapToRepository } from "../features/repositories/lib/mappers/repository.mapper";
+import { Repository } from "../features/repositories/types/repository";
 
-import { repositoryService } from "./repository.service";
 import { userService } from "./user.service";
+
+type QueryResponse = {
+  data?: unknown;
+  error?: {
+    message: string;
+  };
+};
 
 /**
  * Service responsible for orchestrating the initialization of all application data
@@ -22,6 +27,8 @@ export class AppInitializationService {
   private initializeCount = 0;
   private lastInitialization: number = 0;
   private cacheExpiryMs: number = 5 * 60 * 1000; // 5 minute cache
+  private rateLimitedRetryCount = 0;
+  private maxRetries = 5;
 
   /**
    * Initialize all application data in a coordinated manner
@@ -52,35 +59,58 @@ export class AppInitializationService {
 
       // Make a single GraphQL query to fetch ALL data at once
       // This will also verify the token as a side effect since the query will fail with an invalid token
-      const { data, error } = await client.query(GetAllInitialDataDocument, {}).toPromise();
+      const response = await this.queryWithRetry();
+      const { data, error } = response;
 
       if (error || !data) {
         throw new Error(error?.message || "Failed to fetch initial data");
       }
 
       // Extract data from the viewer object which contains everything
-      const viewer = data.viewer;
-      if (viewer) {
+      // Using type assertion as we know the structure from the GraphQL schema
+      const viewerData = data as { viewer: any };
+      if (viewerData.viewer) {
         // Set user profile using mapToUserProfile from userMapper
-        const userProfile = mapToUserProfile(viewer as GithubViewerData);
+        const userProfile = mapToUserProfile(viewerData.viewer as GithubViewerData);
         userService.setUserProfile(userProfile);
 
-        // Set repositories using mapToRepository from repositoryMapper
-        if (viewer.repositories?.nodes) {
-          const repositories = viewer.repositories.nodes
-            .filter((node) => node !== null)
-            .map((node) => mapToRepository(node as unknown as GithubRepositoryData));
-          repositoryService.setRepositories(repositories);
+        // Set repositories
+        if (viewerData.viewer.repositories?.nodes) {
+          const repositories = viewerData.viewer.repositories.nodes
+            .filter((node: unknown) => node !== null)
+            .map((node: unknown) => {
+              // Map the repository using the repository mapper
+              return mapToRepository(node as Partial<RepositoryApiModel>);
+            });
+
+          // Update the repository store in the feature
+          if (Repositories && Repositories.store) {
+            // Need to ensure all repositories have createdAt as non-optional field
+            const reposWithRequiredFields = repositories.map((repo: Repository) => ({
+              ...repo,
+              createdAt: repo.createdAt || new Date().toISOString(),
+            }));
+            Repositories.store.setRepositories(reposWithRequiredFields);
+          }
         }
 
-        // Set projects using mapToProject from projectMapper
-        if (viewer.projectsV2?.nodes) {
-          const projects = viewer.projectsV2.nodes
-            .filter((node) => node !== null)
-            .map((node) =>
-              mapToProject(node as unknown as GithubProjectData, viewer as GithubViewerData)
-            );
+        // Set projects
+        if (viewerData.viewer.projectsV2?.nodes) {
+          const projects = viewerData.viewer.projectsV2.nodes
+            .filter((node: unknown) => node !== null)
+            .map((node: unknown) => {
+              // Use type assertion for the node and viewer
+              // Using any type here because the project mapper has complex type requirements
+              return mapToProject(node as any, viewerData.viewer as GithubViewerData);
+            });
+
+          // Update the project store in the features
           Projects.services.crud.setProjects(projects);
+
+          // Also update the root project store directly
+          if (Projects.store) {
+            Projects.store.crud.setProjects(projects);
+          }
         }
       }
 
@@ -110,7 +140,9 @@ export class AppInitializationService {
         websiteUrl: null,
         twitterUsername: null,
       },
-      repositories: repositoryService.getRepositories(),
+      // Cast the repositories to any[] to ensure compatibility with AllAppData type
+      // This is necessary because of differences between repository types in core and features
+      repositories: Repositories.store.repositories as any[],
       projects: Projects.services.crud.getProjects(),
     };
   }
@@ -125,8 +157,8 @@ export class AppInitializationService {
   /**
    * Get repositories from repository service
    */
-  getRepositories() {
-    return repositoryService.getRepositories();
+  getRepositories(): Repository[] {
+    return Repositories.store.repositories;
   }
 
   /**
@@ -182,19 +214,56 @@ export class AppInitializationService {
   }
 
   /**
-   * Wait for any ongoing initialization to complete
+   * Query with retry logic for rate limit errors
    */
-  private async waitForInitialization(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const checkInitialization = () => {
-        if (!this.isInitializing) {
-          resolve();
-        } else {
-          setTimeout(checkInitialization, 100);
-        }
-      };
+  private async queryWithRetry(): Promise<QueryResponse> {
+    try {
+      // Use the client to execute the query
+      const response = await client.query(GetAllInitialDataDocument, {}).toPromise();
 
-      checkInitialization();
+      // Reset retry count on success
+      this.rateLimitedRetryCount = 0;
+      return response;
+    } catch (error: unknown) {
+      const err = error as Error;
+      if (err.message && err.message.includes("API rate limit exceeded")) {
+        this.rateLimitedRetryCount++;
+
+        if (this.rateLimitedRetryCount <= this.maxRetries) {
+          console.warn(
+            `API rate limit exceeded. Retrying (${this.rateLimitedRetryCount}/${this.maxRetries})...`
+          );
+          // Wait with exponential backoff
+          await this.waitBetweenRetries(this.rateLimitedRetryCount);
+          return this.queryWithRetry();
+        } else {
+          throw new Error(`API rate limit exceeded. Maximum retries (${this.maxRetries}) reached.`);
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Wait between retries with exponential backoff
+   */
+  private waitBetweenRetries(retryCount: number): Promise<void> {
+    // Exponential backoff: 2^retryCount * 1000ms (1s, 2s, 4s, 8s, 16s)
+    const waitTime = Math.min(Math.pow(2, retryCount) * 1000, 30000);
+    return new Promise((resolve) => setTimeout(resolve, waitTime));
+  }
+
+  /**
+   * Helper method to wait for initialization to complete
+   */
+  private waitForInitialization(): Promise<void> {
+    return new Promise((resolve) => {
+      const checkInterval = setInterval(() => {
+        if (!this.isInitializing) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
     });
   }
 }

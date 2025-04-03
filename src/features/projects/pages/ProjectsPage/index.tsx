@@ -9,6 +9,7 @@ import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, ConfirmationDialog, EmptyState, ModalForm } from "@/common/components/ui";
 import { useAsync, useModalOperation } from "@/common/hooks";
 import { ProjectCard, ProjectForm } from "@/features/projects/components";
+import { projectSearchService } from "@/features/projects/services";
 import { projectStore } from "@/stores";
 
 import { Project } from "../../types";
@@ -70,14 +71,10 @@ const ProjectsPage: React.FC = observer(() => {
     navigate(`/projects/${projectId}`);
   };
 
-  const filteredProjects = projects.filter((project) => {
-    return (
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.description &&
-        project.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      project.owner?.login.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
+  // Use the project search service to filter projects
+  const filteredProjects = searchQuery
+    ? projectSearchService.searchProjects(searchQuery)
+    : projects;
 
   return (
     <PageContainer

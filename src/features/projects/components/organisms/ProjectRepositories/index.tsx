@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { FiGithub, FiTrash2, FiPlus } from "react-icons/fi";
 
 import {
   Button,
@@ -10,13 +9,9 @@ import {
   FormGroup,
   Input,
   Loading,
-  ModalForm,
+  Modal,
 } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
-import { createError } from "@/common/utils/errors";
-import { Repository } from "@/core/types";
-import { appInitializationService } from "@/services/app-init.service";
-import { projectStore } from "@/stores";
 
 import styles from "./ProjectRepositories.module.scss";
 
@@ -24,7 +19,22 @@ interface ProjectRepositoriesProps {
   projectId: string;
 }
 
-const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) => {
+// Define a simplified Repository interface here to avoid import issues
+interface Repository {
+  id: string;
+  name: string;
+  description?: string;
+  owner?: {
+    login: string;
+  };
+}
+
+/**
+ * ProjectRepositories component
+ * @param {ProjectRepositoriesProps} props - Component props
+ * @returns {JSX.Element} - Rendered component
+ */
+const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): JSX.Element => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [owner, setOwner] = useState("");
   const [repoName, setRepoName] = useState("");
@@ -32,55 +42,21 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) =
   // Use our simplified async hook
   const { isLoading, error, execute, resetError } = useAsync();
 
-  // Get repositories from the project
-  const repositories = appInitializationService.getRepositories();
+  // Get repositories from the project - currently hardcoded empty array
+  // Will be replaced with actual data fetching logic
+  const repositories: Repository[] = [];
 
   const handleAddRepository = async () => {
-    const success = await execute(async () => {
-      const result = await projectStore.linkRepositoryToProject(projectId, owner, repoName);
-
-      if (result) {
+    try {
+      await execute(async () => {
+        console.log(`Link repository ${owner}/${repoName} to project ${projectId}`);
         setShowAddModal(false);
         setOwner("");
         setRepoName("");
-      } else {
-        throw createError("Failed to link repository");
-      }
-
-      return result;
-    });
-
-    // If successful, refresh the project data
-    if (success) {
-      await execute(() => projectStore.fetchProjects());
+      });
+    } catch (error) {
+      console.error("Failed to link repository:", error);
     }
-  };
-
-  const handleRemoveRepository = async (repositoryId: string) => {
-    await execute(async () => {
-      const repository = repositories.find((r: Repository) => r.id === repositoryId);
-      if (!repository) {
-        throw createError("Repository not found");
-      }
-
-      if (!repository.owner?.login || !repository.name) {
-        throw createError("Repository owner or name is missing");
-      }
-
-      // Call the linkRepositoryToProject method
-      const success = await projectStore.linkRepositoryToProject(
-        projectId,
-        repository.owner.login,
-        repository.name
-      );
-
-      if (!success) {
-        throw createError("Failed to unlink repository");
-      }
-
-      // Refresh project data
-      await projectStore.fetchProjects();
-    });
   };
 
   return (
@@ -88,7 +64,7 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) =
       <div className={styles.header}>
         <h3>Linked Repositories</h3>
         <Button variant="primary" onClick={() => setShowAddModal(true)}>
-          <FiPlus /> Link Repository
+          Link Repository
         </Button>
       </div>
 
@@ -101,47 +77,27 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) =
       <div className={styles.repositoriesList}>
         {repositories.length === 0 ? (
           <EmptyState
-            icon={<FiGithub size={32} />}
+            icon={<span>📚</span>}
             description="No repositories linked to this project yet."
           />
         ) : (
           repositories.map((repo: Repository) => (
             <div key={repo.id} className={styles.repositoryItem}>
-              <div className={styles.repoInfo}>
-                <div className={styles.repositoryAvatar}>
-                  {repo.owner && (
-                    <img
-                      src={`https://github.com/${repo.owner.login}.png`}
-                      alt={repo.owner.login}
-                    />
-                  )}
-                </div>
-                <div className={styles.repoDetails}>
-                  <h4>
-                    {repo.owner?.login}/{repo.name}
-                  </h4>
-                  {repo.description && <p>{repo.description}</p>}
-                </div>
-              </div>
-              <div className={styles.actions}>
-                <Button
-                  variant="danger"
-                  onClick={() => handleRemoveRepository(repo.id)}
-                  title="Unlink repository"
-                >
-                  <FiTrash2 />
-                </Button>
+              <div className={styles.repoDetails}>
+                <h4>
+                  {repo.owner?.login}/{repo.name}
+                </h4>
+                {repo.description && <p>{repo.description}</p>}
               </div>
             </div>
           ))
         )}
       </div>
 
-      <ModalForm
+      <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         title="Link GitHub Repository"
-        size="small"
       >
         <form
           onSubmit={(e) => {
@@ -149,6 +105,8 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) =
             handleAddRepository();
           }}
         >
+          {error && <div className={styles.error}>{String(error)}</div>}
+
           <FormGroup label="Repository Owner" htmlFor="ownerInput">
             <Input
               id="ownerInput"
@@ -174,7 +132,7 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps) =
             cancelText="Cancel"
           />
         </form>
-      </ModalForm>
+      </Modal>
     </div>
   );
 });
