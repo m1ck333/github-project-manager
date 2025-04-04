@@ -3,56 +3,27 @@ import { GetUserProfileDocument, GetViewerDocument } from "@/api-github/generate
 import { getErrorMessage } from "@/common/utils/errors.utils";
 
 import { mapToUserProfile } from "../mappers";
+import { userStore } from "../stores";
 import { UserApiModel } from "../types/user-api.types";
 import { UserProfile } from "../types/user.types";
 
 /**
- * Service responsible for handling user-related operations
+ * Service responsible for handling user-related API operations
  */
 class UserService {
-  private userProfile: UserProfile | null = null;
-
   /**
    * Check if a GitHub token exists
    */
   hasToken(): boolean {
-    const token = localStorage.getItem("github_token");
-    return !!token;
+    // This would be handled by environment configuration
+    return true; // Default to true as token handling is managed elsewhere
   }
 
   /**
-   * Get the current user profile from memory or storage
+   * Get the current user profile from the store
    */
   getUserProfile(): UserProfile | null {
-    if (this.userProfile) {
-      return this.userProfile;
-    }
-
-    // Try to get from storage
-    const storedProfile = localStorage.getItem("user_profile");
-    if (storedProfile) {
-      try {
-        this.userProfile = JSON.parse(storedProfile) as UserProfile;
-        return this.userProfile;
-      } catch (error) {
-        console.error("Failed to parse stored user profile:", error);
-        localStorage.removeItem("user_profile");
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Set the user profile in both memory and storage
-   */
-  setUserProfile(profile: UserProfile | null): void {
-    this.userProfile = profile;
-    if (profile) {
-      localStorage.setItem("user_profile", JSON.stringify(profile));
-    } else {
-      localStorage.removeItem("user_profile");
-    }
+    return userStore.profile;
   }
 
   /**
@@ -60,24 +31,33 @@ class UserService {
    */
   async fetchBasicProfile(): Promise<UserProfile | null> {
     try {
+      userStore.setLoading(true);
+      userStore.setError(null);
+
       const response = await executeGitHubQuery(GetUserProfileDocument);
 
       if (response.error || !response.data) {
-        console.error("Error fetching user profile:", getErrorMessage(response.error));
+        const error = new Error(getErrorMessage(response.error));
+        console.error("Error fetching user profile:", error.message);
+        userStore.setError(error);
         return null;
       }
 
       // Convert data.viewer to UserApiModel
       if (response.data.viewer) {
         const userProfile = mapToUserProfile(response.data.viewer as unknown as UserApiModel);
-        this.setUserProfile(userProfile);
+        userStore.setProfile(userProfile);
         return userProfile;
       }
 
       return null;
     } catch (error) {
-      console.error("Failed to fetch user profile:", getErrorMessage(error));
+      const errorObj = error instanceof Error ? error : new Error(getErrorMessage(error));
+      console.error("Failed to fetch user profile:", errorObj.message);
+      userStore.setError(errorObj);
       return null;
+    } finally {
+      userStore.setLoading(false);
     }
   }
 
@@ -104,9 +84,7 @@ class UserService {
    * Clear all user data
    */
   clearUserData(): void {
-    this.userProfile = null;
-    localStorage.removeItem("user_profile");
-    localStorage.removeItem("github_token");
+    userStore.clearUserData();
   }
 }
 

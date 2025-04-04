@@ -1,4 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+
+import { useBodyScrollLock, useClickOutside, useEscapeKey } from "@/common/hooks";
 
 import styles from "./Modal.module.scss";
 
@@ -13,42 +15,10 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, size = "medium" }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Prevent scrolling when modal is open
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
+  // Use custom hooks for body scroll locking, escape key handling, and click outside
+  useBodyScrollLock(isOpen);
+  useEscapeKey(onClose, isOpen);
+  useClickOutside(modalRef, onClose, isOpen);
 
   if (!isOpen) return null;
 

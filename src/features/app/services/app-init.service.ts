@@ -12,6 +12,7 @@ import { Repository } from "@/features/repositories/types/repository";
 import { RepositoryApiModel } from "@/features/repositories/types/repository-api.types";
 import { mapToUserProfile } from "@/features/user/mappers";
 import { userService } from "@/features/user/services";
+import { userStore } from "@/features/user/stores";
 import { UserProfile } from "@/features/user/types";
 
 import { GitHubViewerData, GitHubProjectNode } from "../types/app.types";
@@ -137,7 +138,7 @@ export class AppInitializationService {
       if (viewerData.viewer) {
         // Set user profile using mapToUserProfile from userMapper
         const userProfile = mapToUserProfile(viewerData.viewer);
-        userService.setUserProfile(userProfile);
+        userStore.setProfile(userProfile);
 
         // Set repositories
         if (viewerData.viewer.repositories?.nodes) {
@@ -306,7 +307,7 @@ export class AppInitializationService {
    * This is useful when we have the profile from another source
    */
   setUserProfile(profile: UserProfile): void {
-    userService.setUserProfile(profile);
+    userStore.setProfile(profile);
 
     this._data.user = profile;
 
