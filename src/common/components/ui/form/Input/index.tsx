@@ -1,21 +1,40 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 import styles from "./Input.module.scss";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface CustomInputProps {
   label?: string;
   error?: string;
+  prefix?: ReactNode;
+  suffix?: ReactNode;
+  wrapperClassName?: string;
 }
 
-const Input: React.FC<InputProps> = ({ label, error, className, ...props }) => {
+export interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "prefix">,
+    CustomInputProps {}
+
+const Input: React.FC<InputProps> = ({
+  label,
+  error,
+  className,
+  prefix,
+  suffix,
+  wrapperClassName,
+  ...props
+}) => {
   return (
-    <div className={styles.inputWrapper}>
+    <div className={`${styles.inputWrapper} ${wrapperClassName || ""}`}>
       {label && <label className={styles.label}>{label}</label>}
-      <input
-        className={`${styles.input} ${error ? styles.error : ""} ${className || ""}`}
-        {...props}
-      />
-      {error && <span className={styles.error}>{error}</span>}
+      <div className={`${styles.inputContainer} ${error ? styles.hasError : ""}`}>
+        {prefix && <span className={styles.prefix}>{prefix}</span>}
+        <input
+          className={`${styles.input} ${error ? styles.error : ""} ${prefix ? styles.hasPrefix : ""} ${suffix ? styles.hasSuffix : ""} ${className || ""}`}
+          {...props}
+        />
+        {suffix && <span className={styles.suffix}>{suffix}</span>}
+      </div>
+      {error && <span className={styles.errorMessage}>{error}</span>}
     </div>
   );
 };

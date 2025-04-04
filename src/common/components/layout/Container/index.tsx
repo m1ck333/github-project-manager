@@ -8,7 +8,7 @@ interface ContainerProps {
   fluid?: boolean;
   withPadding?: boolean;
   withBg?: boolean;
-  title?: string;
+  title?: ReactNode;
   titleClassName?: string;
 }
 
@@ -35,7 +35,7 @@ const Container: React.FC<ContainerProps> = ({
         ${className}
       `}
     >
-      {title && <h1 className={`${styles.title} ${titleClassName}`}>{title}</h1>}
+      {title && <div className={`${styles.title} ${titleClassName}`}>{title}</div>}
       {children}
     </div>
   );

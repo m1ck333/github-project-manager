@@ -1,0 +1,38 @@
+@use "@/styles/variables" as *;
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  width: 100%;
+}
+
+.searchInputWrapper {
+  flex: 1;
+}
+
+.searchInput {
+  &::placeholder {
+    color: $gray-400;
+  }
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  white-space: nowrap;
+}
+
+.spinning {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

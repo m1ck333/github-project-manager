@@ -2,17 +2,17 @@
 
 .infoBox {
   display: flex;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+  padding: $spacing-sm;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-md;
+  font-size: $font-size-small;
   position: relative;
 
   .iconContainer {
-    margin-right: 12px;
+    margin-right: $spacing-sm;
     display: flex;
     align-items: center;
-    font-size: 1.1rem;
+    font-size: $font-size-medium;
     height: min-content;
   }
 
@@ -20,9 +20,9 @@
     flex: 1;
 
     .title {
-      margin: 0 0 4px 0;
-      font-weight: 600;
-      font-size: 1rem;
+      margin: 0 0 calc($spacing-xs / 2) 0;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-base;
     }
 
     .message {
@@ -37,13 +37,13 @@
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: calc($spacing-xs / 2);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0.7;
     border-radius: 50%;
-    font-size: 1.1rem;
+    font-size: $font-size-medium;
 
     &:hover {
       opacity: 1;
@@ -53,42 +53,42 @@
 
   // Variants
   &.info {
-    background-color: rgba(13, 110, 253, 0.1);
-    border: 1px solid rgba(13, 110, 253, 0.2);
-    color: #0d6efd;
+    background-color: rgba($primary-500, 0.1);
+    border: 1px solid rgba($primary-500, 0.2);
+    color: $primary-600;
 
     .iconContainer {
-      color: #0d6efd;
+      color: $primary-500;
     }
   }
 
   &.success {
-    background-color: rgba(25, 135, 84, 0.1);
-    border: 1px solid rgba(25, 135, 84, 0.2);
-    color: #198754;
+    background-color: rgba($success-500, 0.1);
+    border: 1px solid rgba($success-500, 0.2);
+    color: $success-600;
 
     .iconContainer {
-      color: #198754;
+      color: $success-500;
     }
   }
 
   &.warning {
-    background-color: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.2);
-    color: #664d01;
+    background-color: rgba($warning-500, 0.1);
+    border: 1px solid rgba($warning-500, 0.2);
+    color: $warning-700;
 
     .iconContainer {
-      color: #fd7e14;
+      color: $warning-600;
     }
   }
 
   &.error {
-    background-color: rgba(220, 53, 69, 0.1);
-    border: 1px solid rgba(220, 53, 69, 0.2);
-    color: #dc3545;
+    background-color: rgba($error-500, 0.1);
+    border: 1px solid rgba($error-500, 0.2);
+    color: $error-600;
 
     .iconContainer {
-      color: #dc3545;
+      color: $error-500;
     }
   }
 }

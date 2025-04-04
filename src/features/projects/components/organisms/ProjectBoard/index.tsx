@@ -19,6 +19,7 @@ import {
   InfoBox,
   Loading,
   Modal,
+  Typography,
   useToast,
 } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
@@ -83,7 +84,9 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
         <div className={styles.formError}>
           <div className={styles.error}>
             <FiAlertCircle size={20} className={styles.icon} />
-            <span>{errorMessage}</span>
+            <Typography variant="body2" color="error" component="span">
+              {errorMessage}
+            </Typography>
           </div>
         </div>
       )}
@@ -91,7 +94,9 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
       {/* Only show repository selection for new issues */}
       {!isEditing && (
         <div className={styles.formGroup}>
-          <label htmlFor="repository">Repository</label>
+          <label htmlFor="repository">
+            <Typography variant="subtitle2">Repository</Typography>
+          </label>
           <select
             id="repository"
             className={styles.select}
@@ -110,7 +115,9 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
       )}
 
       <div className={styles.formGroup}>
-        <label htmlFor="issue-title">Issue Title</label>
+        <label htmlFor="issue-title">
+          <Typography variant="subtitle2">Issue Title</Typography>
+        </label>
         <input
           id="issue-title"
           type="text"
@@ -123,7 +130,9 @@ const SimpleIssueForm: React.FC<SimpleIssueFormProps> = ({
       </div>
 
       <div className={styles.formGroup}>
-        <label htmlFor="issue-body">Description</label>
+        <label htmlFor="issue-body">
+          <Typography variant="subtitle2">Description</Typography>
+        </label>
         <textarea
           id="issue-body"
           className={styles.input}
@@ -193,10 +202,12 @@ const SimpleLabelSelectorForm: React.FC<SimpleLabelSelectorFormProps> = ({
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
-        <label>Select Labels</label>
+        <Typography variant="subtitle2">Select Labels</Typography>
         <div className={styles.labelsList}>
           {availableLabels.length === 0 ? (
-            <p className={styles.emptyMessage}>No labels available. Create some labels first.</p>
+            <Typography variant="body2" className={styles.emptyMessage}>
+              No labels available. Create some labels first.
+            </Typography>
           ) : (
             availableLabels.map((label) => (
               <div key={label.id} className={styles.labelCheckboxItem}>
@@ -208,9 +219,11 @@ const SimpleLabelSelectorForm: React.FC<SimpleLabelSelectorFormProps> = ({
                   />
                   <span
                     className={styles.labelColor}
-                    style={{ backgroundColor: label.color }}
+                    style={{ backgroundColor: `#${label.color}` }}
                   ></span>
-                  <span className={styles.labelName}>{label.name}</span>
+                  <Typography variant="body2" component="span" className={styles.labelName}>
+                    {label.name}
+                  </Typography>
                 </label>
               </div>
             ))
@@ -223,7 +236,7 @@ const SimpleLabelSelectorForm: React.FC<SimpleLabelSelectorFormProps> = ({
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading || availableLabels.length === 0}>
-          {isLoading ? "Updating Labels..." : "Update Labels"}
+          Save Labels
         </Button>
       </div>
     </form>
@@ -445,7 +458,9 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) 
       return (
         <div className={styles.loadingContainer}>
           <Loading size="large" />
-          <p>Loading project board...</p>
+          <Typography variant="body1" component="p">
+            Loading project board...
+          </Typography>
         </div>
       );
     }
@@ -464,8 +479,10 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) 
       return (
         <div className={styles.emptyState}>
           <FiAlertCircle size={48} />
-          <h3>Project Not Found</h3>
-          <p>The project data could not be loaded. Please try refreshing.</p>
+          <Typography variant="h3">Project Not Found</Typography>
+          <Typography variant="body1">
+            The project data could not be loaded. Please try refreshing.
+          </Typography>
         </div>
       );
     }
@@ -475,11 +492,11 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = observer(({ project }) 
       return (
         <div className={styles.emptyState}>
           <FiColumns size={48} />
-          <h3>No Columns Found</h3>
-          <p>
-            This GitHub Project doesn't have any Status field options. Please go to GitHub and add
-            column options to your Status field.
-          </p>
+          <Typography variant="h3">No Columns Found</Typography>
+          <Typography variant="body1">
+            This project doesn't have any columns set up yet. Add columns to your project to track
+            issues.
+          </Typography>
         </div>
       );
     }

@@ -10,7 +10,7 @@ import styles from "./PageContainer.module.scss";
 
 interface PageContainerProps {
   children: ReactNode;
-  title?: string;
+  title?: ReactNode;
   fluid?: boolean;
   withBg?: boolean;
   backDestination?: BackDestination;
@@ -44,7 +44,19 @@ const PageContainer: React.FC<PageContainerProps> = ({
 
   // Set document title based on props
   useEffect(() => {
-    document.title = title ? `${title} | ${env.appName}` : env.appName;
+    // For document title, extract string from React node if necessary
+    let titleText = "";
+    if (typeof title === "string") {
+      titleText = title;
+    } else if (title) {
+      // Try to get innerText (this won't work in SSR, but we're client-only)
+      const tempDiv = document.createElement("div");
+      // @ts-expect-error - This is a hack to get text content from ReactNode
+      tempDiv.innerHTML = title.props?.children || "";
+      titleText = tempDiv.textContent || "";
+    }
+
+    document.title = titleText ? `${titleText} | ${env.appName}` : env.appName;
   }, [title]);
 
   // Helper to render loading state
@@ -53,6 +65,14 @@ const PageContainer: React.FC<PageContainerProps> = ({
       <p>{loadingMessage}</p>
     </div>
   );
+
+  // Get a title string for error display
+  const getErrorTitle = () => {
+    if (typeof title === "string") {
+      return `Error - ${title}`;
+    }
+    return "Error - Page";
+  };
 
   return (
     <Container
@@ -74,7 +94,7 @@ const PageContainer: React.FC<PageContainerProps> = ({
       {isLoading ? (
         renderLoading()
       ) : error ? (
-        <Error error={error} title={`Error - ${title || "Page"}`} onRetry={onRetry} />
+        <Error error={error} title={getErrorTitle()} onRetry={onRetry} />
       ) : (
         <div className={styles.pageContent}>{children}</div>
       )}

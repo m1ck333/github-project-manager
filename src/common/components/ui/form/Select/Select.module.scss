@@ -1,0 +1,27 @@
+@use "@/styles/variables" as *;
+
+.select {
+  display: block;
+  width: 100%;
+  padding: $spacing-xs;
+  font-size: $font-size-base;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-base;
+  background-color: $background-primary;
+
+  &:focus {
+    border-color: $border-color-focus;
+    outline: none;
+    box-shadow: $shadow-focus;
+  }
+
+  &:disabled {
+    background-color: $background-tertiary;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  option {
+    padding: $spacing-xs;
+  }
+}

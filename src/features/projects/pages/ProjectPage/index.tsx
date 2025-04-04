@@ -1,59 +1,59 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { FiUsers } from "react-icons/fi";
 import { useParams, useNavigate } from "react-router-dom";
 
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import PageContainer from "@/common/components/layout/PageContainer";
-import { Button } from "@/common/components/ui";
+import { Button, Typography } from "@/common/components/ui";
 import { ROUTES } from "@/common/constants/routes";
+import { useAsync } from "@/common/hooks";
 import { ProjectBoard, ProjectRepositories } from "@/features/projects/components";
 import { projectStore } from "@/stores";
 
 const ProjectPage: React.FC = observer(() => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const hasLoaded = useRef(false);
 
-  // Find the project directly from the store
+  // Use the useAsync hook for better state management
+  const { isLoading, error, execute } = useAsync();
+
+  // Load project only once on component mount or when projectId changes
   useEffect(() => {
-    if (!projectId) return;
+    // Skip if no projectId or already loaded this project
+    if (!projectId || (hasLoaded.current && projectStore.selectedProject?.id === projectId)) {
+      return;
+    }
 
-    try {
-      // We already have all projects loaded, just select the current one
-      if (!projectStore.selectedProject || projectStore.selectedProject.id !== projectId) {
-        projectStore.selectProjectWithoutFetch(projectId);
+    const loadProject = async () => {
+      try {
+        await execute(async () => {
+          // Only try to select if it's a different project
+          if (!projectStore.selectedProject || projectStore.selectedProject.id !== projectId) {
+            projectStore.selectProjectWithoutFetch(projectId);
+          }
+          return projectStore.selectedProject;
+        });
+
+        // Mark as loaded to prevent reloading
+        hasLoaded.current = true;
+      } catch (err) {
+        console.error("Error loading project:", err);
       }
-    } catch (err) {
-      console.error("Error selecting project:", err);
-      setError(err instanceof Error ? err.message : String(err));
-    }
-
-    // Clear selected project on unmount only
-    return () => {
-      projectStore.clearSelectedProject();
     };
-  }, [projectId]); // Only depends on projectId
 
-  // Also observe errors from the projectStore
-  useEffect(() => {
-    if (projectStore.error) {
-      setError(
-        projectStore.error instanceof Error
-          ? projectStore.error.message
-          : String(projectStore.error)
-      );
-    } else {
-      setError(null);
-    }
-  }, []);
+    loadProject();
+
+    // No cleanup function to avoid the infinite loop
+  }, [projectId, execute]);
 
   const project = projectStore.selectedProject;
 
   // Define title actions that will appear in the top-right corner
   const titleActions = project && (
     <>
-      <ViewOnGithub link={project.url || ""} />
+      <ViewOnGithub link={project.html_url || project.url || ""} />
       <Button
         variant="secondary"
         onClick={() => navigate(ROUTES.PROJECT_COLLABORATORS(project.id))}
@@ -65,9 +65,13 @@ const ProjectPage: React.FC = observer(() => {
 
   return (
     <PageContainer
-      title={project?.name || "Project"}
+      title={
+        <Typography variant="h1" component="h1" gutterBottom>
+          {project?.name || "Project"}
+        </Typography>
+      }
       backDestination="projects"
-      isLoading={false}
+      isLoading={isLoading}
       error={error}
       loadingMessage="Loading project..."
       titleActions={titleActions}

@@ -1,9 +1,8 @@
 import React from "react";
-import { FiGithub, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiGitBranch, FiList } from "react-icons/fi";
 
-import GridCard from "@/common/components/composed/grid/GridCard";
-
-import { Project } from "../../../types";
+import { Button } from "@/common/components/ui";
+import { Project } from "@/features/projects/types";
 
 import styles from "./ProjectCard.module.scss";
 
@@ -15,51 +14,59 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onDelete }) => {
-  // Build the actions array
-  const cardActions = [
-    {
-      icon: <FiEdit size={16} />,
-      label: "Edit",
-      ariaLabel: "Edit project",
-      onClick: (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onEdit(project);
-      },
-    },
-    {
-      icon: <FiTrash2 size={16} />,
-      label: "Delete",
-      ariaLabel: "Delete project",
-      onClick: (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onDelete(project);
-      },
-    },
-  ];
+  // Prevent event bubbling when clicking edit or delete
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(project);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(project);
+  };
 
   return (
-    <GridCard
-      title={project.name}
-      subtitle={project.owner?.login || ""}
-      description={project.description || "No description provided"}
-      avatar={{
-        src:
-          project.owner?.avatarUrl || `https://github.com/${project.owner?.login || "github"}.png`,
-        alt: project.owner?.login || "Owner",
-      }}
-      stats={[
-        {
-          icon: <FiGithub size={14} />,
-          text: `${project.repositories?.length || 0} Repositories`,
-        },
-      ]}
-      actions={cardActions}
-      createdAt={project.createdAt}
-      htmlUrl={project.html_url}
-      viewPath={`/projects/${project.id}`}
-      onClick={onClick}
-      className={styles.projectCard}
-    />
+    <div className={styles.projectCard} onClick={onClick}>
+      <div className={styles.projectHeader}>
+        <h3 className={styles.projectName}>{project.name}</h3>
+        <div className={styles.actionButtons}>
+          <Button
+            variant="secondary"
+            onClick={handleEdit}
+            title="Edit project"
+            className={styles.editButton}
+          >
+            <FiEdit2 size={16} />
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handleDelete}
+            title="Delete project"
+            className={styles.deleteButton}
+          >
+            <FiTrash2 size={16} />
+          </Button>
+        </div>
+      </div>
+
+      {project.description && <p className={styles.projectDescription}>{project.description}</p>}
+
+      <div className={styles.projectInfo}>
+        <div className={styles.infoItem}>
+          <FiGitBranch />
+          <span>
+            {project.repositories?.length || 0}{" "}
+            {project.repositories?.length === 1 ? "repo" : "repos"}
+          </span>
+        </div>
+        <div className={styles.infoItem}>
+          <FiList />
+          <span>
+            {project.issues?.length || 0} {project.issues?.length === 1 ? "issue" : "issues"}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 };
 

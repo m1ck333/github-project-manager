@@ -1,0 +1,31 @@
+@use "@/styles/variables" as *;
+
+.inline {
+  font-family: $font-family-monospace;
+  font-size: 0.875em;
+  padding: 0.2em 0.4em;
+  background-color: $background-tertiary;
+  border-radius: $border-radius-sm;
+  color: $text-primary;
+  white-space: nowrap;
+}
+
+.block {
+  font-family: $font-family-monospace;
+  background-color: $background-tertiary;
+  border-radius: $border-radius-md;
+  padding: $spacing-sm;
+  margin: $spacing-sm 0;
+  overflow-x: auto;
+  color: $text-primary;
+
+  code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    display: block;
+    white-space: pre;
+    font-size: 0.875em;
+    line-height: $line-height-base;
+  }
+}

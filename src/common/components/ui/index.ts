@@ -1,23 +1,10 @@
-// Re-export all components by category, choose one approach below:
-
-// Option 1: Re-export everything (might include unwanted exports)
-export * from "./form";
-export * from "./modal";
-export * from "./feedback";
+// Export by category
 export * from "./display";
+export * from "./feedback";
+export * from "./modal";
+export * from "./form";
+export * from "./typography";
 
-/* 
-// Option 2: Selective re-export (more control, but more verbose)
-// Form components
-export { FormGroup, FormActionButtons, Input } from './form';
-
-// Modal components
-export { Modal, ModalForm, ConfirmationDialog } from './modal';
-
-// Feedback components
-export { Loading, Error, InfoBox, ToastContainer, ToastProvider, useToast } from './feedback';
-export type { ToastContextValue, ToastData, ToastType } from './feedback';
-
-// Display components
-export { Button, EmptyState, Tooltip } from './display';
-*/
+// Add Search to the exports
+export { default as Search } from "./search/Search";
+export type { SearchProps } from "./search/Search";

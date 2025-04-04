@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiUsers, FiEdit, FiPower } from "react-icons/fi";
 
 import GridCard from "@/common/components/composed/grid/GridCard";
-import Loading from "@/common/components/ui/feedback/Loading";
+import { Loading, Typography } from "@/common/components/ui";
 import { Repository, Repositories } from "@/features/repositories";
 
 import styles from "./RepositoryCard.module.scss";
@@ -42,11 +42,15 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
   const collaboratorCount = repository.collaborators?.length || 0;
   const collaboratorText =
     collaboratorCount > 0 ? (
-      `${collaboratorCount} Collaborators`
+      <Typography variant="body2" component="span">
+        {collaboratorCount} Collaborators
+      </Typography>
     ) : repository.collaborators === undefined && isLoadingCollaborators ? (
       <Loading size="small" text="" />
     ) : (
-      "No collaborators"
+      <Typography variant="body2" component="span">
+        No collaborators
+      </Typography>
     );
 
   // Build the actions array conditionally

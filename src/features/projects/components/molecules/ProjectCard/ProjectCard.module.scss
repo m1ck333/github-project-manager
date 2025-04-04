@@ -2,5 +2,88 @@
 
 // Just provide specific overrides if needed
 .projectCard {
-  // Extend the base card styling if needed
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8;
+  background-color: #fff;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #0366d6;
+  }
+
+  .projectHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+
+    .projectName {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: #24292e;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .actionButtons {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        padding: 0.25rem;
+        background: transparent;
+        border: none;
+        color: #586069;
+        cursor: pointer;
+
+        &:hover {
+          color: #0366d6;
+        }
+
+        &.deleteButton:hover {
+          color: #cb2431;
+        }
+      }
+    }
+  }
+
+  .projectDescription {
+    color: #586069;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .projectInfo {
+    margin-top: auto;
+    display: flex;
+    gap: 1rem;
+
+    .infoItem {
+      display: flex;
+      align-items: center;
+      color: #586069;
+      font-size: 0.75rem;
+
+      svg {
+        margin-right: 0.25rem;
+      }
+    }
+  }
 }

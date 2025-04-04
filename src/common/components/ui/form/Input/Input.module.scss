@@ -1,36 +1,81 @@
-@use "src/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .inputWrapper {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xs;
   width: 100%;
 }
 
 .label {
-  font-size: $font-size-base;
-  font-weight: 500;
-  color: $text-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+  color: $text-secondary;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: $background-primary;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-md;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: $primary-500;
+    box-shadow: $shadow-focus;
+  }
+
+  &.hasError {
+    border-color: $error-500;
+  }
 }
 
 .input {
-  padding: $spacing-sm $spacing-md;
-  border: 1px solid $border-color;
-  border-radius: $border-radius-sm;
   font-size: $font-size-base;
-  transition: $transition-base;
+  color: $text-primary;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-md;
 
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
+  &::placeholder {
+    color: $gray-400;
   }
 
-  &.error {
-    border-color: $danger-color;
+  &.hasPrefix {
+    padding-left: calc(24px + $spacing-md);
+  }
+
+  &.hasSuffix {
+    padding-right: calc(24px + $spacing-md);
   }
 }
 
-.error {
+.prefix,
+.suffix {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  z-index: 1;
+}
+
+.prefix {
+  left: $spacing-sm;
+}
+
+.suffix {
+  right: $spacing-sm;
+}
+
+.errorMessage {
   font-size: $font-size-small;
-  color: $danger-color;
+  color: $error-500;
+  margin-top: $spacing-xs;
 }

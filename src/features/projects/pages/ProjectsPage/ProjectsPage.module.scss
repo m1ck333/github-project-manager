@@ -1,5 +1,5 @@
+@use "@/styles/variables" as *;
 @use "sass:color";
-@use "@/styles/variables.scss" as *;
 
 .content {
   h1 {
@@ -108,8 +108,23 @@
       color: white;
 
       &:hover:not(:disabled) {
-        background-color: color.adjust($danger-color, $lightness: -10%);
+        background-color: darken($danger-color, 10%);
       }
     }
   }
+}
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.noResults {
+  display: flex;
+  justify-content: center;
+  margin: $spacing-lg 0;
+  padding: $spacing-md;
+  background-color: $background-tertiary;
+  border-radius: $border-radius-md;
 }

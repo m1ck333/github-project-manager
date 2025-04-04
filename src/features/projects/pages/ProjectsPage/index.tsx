@@ -1,151 +1,156 @@
 import { observer } from "mobx-react-lite";
-import React, { useState } from "react";
-import { FiGithub } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
-import GridContainer from "@/common/components/composed/grid/GridContainer";
 import PageContainer from "@/common/components/layout/PageContainer";
-import { Button, ConfirmationDialog, EmptyState, ModalForm } from "@/common/components/ui";
-import { useAsync, useModalOperation } from "@/common/hooks";
-import { ProjectCard, ProjectForm } from "@/features/projects/components";
-import { projectSearchService } from "@/features/projects/services";
-import { projectStore } from "@/stores";
-
-import { Project } from "../../types";
+import { Search, Typography } from "@/common/components/ui";
+import { useAsync, useDebounce } from "@/common/hooks";
+import { getErrorMessage } from "@/common/utils/errors";
+import { Projects } from "@/features/projects";
+import { ProjectGrid } from "@/features/projects/components";
+import { ProjectFormModal } from "@/features/projects/components/molecules/ProjectForm";
+import { useProjectConfirmation } from "@/features/projects/hooks";
+import { Project, ProjectFormData } from "@/features/projects/types";
 
 import styles from "./ProjectsPage.module.scss";
 
 const ProjectsPage: React.FC = observer(() => {
-  const { projects } = projectStore;
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Use our async hooks
-  const { isLoading: loading, error, execute } = useAsync();
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // Use modal operation hooks for create, edit, and delete flows
-  const createModal = useModalOperation();
-  const editModal = useModalOperation<Project>();
-  const deleteModal = useModalOperation<Project>();
+  // Use the async hook for loading state management
+  const { execute, isLoading, error } = useAsync();
 
-  const handleRetry = () => {
-    execute(() => projectStore.fetchProjects());
+  // Custom hook for project confirmation dialogs
+  const { confirmDeleteProject } = useProjectConfirmation();
+
+  useEffect(() => {
+    // Reset the selected project when the page loads
+    if (Projects.store) {
+      Projects.store.clearSelectedProject();
+    }
+  }, []);
+
+  // Filter projects based on search query
+  const filteredProjects = debouncedSearchQuery
+    ? Projects.services.search.searchProjects(debouncedSearchQuery)
+    : Projects.store.projects;
+
+  // Handle refreshing projects
+  const handleRefreshProjects = async () => {
+    execute(async () => {
+      await Projects.store.fetchProjects();
+    });
   };
 
-  const handleRefresh = () => {
-    execute(() => projectStore.fetchProjects());
+  // Handle navigating to a project
+  const handleNavigateToProject = (projectId: string) => {
+    navigate(`/projects/${projectId}`);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+  // Handle creating a new project
+  const handleCreateProject = async (projectData: ProjectFormData) => {
+    return execute(async () => {
+      const project = await Projects.store.createProject(projectData);
+      setShowCreateModal(false);
+      return project;
+    });
   };
 
-  const handleEdit = (project: Project) => {
-    editModal.open(project);
+  // Handle editing a project
+  const handleEditProject = (project: Project) => {
+    setSelectedProject(project);
   };
 
-  const handleDelete = (project: Project) => {
-    deleteModal.open(project);
+  // Handle saving edited project
+  const handleUpdateProject = async (projectData: ProjectFormData) => {
+    if (!selectedProject) return null;
+
+    return execute(async () => {
+      const updatedProject = await Projects.store.updateProject(selectedProject.id, projectData);
+      setSelectedProject(null);
+      return updatedProject;
+    });
   };
 
-  const confirmDelete = async () => {
-    if (deleteModal.data) {
-      await deleteModal.execute(async () => {
-        const result = await projectStore.deleteProject(deleteModal.data!.id);
+  // Handle deleting a project with confirmation
+  const handleDeleteProject = async (project: Project) => {
+    const confirmed = await confirmDeleteProject(project.name);
 
-        if (result) {
-          const toast = (await import("@/common/components/ui/feedback/Toast")).useToast();
-          toast.showToast(`Project "${deleteModal.data!.name}" deleted successfully`, "success");
-        } else {
-          const toast = (await import("@/common/components/ui/feedback/Toast")).useToast();
-          toast.showToast("Failed to delete project", "error");
-        }
-
-        return result;
+    if (confirmed) {
+      execute(async () => {
+        await Projects.store.deleteProject(project.id);
       });
     }
   };
 
-  const navigateToProject = (projectId: string) => {
-    navigate(`/projects/${projectId}`);
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
-
-  // Use the project search service to filter projects
-  const filteredProjects = searchQuery
-    ? projectSearchService.searchProjects(searchQuery)
-    : projects;
 
   return (
     <PageContainer
-      fluid={true}
-      title="Projects"
-      isLoading={loading}
-      error={error}
+      title={
+        <Typography variant="h1" component="h1" gutterBottom>
+          Projects
+        </Typography>
+      }
+      fluid={false}
+      isLoading={isLoading && Projects.store.projects.length === 0}
       loadingMessage="Loading projects..."
+      error={error ? getErrorMessage(error) : null}
     >
-      <GridContainer
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        onRefresh={handleRefresh}
-        loading={loading}
-        error={error}
-        onRetry={handleRetry}
-        loadingText="Loading projects..."
-        emptyState={
-          <EmptyState
-            icon={<FiGithub size={48} />}
-            description="No projects found. Create a project to get started."
-          />
-        }
-      >
-        <GridCardAdd
-          label="Create Project"
-          onClick={() => createModal.open()}
-          className={styles.createProjectCard}
+      <div className={styles.pageContent}>
+        <Search
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onRefresh={handleRefreshProjects}
+          isLoading={isLoading}
+          placeholder="Search projects..."
         />
 
-        {filteredProjects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onClick={() => navigateToProject(project.id)}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </GridContainer>
+        {filteredProjects.length === 0 && debouncedSearchQuery && !isLoading && (
+          <div className={styles.noResults}>
+            <Typography variant="body1" color="secondary" align="center">
+              No projects found matching "{debouncedSearchQuery}".
+            </Typography>
+          </div>
+        )}
+
+        <ProjectGrid
+          projects={filteredProjects}
+          onNavigateToProject={handleNavigateToProject}
+          onCreateProject={() => setShowCreateModal(true)}
+          onEditProject={handleEditProject}
+          onDeleteProject={handleDeleteProject}
+        />
+      </div>
 
       {/* Project Creation Modal */}
-      <ModalForm isOpen={createModal.isOpen} onClose={createModal.close} title="Create New Project">
-        <ProjectForm onSuccess={createModal.close} onCancel={createModal.close} />
-      </ModalForm>
+      <ProjectFormModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateProject}
+        title="Create New Project"
+        submitLabel="Create Project"
+      />
 
       {/* Project Edit Modal */}
-      <ModalForm isOpen={editModal.isOpen} onClose={editModal.close} title="Edit Project">
-        <ProjectForm
-          project={editModal.data || undefined}
-          onSuccess={editModal.close}
-          onCancel={editModal.close}
-        />
-      </ModalForm>
-
-      {/* Delete Confirmation Modal */}
-      <ModalForm isOpen={deleteModal.isOpen} onClose={deleteModal.close} title="Delete Project">
-        <ConfirmationDialog
-          title="Delete Project Confirmation"
-          description={`Are you sure you want to delete project "${deleteModal.data?.name}"?`}
-          footer={
-            <Button variant="danger" onClick={confirmDelete} disabled={deleteModal.isLoading}>
-              {deleteModal.isLoading ? "Deleting..." : "Delete Project"}
-            </Button>
-          }
-          isOpen={deleteModal.isOpen}
-          onClose={deleteModal.close}
-        />
-      </ModalForm>
+      <ProjectFormModal
+        isOpen={!!selectedProject}
+        onClose={() => setSelectedProject(null)}
+        onSubmit={handleUpdateProject}
+        initialValues={selectedProject}
+        title="Edit Project"
+        submitLabel="Update Project"
+      />
     </PageContainer>
   );
 });
 
-export default React.memo(ProjectsPage);
+export default ProjectsPage;

@@ -6,7 +6,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  title?: string;
+  title?: React.ReactNode;
   size?: "small" | "medium" | "large";
 }
 
@@ -63,7 +63,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, size = 
     <div className={styles.modalOverlay}>
       <div className={`${styles.modalContent} ${sizeClass}`} ref={modalRef}>
         <div className={styles.modalHeader}>
-          {title && <h2 className={styles.modalTitle}>{title}</h2>}
+          {title && <div className={styles.modalTitle}>{title}</div>}
           <button className={styles.closeButton} onClick={onClose}>
             ×
           </button>

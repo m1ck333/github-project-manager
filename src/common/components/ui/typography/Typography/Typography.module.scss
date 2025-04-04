@@ -1,0 +1,144 @@
+@use "@/styles/variables" as *;
+
+.root {
+  margin: 0;
+}
+
+// Typography variants
+.h1 {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+}
+
+.h2 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.h3 {
+  font-size: $font-size-large;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.h4 {
+  font-size: $font-size-medium;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.h5 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-tight;
+}
+
+.h6 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-tight;
+}
+
+.subtitle1 {
+  font-size: $font-size-medium;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-base;
+}
+
+.subtitle2 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-base;
+}
+
+.body1 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-base;
+}
+
+.body2 {
+  font-size: $font-size-small;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-base;
+}
+
+.caption {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-base;
+}
+
+.overline {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-base;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.button {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-base;
+  text-transform: uppercase;
+}
+
+// Colors
+.color-primary {
+  color: $text-primary;
+}
+
+.color-secondary {
+  color: $text-secondary;
+}
+
+.color-tertiary {
+  color: $text-tertiary;
+}
+
+.color-disabled {
+  color: $text-disabled;
+}
+
+.color-error {
+  color: $error-600;
+}
+
+.color-success {
+  color: $success-600;
+}
+
+.color-warning {
+  color: $warning-600;
+}
+
+// Alignment
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-justify {
+  text-align: justify;
+}
+
+// Utilities
+.gutterBottom {
+  margin-bottom: $spacing-md;
+}
+
+.noWrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

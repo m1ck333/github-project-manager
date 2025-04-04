@@ -1,4 +1,4 @@
-@use "src/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .tooltip {
   position: fixed;
@@ -6,17 +6,17 @@
   top: var(--y);
   transform: translate(-50%, -50%);
   z-index: 1000;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 8px;
+  background-color: $background-primary;
+  border-radius: $border-radius-sm;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xs;
   pointer-events: auto; /* Important for allowing tooltip content to be clicked */
   max-width: 300px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid $border-color;
 
   // Position modifiers
   &.top {
-    transform: translate(-50%, calc(-100% - 16px));
+    transform: translate(-50%, calc(-100% - #{$spacing-md}));
 
     &:after {
       content: "";
@@ -26,12 +26,12 @@
       transform: translateX(-50%);
       border-width: 6px;
       border-style: solid;
-      border-color: white transparent transparent transparent;
+      border-color: $background-primary transparent transparent transparent;
     }
   }
 
   &.right {
-    transform: translate(16px, -50%);
+    transform: translate($spacing-md, -50%);
 
     &:after {
       content: "";
@@ -41,12 +41,12 @@
       transform: translateY(-50%);
       border-width: 6px;
       border-style: solid;
-      border-color: transparent white transparent transparent;
+      border-color: transparent $background-primary transparent transparent;
     }
   }
 
   &.bottom {
-    transform: translate(-50%, 16px);
+    transform: translate(-50%, $spacing-md);
 
     &:after {
       content: "";
@@ -56,12 +56,12 @@
       transform: translateX(-50%);
       border-width: 6px;
       border-style: solid;
-      border-color: transparent transparent white transparent;
+      border-color: transparent transparent $background-primary transparent;
     }
   }
 
   &.left {
-    transform: translate(calc(-100% - 16px), -50%);
+    transform: translate(calc(-100% - #{$spacing-md}), -50%);
 
     &:after {
       content: "";
@@ -71,7 +71,7 @@
       transform: translateY(-50%);
       border-width: 6px;
       border-style: solid;
-      border-color: transparent transparent transparent white;
+      border-color: transparent transparent transparent $background-primary;
     }
   }
 }

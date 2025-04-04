@@ -1,26 +1,26 @@
-@use "@/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .backButton {
   display: flex;
   align-items: center;
   gap: $spacing-xs;
-  color: $gray-700;
+  color: $text-secondary;
   background: none;
   border: none;
   padding: $spacing-xs $spacing-sm;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
   transition: color 0.2s ease;
   border-radius: $border-radius-sm;
 
   &:hover {
     color: $primary-600;
-    background-color: $gray-100;
+    background-color: $background-tertiary;
   }
 
   svg {
-    font-size: 1rem;
+    font-size: $font-size-base;
   }
 }
 
@@ -30,6 +30,6 @@
   gap: $spacing-xs;
 
   svg {
-    font-size: 1rem;
+    font-size: $font-size-base;
   }
 }

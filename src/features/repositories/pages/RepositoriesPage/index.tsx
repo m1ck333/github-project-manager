@@ -1,12 +1,20 @@
 import { observer } from "mobx-react-lite";
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { FiGithub } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
-import GridContainer from "@/common/components/composed/grid/GridContainer";
 import PageContainer from "@/common/components/layout/PageContainer";
-import { Button, ConfirmationDialog, Input, Modal, useToast } from "@/common/components/ui";
+import {
+  Button,
+  ConfirmationDialog,
+  Input,
+  Modal,
+  Search,
+  Typography,
+  useToast,
+  Code,
+} from "@/common/components/ui";
+import { getErrorMessage } from "@/common/utils/errors";
 import { Repositories, Repository } from "@/features/repositories";
 import RepositoryCard from "@/features/repositories/components/molecules/RepositoryCard";
 
@@ -71,11 +79,6 @@ const RepositoriesPage: React.FC = observer(() => {
     Repositories.services.crud.fetchRepositories();
   };
 
-  const handleRetry = () => {
-    repositoryStore.clearError();
-    Repositories.services.crud.fetchRepositories();
-  };
-
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
@@ -101,7 +104,7 @@ const RepositoriesPage: React.FC = observer(() => {
         toast.toast.success(`Repository "${disableRepository.name}" disabled successfully`);
         setDisableRepository(null);
       } catch (error) {
-        toast.toast.error(`Failed to disable repository: ${(error as Error).message}`);
+        toast.toast.error(`Failed to disable repository: ${getErrorMessage(error)}`);
       } finally {
         setIsDisabling(false);
       }
@@ -111,41 +114,50 @@ const RepositoriesPage: React.FC = observer(() => {
   return (
     <PageContainer
       fluid={true}
-      title="Repositories"
+      title={
+        <Typography variant="h1" component="h1" gutterBottom>
+          Repositories
+        </Typography>
+      }
       isLoading={loading}
-      error={error}
+      error={error ? getErrorMessage(error) : null}
       loadingMessage="Loading repositories..."
     >
-      <GridContainer
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        loading={loading}
-        error={error}
-        onRefresh={handleRefresh}
-        onRetry={handleRetry}
-        loadingText="Loading repositories..."
-        emptyState={
-          <div className={styles.emptyState}>
-            <FiGithub size={48} />
-            <p>No repositories found. Create a repository to get started.</p>
-          </div>
-        }
-      >
-        <GridCardAdd label="Create Repository" onClick={() => setIsModalOpen(true)} />
+      <div className={styles.pageContent}>
+        <Search
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onRefresh={handleRefresh}
+          isLoading={loading}
+          placeholder="Search repositories..."
+          className={styles.search}
+        />
 
-        {filteredRepositories.map((repository: Repository) => (
-          <RepositoryCard
-            key={repository.id}
-            repository={repository}
-            onClick={() => navigateToRepository(repository)}
-            onDisable={handleDisableRepository}
-          />
-        ))}
-      </GridContainer>
+        <div className={styles.gridContainer}>
+          <GridCardAdd label="Create Repository" onClick={() => setIsModalOpen(true)} />
+
+          {filteredRepositories.map((repository: Repository) => (
+            <RepositoryCard
+              key={repository.id}
+              repository={repository}
+              onClick={() => navigateToRepository(repository)}
+              onDisable={handleDisableRepository}
+            />
+          ))}
+        </div>
+
+        {filteredRepositories.length === 0 && searchQuery && !loading && (
+          <div className={styles.noResults}>
+            <Typography variant="body1" color="secondary" align="center">
+              No repositories found matching "{searchQuery}"
+            </Typography>
+          </div>
+        )}
+      </div>
 
       {/* Create Repository Modal */}
       <Modal
-        title="Create Repository"
+        title={<Typography variant="h2">Create Repository</Typography>}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
@@ -154,7 +166,9 @@ const RepositoriesPage: React.FC = observer(() => {
       >
         <form onSubmit={handleCreateRepository} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="repoName">Repository Name</label>
+            <label htmlFor="repoName">
+              <Typography variant="subtitle2">Repository Name</Typography>
+            </label>
             <Input
               id="repoName"
               value={repoName}
@@ -165,7 +179,9 @@ const RepositoriesPage: React.FC = observer(() => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="repoDesc">Description (optional)</label>
+            <label htmlFor="repoDesc">
+              <Typography variant="subtitle2">Description (optional)</Typography>
+            </label>
             <Input
               id="repoDesc"
               value={repoDesc}
@@ -175,7 +191,9 @@ const RepositoriesPage: React.FC = observer(() => {
           </div>
 
           <div className={styles.formGroup}>
-            <label>Visibility</label>
+            <Typography variant="subtitle2" component="div" gutterBottom>
+              Visibility
+            </Typography>
             <div className={styles.radioGroup}>
               <label className={styles.radioLabel}>
                 <input
@@ -185,7 +203,9 @@ const RepositoriesPage: React.FC = observer(() => {
                   checked={visibility === "PUBLIC"}
                   onChange={() => setVisibility("PUBLIC")}
                 />
-                Public
+                <Typography variant="body2" component="span">
+                  Public
+                </Typography>
               </label>
               <label className={styles.radioLabel}>
                 <input
@@ -195,13 +215,17 @@ const RepositoriesPage: React.FC = observer(() => {
                   checked={visibility === "PRIVATE"}
                   onChange={() => setVisibility("PRIVATE")}
                 />
-                Private
+                <Typography variant="body2" component="span">
+                  Private
+                </Typography>
               </label>
             </div>
           </div>
 
           <div className={styles.infoBox}>
-            <p>This will create a repository on GitHub.</p>
+            <Typography variant="body2" color="secondary">
+              This will create a repository on GitHub.
+            </Typography>
           </div>
 
           <div className={styles.modalActions}>
@@ -216,7 +240,7 @@ const RepositoriesPage: React.FC = observer(() => {
               Cancel
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting || !repoName.trim()}>
-              Create Repository
+              {isSubmitting ? "Creating..." : "Create Repository"}
             </Button>
           </div>
         </form>
@@ -227,11 +251,16 @@ const RepositoriesPage: React.FC = observer(() => {
         <Modal
           isOpen={!!disableRepository}
           onClose={() => !isDisabling && setDisableRepository(null)}
-          title="Disable Repository"
+          title={<Typography variant="h2">Disable Repository</Typography>}
         >
           <ConfirmationDialog
             title="Disable Repository Confirmation"
-            description={`Are you sure you want to disable repository "${disableRepository.name}"? This will turn off issues, projects, wiki, and discussions.`}
+            description={
+              <Typography variant="body1">
+                Are you sure you want to disable repository <Code>{disableRepository.name}</Code>?
+                This will turn off issues, projects, wiki, and discussions.
+              </Typography>
+            }
             footer={
               <Button variant="danger" onClick={confirmDisable} disabled={isDisabling}>
                 {isDisabling ? "Disabling..." : "Disable Repository"}

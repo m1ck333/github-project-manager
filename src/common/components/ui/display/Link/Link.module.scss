@@ -1,0 +1,54 @@
+@use "@/styles/variables" as *;
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: $transition-base;
+  cursor: pointer;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium;
+
+  &.primary {
+    color: $primary-color;
+
+    &:hover,
+    &:focus {
+      color: $primary-600;
+    }
+  }
+
+  &.secondary {
+    color: $text-secondary;
+
+    &:hover,
+    &:focus {
+      color: $text-primary;
+    }
+  }
+
+  &.tertiary {
+    color: $text-tertiary;
+
+    &:hover,
+    &:focus {
+      color: $text-secondary;
+    }
+  }
+
+  &.underlineOnHover {
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+  }
+}
+
+.buttonLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  outline: none;
+  text-align: left;
+}

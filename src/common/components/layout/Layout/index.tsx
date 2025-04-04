@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 
 import Header from "../Header";
 
+import styles from "./Layout.module.scss";
+
 interface LayoutProps {
   children: ReactNode;
 }
@@ -11,7 +13,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <div className="app-container">
+    <div className={styles.appContainer}>
       <Header />
       <main key={`main-${location.pathname}`}>{children}</main>
     </div>

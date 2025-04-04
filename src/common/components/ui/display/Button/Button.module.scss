@@ -1,11 +1,11 @@
-@use "src/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-weight: 500;
+  gap: $spacing-xs;
+  font-weight: $font-weight-medium;
   font-family: inherit;
   cursor: pointer;
   transition:
@@ -14,7 +14,7 @@
     opacity 0.2s;
   border-radius: $border-radius-md;
   padding: 0 $spacing-md;
-  line-height: 1;
+  line-height: $line-height-tight;
   border: 1px solid transparent;
 
   &:disabled {
@@ -25,17 +25,17 @@
   // Size variants
   &.large {
     height: 48px;
-    font-size: 16px;
+    font-size: $font-size-medium;
   }
 
   &.medium {
     height: 40px;
-    font-size: 14px;
+    font-size: $font-size-base;
   }
 
   &.small {
     height: 32px;
-    font-size: 13px;
+    font-size: $font-size-small;
     padding: 0 $spacing-sm;
   }
 

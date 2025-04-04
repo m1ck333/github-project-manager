@@ -1,79 +1,135 @@
 import React, { useState } from "react";
 
-import { FormActionButtons, FormGroup, Input, useToast } from "@/common/components/ui";
-import { useAsync } from "@/common/hooks";
-import { projectStore } from "@/stores";
-
-import { Project, ProjectFormData } from "../../../types";
+import { Button, FormGroup, Input, Typography } from "@/common/components/ui";
+import ModalForm from "@/common/components/ui/modal/ModalForm";
+import { Project, ProjectFormData } from "@/features/projects/types";
 
 import styles from "./ProjectForm.module.scss";
 
 interface ProjectFormProps {
-  project?: Project; // Optional - if provided, component is in edit mode
-  onSuccess: () => void;
+  onSubmit: (data: ProjectFormData) => Promise<unknown>;
   onCancel: () => void;
+  initialValues?: Project | null;
+  isSubmitting?: boolean;
+  submitLabel: string;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ project, onSuccess, onCancel }) => {
-  const isEditMode = !!project;
-  const [name, setName] = useState(project?.name || "");
-  const { showToast } = useToast();
-  const { isLoading: isSubmitting, error, execute } = useAsync();
+export const ProjectForm: React.FC<ProjectFormProps> = ({
+  onSubmit,
+  onCancel,
+  initialValues,
+  isSubmitting = false,
+  submitLabel,
+}) => {
+  const [name, setName] = useState(initialValues?.name || "");
+  const [description, setDescription] = useState(initialValues?.description || "");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
+      setError("Project name is required");
       return;
     }
 
-    const success = await execute(async () => {
-      const projectData: ProjectFormData = {
+    try {
+      await onSubmit({
         name,
-        description: project?.description || "",
-      };
+        description,
+      });
 
-      if (isEditMode && project) {
-        await projectStore.updateProject(project.id, projectData);
-        showToast(`Project "${name}" updated successfully`, "success");
-      } else {
-        await projectStore.createProject(projectData);
-        showToast("Project created successfully", "success");
-      }
-
-      return true;
-    });
-
-    if (success) {
-      onSuccess();
+      // Clear form on success
+      setName("");
+      setDescription("");
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save project");
     }
   };
 
-  // Extract error message from the error object
-  const errorMessage = error ? String(error) : "";
-
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <FormGroup label="Project Name" htmlFor="name" error={errorMessage}>
+    <form onSubmit={handleSubmit} className={styles.form}>
+      {error && (
+        <div className={styles.error}>
+          <Typography variant="body2" color="error">
+            {error}
+          </Typography>
+        </div>
+      )}
+
+      <FormGroup label="Project Name" htmlFor="project-name">
         <Input
-          id="name"
+          id="project-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter project name"
-          disabled={isSubmitting}
+          placeholder="My Awesome Project"
           required
         />
       </FormGroup>
 
-      <FormActionButtons
-        onCancel={onCancel}
-        isSubmitting={isSubmitting}
-        submitDisabled={!name.trim()}
-        submitText={isEditMode ? "Update Project" : "Create Project"}
-        submittingText={isEditMode ? "Updating..." : "Creating..."}
-      />
+      <FormGroup label="Description (optional)" htmlFor="project-description">
+        <Input
+          id="project-description"
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="A brief description of your project"
+        />
+      </FormGroup>
+
+      <div className={styles.actions}>
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : submitLabel}
+        </Button>
+      </div>
     </form>
+  );
+};
+
+interface ProjectFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: ProjectFormData) => Promise<unknown>;
+  initialValues?: Project | null;
+  title: string;
+  submitLabel: string;
+}
+
+export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialValues,
+  title,
+  submitLabel,
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (data: ProjectFormData) => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit(data);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <ModalForm isOpen={isOpen} onClose={onClose} title={title}>
+      <ProjectForm
+        onSubmit={handleSubmit}
+        onCancel={onClose}
+        initialValues={initialValues}
+        isSubmitting={isSubmitting}
+        submitLabel={submitLabel}
+      />
+    </ModalForm>
   );
 };
 

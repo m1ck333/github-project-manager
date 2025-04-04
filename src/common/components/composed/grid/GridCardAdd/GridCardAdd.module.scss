@@ -1,4 +1,4 @@
-@use "src/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .addCard {
   height: 100%;
@@ -46,9 +46,9 @@
 .small {
   min-height: 40px;
   height: 40px;
-  padding: 0.5rem;
+  padding: $spacing-xs;
   flex-direction: row;
-  gap: 0.5rem;
+  gap: $spacing-xs;
   border-width: 1px;
 
   .addIcon {
@@ -59,6 +59,6 @@
 
   p {
     margin-top: 0;
-    font-size: 0.9rem;
+    font-size: $font-size-small;
   }
 }

@@ -1,4 +1,4 @@
-@use "@/styles/variables.scss" as *;
+@use "@/styles/variables" as *;
 
 .gridContainerWrapper {
   display: flex;
@@ -10,8 +10,8 @@
 }
 
 .gridTitle {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: $font-size-large;
+  font-weight: $font-weight-semibold;
   margin: 0 0 $spacing-md 0;
   color: $text-primary;
 }
@@ -29,7 +29,7 @@
 
   .toolbarActions {
     display: flex;
-    gap: 10px;
+    gap: $spacing-sm;
     justify-content: flex-end;
   }
 }
