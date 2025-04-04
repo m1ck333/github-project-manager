@@ -13,7 +13,7 @@ import {
 } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
 
-import styles from "./ProjectRepositories.module.scss";
+import styles from "./project-repositories.module.scss";
 
 interface ProjectRepositoriesProps {
   projectId: string;

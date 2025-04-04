@@ -1,0 +1,50 @@
+@use "@/common/styles/variables" as *;
+
+.projectGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+
+  .createProjectCard {
+    height: 100%;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-xl;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.addCard {
+  background-color: rgba($primary-100, 0.3);
+  border: 2px dashed $primary-300;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba($primary-100, 0.5);
+    transform: translateY(-4px);
+  }
+}
+
+.projectCard {
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-md;
+  }
+}

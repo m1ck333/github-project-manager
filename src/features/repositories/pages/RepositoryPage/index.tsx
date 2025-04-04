@@ -6,15 +6,15 @@ import { useParams } from "react-router-dom";
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, Typography, useToast } from "@/common/components/ui";
+import { projectStore } from "@/features/projects/stores";
 import { Repositories } from "@/features/repositories";
 import {
   CollaboratorsList,
   ProjectLinkModal,
   RepositoryInfo,
 } from "@/features/repositories/components";
-import { projectStore } from "@/stores";
 
-import styles from "./RepositoryPage.module.scss";
+import styles from "./repository-page.module.scss";
 
 const RepositoryPage: React.FC = observer(() => {
   const { owner, name } = useParams<{ owner: string; name: string }>();

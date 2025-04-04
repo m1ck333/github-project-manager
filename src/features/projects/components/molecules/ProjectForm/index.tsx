@@ -4,7 +4,7 @@ import { Button, FormGroup, Input, Typography } from "@/common/components/ui";
 import ModalForm from "@/common/components/ui/modal/ModalForm";
 import { Project, ProjectFormData } from "@/features/projects/types";
 
-import styles from "./ProjectForm.module.scss";
+import styles from "./project-form.module.scss";
 
 interface ProjectFormProps {
   onSubmit: (data: ProjectFormData) => Promise<unknown>;

@@ -1,0 +1,1233 @@
+@use "sass:color";
+@use "@/common/styles/variables.scss" as *;
+
+.projectBoard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin-bottom: 2rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    .spinning {
+      animation: spin 1.5s linear infinite;
+    }
+  }
+
+  .content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .boardContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    gap: 2rem;
+    overflow: auto;
+  }
+
+  .boardColumns {
+    display: flex;
+    gap: 1rem;
+    min-height: 400px;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .columnContainer {
+    display: flex;
+    flex-direction: column;
+    background: var(--background-secondary);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+    height: fit-content;
+    max-height: 100%;
+    overflow: hidden;
+
+    .columnHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+
+      h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+    }
+
+    .issuesContainer {
+      padding: 0.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 200px;
+      max-height: 600px;
+    }
+
+    .addIssueCard {
+      margin-top: 0.5rem;
+      min-height: 40px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+
+  .addColumnContainer {
+    flex: 0 0 300px;
+    min-width: 300px;
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-md);
+    background-color: transparent;
+  }
+
+  .addColumnCard {
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-secondary);
+    border: 2px dashed var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+  }
+
+  .emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    min-height: 300px;
+
+    h3 {
+      margin: 1rem 0 0.5rem;
+    }
+
+    p {
+      color: #6e7781;
+      max-width: 500px;
+    }
+  }
+
+  .emptyColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: var(--text-secondary);
+    height: 100px;
+    text-align: center;
+  }
+
+  .loadingContainer,
+  .errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    width: 100%;
+    gap: 1rem;
+    color: var(--text-secondary);
+  }
+
+  // Form styles
+  .form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 600px;
+  }
+
+  .formError {
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .input,
+    .select {
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--background-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      width: 100%;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: var(--color-primary);
+        outline: none;
+      }
+    }
+
+    textarea.input {
+      min-height: 100px;
+      resize: vertical;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  // Label checkbox list
+  .labelsList {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  .labelCheckboxItem {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .labelCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .labelColor {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+
+    .labelName {
+      font-size: 14px;
+    }
+  }
+
+  .labelDot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  // API limitation info
+  .apiLimitationInfo {
+    padding: 16px;
+
+    .infoHeader {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .infoIcon {
+        color: var(--color-warning);
+      }
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+    }
+
+    p {
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    ul {
+      margin: 0 0 16px;
+      padding-left: 24px;
+
+      li {
+        margin-bottom: 8px;
+      }
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+.projectBoard {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+    }
+
+    .actions {
+      display: flex;
+      gap: $spacing-md;
+    }
+
+    .viewToggle {
+      display: flex;
+      background-color: $gray-100;
+      border-radius: $border-radius-md;
+      padding: $spacing-xs;
+      margin-right: $spacing-sm;
+
+      .viewButton {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        border: none;
+        background-color: transparent;
+        color: $gray-600;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-small;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: $gray-200;
+        }
+
+        &.active {
+          background-color: $white;
+          color: $primary-color;
+          font-weight: $font-weight-medium;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+
+  .content {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .spinning {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  // Board View Styles
+  .boardContainer {
+    height: 100%;
+    overflow: auto;
+    padding-bottom: $spacing-xl;
+
+    .emptyState {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-md;
+      padding: $spacing-xl * 2;
+      text-align: center;
+      color: $gray-500;
+
+      h3 {
+        margin-top: $spacing-md;
+        margin-bottom: 0;
+        font-weight: $font-weight-medium;
+      }
+
+      p {
+        margin-bottom: $spacing-lg;
+      }
+    }
+
+    .columnsContainer {
+      display: flex;
+      gap: $spacing-lg;
+      min-height: 100%;
+      overflow-x: auto;
+      padding: $spacing-md;
+
+      .addColumnContainer {
+        min-width: 280px;
+        padding: $spacing-md;
+
+        .addColumnButton {
+          width: 100%;
+          justify-content: center;
+          padding: $spacing-md;
+          border: 2px dashed $gray-300;
+          background-color: $gray-50;
+          color: $gray-600;
+
+          &:hover {
+            background-color: $gray-100;
+            border-color: $gray-400;
+          }
+        }
+      }
+    }
+  }
+
+  .boardColumn {
+    display: flex;
+    flex-direction: column;
+    min-width: 280px;
+    max-width: 280px;
+    background-color: $gray-50;
+    border-radius: $border-radius-md;
+    border: 1px solid $gray-200;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    .columnHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-md;
+      border-bottom: 1px solid $gray-200;
+
+      h3 {
+        margin: 0;
+        font-size: $font-size-medium;
+        font-weight: $font-weight-medium;
+        color: $gray-800;
+      }
+
+      .issueCount {
+        background-color: $gray-200;
+        color: $gray-700;
+        font-size: $font-size-small;
+        padding: 2px 6px;
+        border-radius: 10px;
+      }
+    }
+
+    .columnContent {
+      flex: 1;
+      padding: $spacing-sm;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      .emptyColumn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: $spacing-lg;
+        color: $gray-500;
+        font-style: italic;
+        font-size: $font-size-small;
+      }
+
+      .issuesList {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+
+        .issueCard {
+          background-color: $white;
+          border-radius: $border-radius-sm;
+          padding: $spacing-sm;
+          border: 1px solid $gray-200;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          transition: all 0.2s ease;
+
+          &:hover {
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+          }
+
+          .issueHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: $spacing-xs;
+
+            h4 {
+              margin: 0;
+              font-size: $font-size-small;
+              font-weight: $font-weight-medium;
+              flex: 1;
+            }
+
+            .issueActions {
+              display: flex;
+              gap: $spacing-xs;
+              position: relative;
+
+              .actionButton {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: none;
+                color: $gray-500;
+                cursor: pointer;
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                border-radius: $border-radius-sm;
+
+                &:hover {
+                  background-color: $gray-100;
+                  color: $gray-800;
+                }
+              }
+            }
+          }
+
+          .issueLabels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $spacing-xs;
+            margin-bottom: $spacing-xs;
+
+            .issueLabel {
+              font-size: 10px;
+              padding: 2px 6px;
+              border-radius: 10px;
+              color: $white;
+              font-weight: $font-weight-medium;
+            }
+          }
+
+          .issueNumber {
+            font-size: 11px;
+            color: $gray-500;
+          }
+        }
+      }
+
+      .addIssueButton {
+        margin-top: auto;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .moveIssueForm {
+    .formGroup {
+      margin-bottom: $spacing-md;
+
+      label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-weight: $font-weight-medium;
+      }
+
+      .select {
+        width: 100%;
+        padding: $spacing-sm;
+        border: 1px solid $gray-300;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-small;
+
+        &:focus {
+          border-color: $primary-color;
+          outline: none;
+          box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-sm;
+    }
+  }
+
+  .boardHeader {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $gray-200;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .boardTitle {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+
+      h2 {
+        margin: 0;
+        font-size: $font-size-xl;
+        color: $gray-900;
+        font-weight: $font-weight-semibold;
+      }
+
+      .boardStats {
+        display: flex;
+        gap: $spacing-md;
+        color: $gray-600;
+        font-size: $font-size-small;
+
+        .statItem {
+          display: flex;
+          align-items: center;
+          gap: $spacing-xs;
+        }
+      }
+    }
+
+    .boardActions {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      @media (min-width: 768px) {
+        align-items: flex-end;
+      }
+
+      .actionsTabs {
+        display: flex;
+        background-color: $gray-100;
+        border-radius: $border-radius-sm;
+        overflow: hidden;
+
+        .actionTab {
+          padding: $spacing-xs $spacing-sm;
+          border: none;
+          background: none;
+          cursor: pointer;
+          font-size: $font-size-small;
+          color: $gray-700;
+          display: flex;
+          align-items: center;
+          gap: $spacing-xs;
+
+          &:hover {
+            background-color: $gray-200;
+          }
+
+          &.active {
+            background-color: $primary-color;
+            color: white;
+            font-weight: $font-weight-medium;
+          }
+        }
+      }
+
+      .actionsButtons {
+        display: flex;
+        gap: $spacing-sm;
+        flex-wrap: wrap;
+
+        @media (max-width: 767px) {
+          width: 100%;
+          justify-content: flex-end;
+        }
+
+        .dropdownWrapper {
+          position: relative;
+        }
+      }
+    }
+  }
+
+  .noBoardsMessage {
+    text-align: center;
+    padding: $spacing-xl $spacing-md;
+    background-color: $gray-100;
+    border-radius: $border-radius-md;
+    color: $gray-700;
+
+    p {
+      margin: 0 0 $spacing-md;
+
+      .helpIcon {
+        color: $primary-color;
+        cursor: help;
+        display: inline-flex;
+        align-items: center;
+        margin-left: $spacing-xs;
+      }
+    }
+  }
+
+  .loading {
+    text-align: center;
+    padding: $spacing-xl;
+    color: $gray-600;
+  }
+
+  .error {
+    color: $danger-color;
+    background-color: rgba($danger-color, 0.1);
+    padding: $spacing-md;
+    border-radius: $border-radius-md;
+    text-align: center;
+  }
+
+  // Confirm delete dialog
+  .confirmDelete {
+    padding: $spacing-md;
+
+    p {
+      margin: 0 0 $spacing-md;
+    }
+
+    .warning {
+      color: $danger-color;
+      font-weight: $font-weight-medium;
+      margin-bottom: $spacing-lg;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-sm;
+    }
+  }
+
+  // API Limitation info modal
+  .apiLimitationInfo {
+    padding: $spacing-md;
+
+    .infoHeader {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-md;
+
+      .infoIcon {
+        color: $primary-color;
+      }
+
+      h3 {
+        margin: 0;
+        color: $text-primary;
+      }
+    }
+
+    p {
+      margin: 0 0 $spacing-md;
+      line-height: 1.5;
+    }
+
+    ul {
+      margin: 0 0 $spacing-lg;
+      padding-left: $spacing-lg;
+
+      li {
+        margin-bottom: $spacing-xs;
+        line-height: 1.5;
+      }
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// Form styles
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    label {
+      font-weight: $font-weight-medium;
+      color: $gray-800;
+    }
+
+    .input,
+    .select {
+      padding: $spacing-sm;
+      border: 1px solid $gray-300;
+      border-radius: $border-radius-sm;
+      font-size: $font-size-base;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      }
+    }
+
+    .error {
+      color: $danger-color;
+      font-size: $font-size-small;
+      margin-top: $spacing-xs;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+  }
+}
+
+.apiLimitationModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.apiLimitationContent {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-top: 0;
+    color: #24292e;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: #586069;
+  }
+}
+
+.closeButton {
+  padding: 0.5rem 1rem;
+  background-color: #0366d6;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 1rem;
+
+  &:hover {
+    background-color: #0358c2;
+  }
+}
+
+.labelDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+
+.moveDropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 5px;
+  background-color: $white;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-sm;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  min-width: 150px;
+  max-height: 200px;
+  overflow-y: auto;
+
+  .moveButton {
+    display: block;
+    width: 100%;
+    padding: $spacing-xs $spacing-sm;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: $font-size-small;
+
+    &:hover {
+      background-color: $gray-100;
+    }
+  }
+}
+
+.noStatusSection {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--background-tertiary);
+  border-radius: 8px;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.errorContainer {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.labelContainer {
+  display: flex;
+  gap: 4px;
+}
+
+.labelDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.addIssueCard {
+  margin-top: 0.5rem;
+  min-height: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.debugInfo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #f0f6fc;
+  border-radius: 8px;
+  text-align: left;
+  width: 100%;
+  max-width: 600px;
+
+  pre {
+    background-color: #ffffff;
+    padding: 0.75rem;
+    border-radius: 4px;
+    overflow: auto;
+    font-size: 0.85rem;
+    max-height: 300px;
+  }
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.boardColumnsDebug {
+  width: 100%;
+  background-color: #f5f7fa;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: #333;
+  }
+
+  h3 {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    color: #637381;
+  }
+}
+
+.columnsDebugTable {
+  width: 100%;
+  border: 1px solid #dfe3e8;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.columnsDebugRow {
+  display: flex;
+
+  &:nth-child(odd) {
+    background-color: #f9f9f9;
+  }
+
+  &:first-child {
+    background-color: #eef0f3;
+    font-weight: 500;
+  }
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #dfe3e8;
+  }
+}
+
+.columnsDebugCell {
+  padding: 0.75rem 1rem;
+  flex: 1;
+
+  &:not(:last-child) {
+    border-right: 1px solid #dfe3e8;
+  }
+}
+
+.actionsDebug {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.unassignedIssues {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.columnTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.issuesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.columnsContainer {
+  width: 100%;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.column {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 15rem;
+}
+
+.issuesContainer {
+  margin-top: 1rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  gap: 1rem;
+}
+
+.addIssueButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.issueCard {
+  height: 100%;
+}
+
+.label {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.deleteFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.issueContent {
+  margin-bottom: 1rem;
+}
+
+.issueActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

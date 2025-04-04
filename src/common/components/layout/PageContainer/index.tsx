@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import { env } from "../../../../config/env";
+import { env } from "../../../config/env";
 import BackButton, { BackDestination } from "../../composed/BackButton";
 import Error from "../../ui/feedback/Error";
 import Container from "../Container";

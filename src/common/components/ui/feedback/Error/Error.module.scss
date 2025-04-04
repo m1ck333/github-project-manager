@@ -1,12 +1,12 @@
-@use "@/styles/variables" as *;
+@use "@/common/styles/variables" as *;
 
 // Standard inline error display
 .error {
   display: flex;
   padding: $spacing-sm;
   border-radius: $border-radius-md;
-  background-color: $error-50;
-  border: 1px solid $error-500;
+  background-color: rgba($danger-color, 0.1);
+  border: 1px solid $danger-color;
   margin-bottom: $spacing-sm;
   width: 100%;
 
@@ -21,7 +21,7 @@
   }
 
   .icon {
-    color: $error-600;
+    color: $danger-color;
     margin-right: $spacing-xs;
     flex-shrink: 0;
   }
@@ -29,14 +29,14 @@
   .title {
     margin: 0;
     font-size: $font-size-base;
-    color: $error-600;
+    color: $danger-color;
     font-weight: $font-weight-semibold;
   }
 
   .message {
     margin: 0 0 $spacing-xs;
     font-size: $font-size-small;
-    line-height: $line-height-base;
+    line-height: 1.5;
 
     &:last-child {
       margin-bottom: 0;
@@ -69,20 +69,20 @@
   text-align: center;
 
   .icon {
-    color: $error-600;
+    color: $danger-color;
     margin-bottom: $spacing-md;
   }
 
   .title {
     margin: 0 0 $spacing-md;
     font-size: $font-size-large;
-    color: $error-600;
+    color: $danger-color;
   }
 
   .message {
     margin: 0 0 $spacing-sm;
     color: $text-secondary;
-    line-height: $line-height-base;
+    line-height: 1.6;
     font-size: $font-size-base;
   }
 

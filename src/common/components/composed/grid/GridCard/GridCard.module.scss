@@ -1,5 +1,5 @@
 @use "sass:color";
-@use "@/styles/variables" as *;
+@use "@/common/styles/variables" as *;
 
 .gridCard {
   background-color: $background-primary;

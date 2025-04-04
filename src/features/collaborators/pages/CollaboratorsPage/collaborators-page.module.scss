@@ -1,0 +1,234 @@
+@use "sass:color";
+@use "@/common/styles/variables" as *;
+
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background-color: $background-secondary;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-md;
+  color: $text-primary;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: $transition-base;
+
+  &:hover {
+    background-color: color.adjust($background-secondary, $lightness: -3%);
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.collaboratorsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.collaboratorCard {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  border: 1px solid $border-color;
+  transition: $transition-base;
+
+  &:hover {
+    box-shadow: $shadow-sm;
+    transform: translateY(-2px);
+  }
+}
+
+.collaboratorAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: $spacing-md;
+  background-color: color.adjust($background-secondary, $lightness: -5%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.teamIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-secondary;
+  background-color: color.adjust($background-secondary, $lightness: -10%);
+  width: 100%;
+  height: 100%;
+}
+
+.collaboratorInfo {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 $spacing-xs;
+    font-size: $font-size-medium;
+    color: $text-primary;
+  }
+}
+
+.roleInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.role {
+  display: inline-block;
+  padding: 2px $spacing-sm;
+  background-color: $primary-color;
+  color: $white;
+  border-radius: 12px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.badge {
+  padding: 2px $spacing-xs;
+  background-color: $secondary-color;
+  color: $white;
+  border-radius: 4px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.removeButton {
+  margin-left: $spacing-sm;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  color: $text-tertiary;
+  text-align: center;
+  gap: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  border: 1px dashed $border-color;
+
+  p {
+    margin: 0;
+    font-size: $font-size-medium;
+  }
+}
+
+.notesSection {
+  margin-top: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.noteCard {
+  padding: $spacing-md;
+  background-color: rgba($primary-color, 0.05);
+  border-left: 3px solid $primary-color;
+  border-radius: $border-radius-sm;
+  color: $text-secondary;
+
+  p {
+    margin: 0;
+    font-size: $font-size-small;
+    line-height: 1.5;
+  }
+
+  &.headerNote {
+    background-color: rgba($secondary-color, 0.05);
+    border-left: 3px solid $secondary-color;
+
+    p {
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+    }
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  font-size: $font-size-base;
+  color: $text-secondary;
+}
+
+.error {
+  background-color: rgba($danger-color, 0.1);
+  color: $danger-color;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  margin: $spacing-md;
+  font-weight: $font-weight-medium;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.selectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+  }
+
+  select {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    background-color: $background-primary;
+    color: $text-primary;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}

@@ -1,1 +1,1 @@
-export { default as EmptyCollaboratorsList } from "./EmptyCollaboratorsList";
+export { default as EmptyCollaboratorsList } from "./organisms/EmptyCollaboratorsList";

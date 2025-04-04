@@ -1,25 +1,34 @@
-// Re-export public API from each module
-export * from "./stores";
-export * from "./services";
-// export * from "./hooks"; // No hooks to export
-export * from "./validation";
-export * from "./types";
-// Avoid duplicate exports by not exporting directly from API
-// export * from "./api";
+import { collaboratorService } from "../collaborators/services";
 
-// Create a repository-related exports object for convenience
-import {
-  repositoryCrudService,
-  repositoryCollaboratorService,
-  repositorySearchService,
-} from "./services";
+import { repositoryCrudService, repositorySearchService } from "./services";
 import { repositoryStore } from "./stores";
 
+// Re-export types
+export * from "./types";
+
+// Export API operations
+export {
+  RepositoryVisibility,
+  GetAllInitialDataDocument,
+  CreateRepositoryDocument,
+  DisableRepositoryDocument,
+  GetRepositoryCollaboratorsDocument,
+  CheckRepositoryCollaboratorDocument,
+  AddRepositoryCollaboratorDocument,
+  RemoveRepositoryCollaboratorDocument,
+} from "./api";
+
+// Export other feature modules
+export * from "./services";
+export * from "./stores";
+export * from "./mappers";
+
+// Feature export object
 export const Repositories = {
   store: repositoryStore,
   services: {
     crud: repositoryCrudService,
-    collaborator: repositoryCollaboratorService,
+    collaborator: collaboratorService,
     search: repositorySearchService,
   },
 };

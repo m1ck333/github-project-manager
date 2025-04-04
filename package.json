@@ -6,9 +6,11 @@
   "scripts": {
     "// ----------------- Development -----------------": "",
     "dev": "vite",
+    "cdev": "clear;vite",
     "preview": "vite preview",
     "// ----------------- Build -----------------": "",
     "build": "tsc && vite build",
+    "cbuild": "clear;tsc && vite build",
     "// ----------------- Code Quality -----------------": "",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -16,8 +18,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss}\"",
     "fix": "npm run format && npm run lint:fix",
     "// ----------------- GraphQL -----------------": "",
-    "codegen": "graphql-codegen --config src/api/codegen.ts",
-    "codegen:watch": "graphql-codegen --config src/api/codegen.ts --watch",
+    "codegen": "graphql-codegen --config src/api-github/codegen.ts",
+    "codegen:watch": "graphql-codegen --config src/api-github/codegen.ts --watch",
     "// ----------------- Git Hooks -----------------": "",
     "prepare": "husky",
     "pre-commit": "lint-staged"

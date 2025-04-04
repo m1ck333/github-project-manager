@@ -1,4 +1,5 @@
-import { graphQLClientService } from "../../../services/graphql-client.service";
+import { executeGitHubMutation } from "@/api-github";
+
 import { CreateProjectDocument, UpdateProjectDocument, DeleteProjectDocument } from "../api";
 import { Project, ProjectFormData } from "../types";
 
@@ -39,10 +40,10 @@ export class ProjectCrudService {
       ...(projectData.description ? { description: projectData.description } : {}),
     };
 
-    const data = await graphQLClientService.mutation(CreateProjectDocument, { input });
+    const { data, error } = await executeGitHubMutation(CreateProjectDocument, { input });
 
-    if (!data?.createProjectV2?.projectV2) {
-      throw new Error("Failed to create project");
+    if (error || !data?.createProjectV2?.projectV2) {
+      throw error || new Error("Failed to create project");
     }
 
     // Return project from the response
@@ -84,10 +85,10 @@ export class ProjectCrudService {
       ...(projectData.description ? { shortDescription: projectData.description } : {}),
     };
 
-    const data = await graphQLClientService.mutation(UpdateProjectDocument, { input });
+    const { data, error } = await executeGitHubMutation(UpdateProjectDocument, { input });
 
-    if (!data?.updateProjectV2?.projectV2) {
-      throw new Error("Failed to update project");
+    if (error || !data?.updateProjectV2?.projectV2) {
+      throw error || new Error("Failed to update project");
     }
 
     const projectResponse = data.updateProjectV2.projectV2;
@@ -117,7 +118,11 @@ export class ProjectCrudService {
   async deleteProject(projectId: string): Promise<boolean> {
     const input = { projectId };
 
-    const data = await graphQLClientService.mutation(DeleteProjectDocument, { input });
+    const { data, error } = await executeGitHubMutation(DeleteProjectDocument, { input });
+
+    if (error) {
+      throw error;
+    }
 
     return Boolean(data?.deleteProjectV2);
   }

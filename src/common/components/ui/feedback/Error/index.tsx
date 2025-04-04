@@ -1,7 +1,7 @@
 import React from "react";
 import { FiAlertCircle, FiRefreshCw } from "react-icons/fi";
 
-import { getErrorMessage } from "@/common/utils/errors";
+import { getErrorMessage } from "@/common/utils/errors.utils";
 
 import Button from "../../display/Button";
 

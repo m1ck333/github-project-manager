@@ -4,7 +4,7 @@ import { FiEdit2, FiTrash2, FiGitBranch, FiList } from "react-icons/fi";
 import { Button } from "@/common/components/ui";
 import { Project } from "@/features/projects/types";
 
-import styles from "./ProjectCard.module.scss";
+import styles from "./project-card.module.scss";
 
 interface ProjectCardProps {
   project: Project;

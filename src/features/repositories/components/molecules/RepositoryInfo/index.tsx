@@ -2,7 +2,7 @@ import React from "react";
 
 import { Repository } from "../../../types/repository";
 
-import styles from "./RepositoryInfo.module.scss";
+import styles from "./repository-info.module.scss";
 
 interface RepositoryInfoProps {
   repository: Repository;

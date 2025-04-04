@@ -1,0 +1,33 @@
+@use "@/common/styles/variables" as *;
+
+.collaboratorsSection {
+  margin-top: $spacing-xl;
+
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+
+    h2 {
+      font-size: $font-size-large;
+      margin: 0;
+    }
+  }
+
+  .loading {
+    display: flex;
+    justify-content: center;
+    padding: $spacing-sm;
+    color: $text-tertiary;
+    font-style: italic;
+  }
+
+  .collaboratorsList {
+    margin-top: $spacing-sm;
+  }
+
+  .emptyCollaborators {
+    margin-top: $spacing-sm;
+  }
+}

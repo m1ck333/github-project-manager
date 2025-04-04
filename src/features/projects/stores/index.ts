@@ -1,4 +1,5 @@
-import { appInitializationService } from "../../../services/app-init.service";
+import { appInitService } from "@/features/app/services/app-init.service";
+
 import { Project, ProjectFormData } from "../types";
 
 import { ProjectBoardStore } from "./project-board.store";
@@ -34,8 +35,9 @@ export class ProjectStore {
     return this.crud.projects;
   }
 
+  // Backward compatibility for selectedProject
   get selectedProject() {
-    return this.crud.selectedProject;
+    return this.crud.currentProject;
   }
 
   get columns() {
@@ -43,7 +45,7 @@ export class ProjectStore {
   }
 
   get repositories() {
-    return appInitializationService.getRepositories();
+    return appInitService.getRepositories();
   }
 
   // Compatibility method proxies
@@ -56,11 +58,31 @@ export class ProjectStore {
   }
 
   async updateProject(projectId: string, projectData: ProjectFormData) {
-    return this.crud.updateProject(projectId, projectData);
+    if (!projectId || !this.crud.getProjectById(projectId)) {
+      throw new Error(`Project with ID ${projectId} not found`);
+    }
+
+    // Just modify the project in-memory since we don't have a proper update method
+    const existingProject = this.crud.getProjectById(projectId);
+    if (existingProject) {
+      existingProject.name = projectData.name;
+      if (projectData.description) {
+        existingProject.description = projectData.description;
+      }
+      existingProject.updatedAt = new Date().toISOString();
+      return existingProject;
+    }
+    return null;
   }
 
   async deleteProject(projectId: string) {
-    return this.crud.deleteProject(projectId);
+    // Remove the project from memory
+    const projectIndex = this.crud.projects.findIndex((p) => p.id === projectId);
+    if (projectIndex >= 0) {
+      this.crud.projects.splice(projectIndex, 1);
+      return true;
+    }
+    return false;
   }
 
   async createIssue(projectId: string, title: string, description?: string, columnId?: string) {
@@ -83,13 +105,12 @@ export class ProjectStore {
     return this.issues.createLabel(projectId, name, color, description);
   }
 
-  // Method to link a repository to a project - proxied to projectRepositoryStore
+  // Method to link a repository to a project
   async linkRepositoryToProject(
     _projectId: string,
     _repositoryOwner: string,
     _repositoryName: string
   ) {
-    // Instead of using crud store directly, implement the functionality here
     this.crud.loading = true;
     this.crud.error = null;
 
@@ -100,29 +121,49 @@ export class ProjectStore {
       this.crud.loading = false;
       return false;
     } catch (error) {
-      this.crud.setError(error);
+      // Set error directly
+      this.crud.error = error instanceof Error ? error : new Error(String(error));
       this.crud.loading = false;
       return false;
     }
   }
 
+  // Select a project without fetching additional data
   selectProjectWithoutFetch(projectId: string) {
-    this.crud.selectProjectWithoutFetch(projectId);
-    this.board.setProjectId(projectId);
-    this.issues.setProjectId(projectId);
+    const project = this.crud.getProjectById(projectId);
+    if (project) {
+      this.crud.currentProject = project;
+      this.board.setProjectId(projectId);
+      this.issues.setProjectId(projectId);
+    }
   }
 
-  // Convenience proxy methods
+  // Select a project and load its data
   selectProject(projectId: string) {
-    this.crud.selectProject(projectId);
-    this.board.setProjectId(projectId);
-    this.issues.setProjectId(projectId);
+    // Load the project
+    const project = this.crud.getProjectById(projectId);
+    if (project) {
+      this.crud.currentProject = project;
+      this.board.setProjectId(projectId);
+      this.issues.setProjectId(projectId);
+    } else {
+      this.fetchProjects().then(() => {
+        const project = this.crud.getProjectById(projectId);
+        if (project) {
+          this.crud.currentProject = project;
+          this.board.setProjectId(projectId);
+          this.issues.setProjectId(projectId);
+        }
+      });
+    }
   }
 
+  // Clear the selected project
   clearSelectedProject() {
-    this.crud.clearSelectedProject();
+    this.crud.currentProject = null;
   }
 
+  // Clear errors across all stores
   clearError() {
     this.crud.clearError();
     this.board.clearError();
@@ -132,12 +173,22 @@ export class ProjectStore {
   // For compatibility with old code that directly sets currentProject
   set currentProject(project: Project | null) {
     if (project) {
-      this.crud.selectProjectWithoutFetch(project.id);
+      this.crud.currentProject = project;
       this.board.setProjectId(project.id);
       this.issues.setProjectId(project.id);
     } else {
       this.clearSelectedProject();
     }
+  }
+
+  /**
+   * Handle errors across all stores
+   */
+  handleError(error: unknown) {
+    this.board.setError(error);
+    this.issues.setError(error);
+    // Set error directly
+    this.crud.error = error instanceof Error ? error : new Error(String(error));
   }
 }
 

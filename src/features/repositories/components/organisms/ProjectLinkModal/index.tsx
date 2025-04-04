@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button, Modal } from "@/common/components/ui";
-import { Project } from "@/core/types";
+import { Project } from "@/features/projects/types";
 
-import styles from "./ProjectLinkModal.module.scss";
+import styles from "./project-link-modal.module.scss";
 
 interface ProjectLinkModalProps {
   isOpen: boolean;

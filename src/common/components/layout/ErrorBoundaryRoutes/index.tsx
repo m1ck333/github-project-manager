@@ -3,15 +3,15 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import Button from "@/common/components/ui/display/Button";
 import Error from "@/common/components/ui/feedback/Error";
-import { getErrorMessage } from "@/common/utils/errors";
+import { getErrorMessage } from "@/common/utils/errors.utils";
+import { HomePage } from "@/features/app";
 import CollaboratorsPage from "@/features/collaborators/pages/CollaboratorsPage";
-import Home from "@/features/home/pages/HomePage";
 import ProjectPage from "@/features/projects/pages/ProjectPage";
 import ProjectsPage from "@/features/projects/pages/ProjectsPage";
 import RepositoriesPage from "@/features/repositories/pages/RepositoriesPage";
 import RepositoryPage from "@/features/repositories/pages/RepositoryPage";
 
-import { ROUTES } from "../../../constants/routes";
+import { ROUTES } from "../../../constants/routes.const";
 
 const ErrorBoundaryRoutes: React.FC = () => {
   const location = useLocation();
@@ -100,7 +100,7 @@ const ErrorBoundaryRoutes: React.FC = () => {
 
   return (
     <Routes key={location.pathname}>
-      <Route path={ROUTES.HOME} element={<Home />} />
+      <Route path={ROUTES.HOME} element={<HomePage />} />
       <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
       <Route path={ROUTES.PROJECT_DETAIL()} element={<ProjectPage />} />
       <Route path={ROUTES.PROJECT_COLLABORATORS()} element={<CollaboratorsPage />} />

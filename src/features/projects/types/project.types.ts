@@ -17,6 +17,7 @@ export interface Column {
   type: ColumnType;
   fieldId?: string;
   fieldName?: string;
+  projectId?: string;
   options?: Array<{
     id: string;
     name: string;

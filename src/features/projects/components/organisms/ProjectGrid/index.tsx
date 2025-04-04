@@ -6,7 +6,7 @@ import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import { Button, EmptyState } from "@/common/components/ui";
 import { Project } from "@/features/projects/types";
 
-import styles from "./ProjectGrid.module.scss";
+import styles from "./project-grid.module.scss";
 
 interface ProjectGridProps {
   projects: Project[];

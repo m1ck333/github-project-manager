@@ -5,14 +5,25 @@ import { useNavigate } from "react-router-dom";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Search, Typography } from "@/common/components/ui";
 import { useAsync, useDebounce } from "@/common/hooks";
-import { getErrorMessage } from "@/common/utils/errors";
+import { getErrorMessage } from "@/common/utils/errors.utils";
 import { Projects } from "@/features/projects";
 import { ProjectGrid } from "@/features/projects/components";
 import { ProjectFormModal } from "@/features/projects/components/molecules/ProjectForm";
 import { useProjectConfirmation } from "@/features/projects/hooks";
 import { Project, ProjectFormData } from "@/features/projects/types";
 
-import styles from "./ProjectsPage.module.scss";
+// Define styles inline instead of importing SCSS
+const styles = {
+  pageContent: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "1.5rem",
+  },
+  noResults: {
+    marginTop: "1.5rem",
+    textAlign: "center" as const,
+  },
+};
 
 const ProjectsPage: React.FC = observer(() => {
   const navigate = useNavigate();
@@ -105,7 +116,7 @@ const ProjectsPage: React.FC = observer(() => {
       loadingMessage="Loading projects..."
       error={error ? getErrorMessage(error) : null}
     >
-      <div className={styles.pageContent}>
+      <div style={styles.pageContent}>
         <Search
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
@@ -115,7 +126,7 @@ const ProjectsPage: React.FC = observer(() => {
         />
 
         {filteredProjects.length === 0 && debouncedSearchQuery && !isLoading && (
-          <div className={styles.noResults}>
+          <div style={styles.noResults}>
             <Typography variant="body1" color="secondary" align="center">
               No projects found matching "{debouncedSearchQuery}".
             </Typography>

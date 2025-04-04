@@ -1,5 +1,4 @@
-// Re-export all hooks from the hooks directory
-
-export const projectsHooks = {};
-
-export { useProjectConfirmation } from "./useProjectConfirmation";
+/**
+ * Re-export all hooks from the projects feature
+ */
+export * from "./use-project-confirmation";

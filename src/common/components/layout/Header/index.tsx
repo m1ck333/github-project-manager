@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Link, NavLink } from "react-router-dom";
 
-import { env } from "@/config/env";
-import GitHubUserInfo from "@/features/home/components/GitHubUserInfo";
+import { env } from "@/common/config/env";
+import { GitHubUserInfo } from "@/features/app";
 
 import styles from "./Header.module.scss";
 

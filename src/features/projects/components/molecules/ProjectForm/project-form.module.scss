@@ -1,0 +1,70 @@
+@use "@/common/styles/variables.scss" as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  background-color: $background-primary;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.description {
+  color: $text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  label {
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+  }
+}
+
+.textarea {
+  padding: $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-base;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+
+  &::placeholder {
+    color: $text-tertiary;
+  }
+}
+
+.error {
+  color: $danger-color;
+  font-size: $font-size-small;
+  margin-top: $spacing-xs;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}

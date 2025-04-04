@@ -1,7 +1,7 @@
-import { ProjectV2SingleSelectFieldOptionColor } from "../../../api/generated/graphql";
-import { graphQLClientService } from "../../../services/graphql-client.service";
+import { executeGitHubMutation } from "@/api-github";
+import { ProjectV2SingleSelectFieldOptionColor } from "@/api-github/generated/graphql";
+
 import { LinkRepositoryToProjectDocument, AddColumnDocument } from "../api";
-import { Column, ColumnFormData, ColumnType } from "../types";
 
 /**
  * Service responsible for project relationships
@@ -16,7 +16,11 @@ export class ProjectRelationsService {
       repositoryId,
     };
 
-    const data = await graphQLClientService.mutation(LinkRepositoryToProjectDocument, { input });
+    const { data, error } = await executeGitHubMutation(LinkRepositoryToProjectDocument, { input });
+
+    if (error) {
+      throw error;
+    }
 
     return Boolean(data?.linkProjectV2ToRepository);
   }
@@ -24,46 +28,17 @@ export class ProjectRelationsService {
   /**
    * Add a column to a project
    */
-  async addColumn(columnData: ColumnFormData, statusFieldId: string): Promise<Column | null> {
-    // Convert column type to a color
-    const color = this.getColorForColumnType(columnData.type);
-
-    await graphQLClientService.mutation(AddColumnDocument, {
-      projectId: statusFieldId,
-      name: columnData.name,
-      color:
-        ProjectV2SingleSelectFieldOptionColor[
-          color as keyof typeof ProjectV2SingleSelectFieldOptionColor
-        ],
+  async addColumn(projectId: string, columnName: string): Promise<string> {
+    const { error } = await executeGitHubMutation(AddColumnDocument, {
+      projectId,
+      name: columnName,
+      color: ProjectV2SingleSelectFieldOptionColor.Blue,
     });
 
-    // Since our mutation doesn't return the field ID, we create a simulated column
-    // In a real app, we would fetch the project fields to get the actual field ID
-    const newColumn: Column = {
-      id: `temp-${Date.now()}`,
-      name: columnData.name,
-      type: columnData.type,
-      fieldId: statusFieldId,
-    };
-
-    return newColumn;
-  }
-
-  /**
-   * Helper method to get a color for a column type
-   */
-  private getColorForColumnType(type: ColumnType): string {
-    switch (type) {
-      case ColumnType.TODO:
-        return "Blue";
-      case ColumnType.IN_PROGRESS:
-        return "Yellow";
-      case ColumnType.DONE:
-        return "Green";
-      case ColumnType.BACKLOG:
-        return "Purple";
-      default:
-        return "Gray";
+    if (error) {
+      throw error;
     }
+
+    return "success";
   }
 }

@@ -1,13 +1,16 @@
 import { makeAutoObservable, runInAction, action } from "mobx";
 
-import { RepositoryVisibility } from "@/api/generated/graphql";
-import { graphQLClientService } from "@/services/graphql-client.service";
+import { executeGitHubQuery, executeGitHubMutation } from "@/api-github";
+import { RepositoryVisibility } from "@/api-github/generated/graphql";
+import { CreateRepositoryDocument, GetAllInitialDataDocument } from "@/features/repositories/api";
 
-import { RepositoryApiModel } from "../api";
-import { CreateRepositoryDocument } from "../api/mutations";
-import { GetAllInitialDataDocument } from "../api/queries";
-import { mapToRepository } from "../lib/mappers/repository.mapper";
+import { mapToRepository } from "../mappers/repository.mapper";
 import { Repository } from "../types/repository";
+import {
+  RepositoryApiModel,
+  ViewerResponse,
+  CreateRepositoryResponse,
+} from "../types/repository-api.types";
 
 /**
  * Store responsible for repository CRUD operations
@@ -78,25 +81,21 @@ export class RepositoryCrudStore {
       this.clearError();
 
       // Fetch repositories from GitHub API
-      const result = await graphQLClientService.query(GetAllInitialDataDocument, {});
+      const { data, error } = await executeGitHubQuery(GetAllInitialDataDocument, {});
 
-      // Type casting with a more specific interface
-      interface ViewerResponse {
-        viewer?: {
-          repositories?: {
-            nodes?: Array<unknown> | null;
-          } | null;
-        } | null;
+      if (error || !data) {
+        throw error || new Error("Failed to fetch repositories: No data returned");
       }
 
-      const data = result as ViewerResponse;
+      // Type casting with the imported interface
+      const viewerData = data as ViewerResponse;
 
-      if (!data?.viewer?.repositories?.nodes) {
+      if (!viewerData?.viewer?.repositories?.nodes) {
         throw new Error("Failed to fetch repositories");
       }
 
       // Map to our domain model
-      const repositories = (data.viewer.repositories.nodes || [])
+      const repositories = (viewerData.viewer.repositories.nodes || [])
         .filter(Boolean)
         .map((node) => mapToRepository(node as Partial<RepositoryApiModel>));
 
@@ -153,7 +152,7 @@ export class RepositoryCrudStore {
       const visibilityEnum = this.mapVisibility(visibility);
 
       // Call the GraphQL API
-      const result = await graphQLClientService.mutation(CreateRepositoryDocument, {
+      const { data, error } = await executeGitHubMutation(CreateRepositoryDocument, {
         input: {
           name,
           description: description || undefined,
@@ -161,14 +160,12 @@ export class RepositoryCrudStore {
         },
       });
 
-      // Type casting with a more specific interface
-      interface CreateRepositoryResponse {
-        createRepository?: {
-          repository?: unknown;
-        } | null;
+      if (error || !data) {
+        throw error || new Error("Failed to create repository: No data returned");
       }
 
-      const response = result as CreateRepositoryResponse;
+      // Type casting with the imported interface
+      const response = data as CreateRepositoryResponse;
 
       if (!response?.createRepository?.repository) {
         throw new Error("Failed to create repository");

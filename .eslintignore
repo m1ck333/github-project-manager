@@ -1,5 +1,6 @@
 # Auto-generated files
-src/graphql/generated/**/*
+src/api-github/generated/**/*
+src/api-github/schema/**/*
 
 # Build output
 dist/

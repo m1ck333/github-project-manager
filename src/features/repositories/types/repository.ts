@@ -14,6 +14,7 @@ export interface RepositoryCollaborator {
   login: string;
   avatarUrl: string;
   permission: string;
+  isCurrentUser?: boolean;
 }
 
 /**

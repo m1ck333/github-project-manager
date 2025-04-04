@@ -1,0 +1,42 @@
+@use "@/common/styles/variables" as *;
+
+.repoInfo {
+  margin-bottom: $spacing-xl;
+
+  .repoOwner {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+
+    .ownerAvatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: $spacing-xs;
+    }
+
+    span {
+      font-size: $font-size-medium;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .description {
+    background-color: $background-tertiary;
+    border-radius: $border-radius-md;
+    padding: $spacing-sm;
+
+    h3 {
+      font-size: $font-size-base;
+      margin-top: 0;
+      margin-bottom: $spacing-xs;
+      color: $text-primary;
+    }
+
+    p {
+      margin: 0;
+      color: $text-tertiary;
+      line-height: $line-height-base;
+    }
+  }
+}

@@ -14,11 +14,11 @@ import {
   useToast,
   Code,
 } from "@/common/components/ui";
-import { getErrorMessage } from "@/common/utils/errors";
+import { getErrorMessage } from "@/common/utils/errors.utils";
 import { Repositories, Repository } from "@/features/repositories";
 import RepositoryCard from "@/features/repositories/components/molecules/RepositoryCard";
 
-import styles from "./RepositoriesPage.module.scss";
+import styles from "./repositories-page.module.scss";
 
 const RepositoriesPage: React.FC = observer(() => {
   const repositoryStore = Repositories.store;

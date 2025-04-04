@@ -1,42 +1,42 @@
-import { observer } from "mobx-react-lite";
-import { FC, ReactNode } from "react";
-import { FiRefreshCcw } from "react-icons/fi";
+import React from "react";
 
-import { useAppInitialization } from "../../../hooks/useAppInitialization";
-import { Button } from "../../ui";
-import InfoBox from "../../ui/feedback/InfoBox";
-import Loading from "../../ui/feedback/Loading";
-
-import styles from "./AppInitializer.module.scss";
+import Error from "@/common/components/ui/feedback/Error";
+import Loading from "@/common/components/ui/feedback/Loading";
+import { useAppInitialization } from "@/features/app/hooks";
 
 interface AppInitializerProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 /**
- * Component that handles app initialization
- * It loads all data at startup and shows a loading state or error
+ * Component that initializes app data before rendering children
+ * Handles loading states and error feedback
  */
-export const AppInitializer: FC<AppInitializerProps> = observer(({ children }) => {
-  const { loading, error, retry } = useAppInitialization();
+export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
+  const { loading, error, initializeApp } = useAppInitialization();
 
-  if (loading || error) {
+  if (loading) {
     return (
-      <div className={styles.errorContainer}>
-        {loading ? (
-          <Loading text="Initializing application..." size="large" fullPage={true} />
-        ) : (
-          <InfoBox variant="error">
-            <h2>Error loading data</h2>
-            <p>{error}</p>
-            <Button onClick={retry}>
-              Retry <FiRefreshCcw />
-            </Button>
-          </InfoBox>
-        )}
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <Loading size="large" text="Initializing GitHub Project Manager..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+        <Error
+          title="Failed to load application data"
+          error={error}
+          onRetry={() => initializeApp(true)}
+          message="Please check your GitHub token and internet connection."
+        />
       </div>
     );
   }
 
   return <>{children}</>;
-});
+};
+
+export default AppInitializer;

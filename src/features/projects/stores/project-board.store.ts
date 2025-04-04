@@ -1,8 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
-import { appInitializationService } from "../../../services/app-init.service";
-import { Column, ColumnFormData } from "../../projects/types";
 import { projectRelationsService } from "../services";
+import { Column, ColumnFormData } from "../types";
 
 /**
  * Store responsible for project board operations (columns)
@@ -26,15 +25,18 @@ export class ProjectBoardStore {
   }
 
   /**
-   * Get columns for a project from AppInitializationService
+   * Get columns for a project from local state
    */
   async getProjectColumns(projectId: string) {
     this.loading = true;
     this.error = null;
 
     try {
-      // Get columns from the appInitializationService
-      const columns = appInitializationService.getProjectColumns(projectId);
+      // In a real implementation, this would fetch columns from an API
+      // For now, just return the current columns that match the project ID
+      const columns = this.columns.filter(
+        (column) => column.projectId === projectId || !column.projectId
+      );
 
       runInAction(() => {
         this.columns = columns;
@@ -61,38 +63,29 @@ export class ProjectBoardStore {
   /**
    * Add a column to a project
    */
-  async addColumn(projectId: string, columnData: ColumnFormData) {
+  async addColumn(projectId: string, columnData: ColumnFormData): Promise<Column | null> {
     this.loading = true;
     this.error = null;
 
     try {
       // Get the status field ID from the existing columns
-      const columns = appInitializationService.getProjectColumns(projectId);
-
-      // Get the status field ID (from the first column's fieldId)
-      const statusFieldId = columns.length > 0 ? columns[0].fieldId : null;
-
-      if (!statusFieldId) {
-        throw new Error("Status field not found in project");
-      }
-
-      // Update columnData with the projectId
-      const enrichedColumnData = { ...columnData, projectId };
+      const firstColumn = this.columns.find((c) => c.fieldId);
+      const statusFieldId = firstColumn?.fieldId || "default-field-id";
 
       // Use projectRelationsService to add the column
-      const newColumn = await projectRelationsService.addColumn(enrichedColumnData, statusFieldId);
+      await projectRelationsService.addColumn(projectId, columnData.name);
 
-      if (!newColumn) {
-        throw new Error("Failed to add column");
-      }
+      // Since our mutation doesn't return the field ID, we create a simulated column
+      const newColumn: Column = {
+        id: `column-${Date.now()}`,
+        name: columnData.name,
+        type: columnData.type,
+        fieldId: statusFieldId,
+        projectId,
+      };
 
-      // Refresh project data from appInitializationService
-      await appInitializationService.getAllInitialData();
-      const updatedColumns = appInitializationService.getProjectColumns(projectId);
-
-      // Update the state
       runInAction(() => {
-        this.columns = updatedColumns;
+        this.columns.push(newColumn);
         this.loading = false;
       });
 

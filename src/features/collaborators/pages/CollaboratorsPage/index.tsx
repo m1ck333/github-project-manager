@@ -6,28 +6,16 @@ import { useParams } from "react-router-dom";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, Input, Modal, useToast } from "@/common/components/ui";
 import { EmptyCollaboratorsList } from "@/features/collaborators/components";
-import { Projects } from "@/features/projects";
-import { projectStore } from "@/stores";
-
 import {
   CollaboratorRole,
   CollaboratorFormData,
-  RepositoryCollaborator,
-} from "../../../../core/types";
+  Collaborator,
+} from "@/features/collaborators/types";
+import { Projects } from "@/features/projects";
+import { projectStore } from "@/features/projects/stores";
+import { RepositoryCollaborator } from "@/features/repositories/types";
 
-import styles from "./CollaboratorsPage.module.scss";
-
-// Define Collaborator interface for this component
-interface Collaborator {
-  id: string;
-  username: string;
-  avatar: string;
-  role: CollaboratorRole;
-  isOrganization?: boolean;
-  isNote?: boolean;
-  isCurrentUser?: boolean;
-  isTeam?: boolean;
-}
+import styles from "./collaborators-page.module.scss";
 
 // Convert RepositoryCollaborator to Collaborator
 function mapToCollaborator(repoCollab: RepositoryCollaborator): Collaborator {

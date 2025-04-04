@@ -5,7 +5,7 @@ import GridCard from "@/common/components/composed/grid/GridCard";
 import { Loading, Typography } from "@/common/components/ui";
 import { Repository, Repositories } from "@/features/repositories";
 
-import styles from "./RepositoryCard.module.scss";
+import styles from "./repository-card.module.scss";
 
 interface RepositoryCardProps {
   repository: Repository;
