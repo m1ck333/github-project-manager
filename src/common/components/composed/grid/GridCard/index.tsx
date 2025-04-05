@@ -3,8 +3,11 @@ import { FiCalendar, FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
+import { Stack } from "@/common/components/ui/display";
+import { Typography } from "@/common/components/ui/typography";
+import { formatDate } from "@/common/utils/date.utils";
 
-import styles from "./GridCard.module.scss";
+import styles from "./grid-card.module.scss";
 
 export interface GridCardProps {
   title: string;
@@ -46,24 +49,30 @@ const GridCard: React.FC<GridCardProps> = ({
   onClick,
   className,
 }) => {
-  // Format the creation date if available
-  const formattedDate = createdAt ? new Date(createdAt).toLocaleDateString() : undefined;
+  // Format the creation date using our utility with default format
+  const formattedDate = formatDate(createdAt);
 
   return (
     <div className={`${styles.gridCard} ${className || ""}`} onClick={onClick}>
-      <div className={styles.cardHeader}>
+      <Stack align="spread" className={styles.cardHeader}>
         <div className={styles.titleArea}>
           {avatar && (
-            <div className={styles.avatarContainer}>
+            <Stack cross="center" className={styles.avatarContainer}>
               <img src={avatar.src} alt={avatar.alt} className={styles.avatar} />
-              {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
-            </div>
+              {subtitle && (
+                <Typography variant="subtitle2" className={styles.subtitle}>
+                  {subtitle}
+                </Typography>
+              )}
+            </Stack>
           )}
-          <h3 className={styles.title}>{title}</h3>
+          <Typography variant="h3" className={styles.title}>
+            {title}
+          </Typography>
         </div>
 
         {actions && actions.length > 0 && (
-          <div className={styles.actionButtons}>
+          <Stack className={styles.actionButtons}>
             {actions.map((action, index) => (
               <button
                 key={`action-${index}`}
@@ -77,25 +86,27 @@ const GridCard: React.FC<GridCardProps> = ({
                 {action.icon}
               </button>
             ))}
-          </div>
+          </Stack>
         )}
-      </div>
+      </Stack>
 
       {description && (
         <div className={styles.description}>
-          <p>{description}</p>
+          <Typography variant="body2">{description}</Typography>
         </div>
       )}
 
       {stats && stats.length > 0 && (
-        <div className={styles.stats}>
+        <Stack wrap className={styles.stats}>
           {stats.map((stat, index) => (
-            <div key={`stat-${index}`} className={styles.statItem}>
+            <Stack cross="center" key={`stat-${index}`} className={styles.statItem}>
               {stat.icon}
-              <span>{stat.text}</span>
-            </div>
+              <Typography variant="body2" component="span">
+                {stat.text}
+              </Typography>
+            </Stack>
           ))}
-        </div>
+        </Stack>
       )}
 
       {/* Custom footer or standard footer */}
@@ -103,15 +114,17 @@ const GridCard: React.FC<GridCardProps> = ({
         <div className={styles.footer}>{footer}</div>
       ) : (
         (formattedDate || htmlUrl || viewPath) && (
-          <div className={styles.footer}>
+          <Stack align="spread" className={styles.footer}>
             {formattedDate && (
-              <span className={styles.dateInfo}>
+              <Stack cross="center" className={styles.dateInfo}>
                 <FiCalendar size={14} />
-                <span>Created on {formattedDate}</span>
-              </span>
+                <Typography variant="caption" component="span">
+                  Created on {formattedDate}
+                </Typography>
+              </Stack>
             )}
 
-            <div className={styles.footerLinks}>
+            <Stack className={styles.footerLinks}>
               {htmlUrl && <ViewOnGithub link={htmlUrl} />}
               {viewPath && (
                 <Link
@@ -126,11 +139,16 @@ const GridCard: React.FC<GridCardProps> = ({
                     }
                   }}
                 >
-                  <FiArrowRight size={14} /> View Details
+                  <Stack cross="center" spacing={0.5}>
+                    <FiArrowRight size={14} />
+                    <Typography variant="button" component="span">
+                      View Details
+                    </Typography>
+                  </Stack>
                 </Link>
               )}
-            </div>
-          </div>
+            </Stack>
+          </Stack>
         )
       )}
     </div>

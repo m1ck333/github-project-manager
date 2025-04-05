@@ -1,7 +1,9 @@
 import React from "react";
 import { FiPlus } from "react-icons/fi";
 
-import styles from "./GridCardAdd.module.scss";
+import Typography from "@/common/components/ui/typography/Typography";
+
+import styles from "./grid-card-add.module.scss";
 
 interface GridCardAddProps {
   label: string;
@@ -21,7 +23,9 @@ const GridCardAdd: React.FC<GridCardAddProps> = ({
       <div className={styles.addIcon}>
         <FiPlus size={size === "small" ? 16 : 24} />
       </div>
-      <p>{label}</p>
+      <Typography variant="body1" className={styles.addLabel}>
+        {label}
+      </Typography>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { makeAutoObservable } from "mobx";
 
 import { executeGitHubQuery, GitHubResponse } from "@/api-github";
 import { GetAllInitialDataDocument } from "@/api-github/generated/graphql";
+import { getCurrentISOString } from "@/common/utils/date.utils";
 import { Projects } from "@/features/projects";
 import { mapToProject } from "@/features/projects/mappers";
 import { Project, BoardIssue, Column } from "@/features/projects/types";
@@ -154,7 +155,7 @@ export class AppInitializationService {
             // Need to ensure all repositories have createdAt as non-optional field
             const reposWithRequiredFields = repositories.map((repo: Repository) => ({
               ...repo,
-              createdAt: repo.createdAt || new Date().toISOString(),
+              createdAt: repo.createdAt || getCurrentISOString(),
             }));
             Repositories.store.setRepositories(reposWithRequiredFields);
           }

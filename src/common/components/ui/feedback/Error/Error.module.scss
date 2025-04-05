@@ -2,7 +2,6 @@
 
 // Standard inline error display
 .error {
-  display: flex;
   padding: $spacing-sm;
   border-radius: $border-radius-md;
   background-color: rgba($danger-color, 0.1);
@@ -15,8 +14,6 @@
   }
 
   .errorHeader {
-    display: flex;
-    align-items: center;
     margin-bottom: $spacing-xs;
   }
 
@@ -44,24 +41,16 @@
   }
 
   .actions {
-    display: flex;
-    gap: $spacing-xs;
     margin-top: $spacing-xs;
   }
 
   .retryButton {
-    display: flex;
-    align-items: center;
-    gap: calc($spacing-xs / 2);
+    // Button styling
   }
 }
 
 // Full page error display
 .fullPageError {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   min-height: 80vh;
   padding: $spacing-md;
   max-width: 600px;
@@ -87,15 +76,10 @@
   }
 
   .actions {
-    display: flex;
-    gap: $spacing-sm;
     margin-top: $spacing-md;
-    justify-content: center;
   }
 
   .retryButton {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+    // Button styling
   }
 }

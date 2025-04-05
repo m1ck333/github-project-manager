@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { env } from "../../../config/env";
 import BackButton, { BackDestination } from "../../composed/BackButton";
 import Error from "../../ui/feedback/Error";
+import { Typography } from "../../ui/typography";
 import Container from "../Container";
 
 import styles from "./PageContainer.module.scss";
@@ -62,7 +63,7 @@ const PageContainer: React.FC<PageContainerProps> = ({
   // Helper to render loading state
   const renderLoading = () => (
     <div className={styles.loading}>
-      <p>{loadingMessage}</p>
+      <Typography variant="body1">{loadingMessage}</Typography>
     </div>
   );
 

@@ -1,8 +1,11 @@
 import React from "react";
 
+import { Stack } from "@/common/components/ui/display";
 import Error from "@/common/components/ui/feedback/Error";
 import Loading from "@/common/components/ui/feedback/Loading";
 import { useAppInitialization } from "@/features/app/hooks";
+
+import styles from "./app-initializer.module.scss";
 
 interface AppInitializerProps {
   children: React.ReactNode;
@@ -17,22 +20,22 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
 
   if (loading) {
     return (
-      <div style={{ padding: "2rem", textAlign: "center" }}>
-        <Loading size="large" text="Initializing GitHub Project Manager..." />
-      </div>
+      <Stack direction="column" align="center" cross="center" className={styles.container}>
+        <Loading text="Initializing GitHub Project Manager..." />
+      </Stack>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: "2rem", maxWidth: "800px", margin: "0 auto" }}>
+      <Stack direction="column" align="center" cross="center" className={styles.errorContainer}>
         <Error
           title="Failed to load application data"
           error={error}
           onRetry={() => initializeApp(true)}
           message="Please check your GitHub token and internet connection."
         />
-      </div>
+      </Stack>
     );
   }
 

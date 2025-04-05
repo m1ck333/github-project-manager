@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Link, NavLink } from "react-router-dom";
 
+import { Typography } from "@/common/components/ui/typography";
 import { env } from "@/common/config/env";
 import { useBodyScrollLock, useEscapeKey } from "@/common/hooks";
 import { GitHubUserInfo } from "@/features/app";
@@ -24,7 +25,9 @@ const Header: React.FC = () => {
       <div className={styles.logo}>
         <Link to="/">
           <img src="/logo-white.svg" alt="Logo" />
-          <h1 className={styles.appName}>{env.appName}</h1>
+          <Typography variant="h1" className={styles.appName}>
+            {env.appName}
+          </Typography>
         </Link>
       </div>
 

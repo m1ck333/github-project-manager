@@ -1,0 +1,63 @@
+@use "@/common/styles/variables" as *;
+
+.root {
+  --stack-base-spacing: $spacing-sm;
+  --stack-gap: calc(var(--stack-factor, 1) * var(--stack-base-spacing));
+  display: flex;
+  gap: var(--stack-gap);
+
+  &.fill {
+    width: 100%;
+  }
+
+  &.wrap {
+    flex-wrap: wrap;
+  }
+
+  // Main axis alignment
+  &.align-start {
+    justify-content: flex-start;
+  }
+
+  &.align-end {
+    justify-content: flex-end;
+  }
+
+  &.align-center {
+    justify-content: center;
+  }
+
+  &.align-spread {
+    justify-content: space-between;
+  }
+
+  &.align-stretch {
+    justify-content: stretch;
+  }
+
+  // Cross axis alignment
+  &.cross-start {
+    align-items: flex-start;
+  }
+
+  &.cross-end {
+    align-items: flex-end;
+  }
+
+  &.cross-center {
+    align-items: center;
+  }
+
+  &.cross-stretch {
+    align-items: stretch;
+  }
+
+  // Direction
+  &.row {
+    flex-direction: row;
+  }
+
+  &.column {
+    flex-direction: column;
+  }
+}

@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Button } from "@/common/components/ui";
+import { Stack } from "@/common/components/ui/display";
 
 import styles from "./FormActionButtons.module.scss";
 
@@ -29,7 +30,7 @@ export const FormActionButtons: React.FC<FormActionButtonsProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`${styles.formActions} ${className}`}>
+    <Stack align="end" spacing={2} className={`${styles.formActions} ${className}`}>
       {onCancel && (
         <Button variant="secondary" onClick={onCancel} disabled={isSubmitting}>
           {cancelText}
@@ -44,7 +45,7 @@ export const FormActionButtons: React.FC<FormActionButtonsProps> = ({
       >
         {isSubmitting ? submittingText : submitText}
       </Button>
-    </div>
+    </Stack>
   );
 };
 

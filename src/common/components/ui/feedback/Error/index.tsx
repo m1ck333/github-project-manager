@@ -1,6 +1,7 @@
 import React from "react";
 import { FiAlertCircle, FiRefreshCw } from "react-icons/fi";
 
+import { Stack } from "@/common/components/ui/display";
 import { getErrorMessage } from "@/common/utils/errors.utils";
 
 import Button from "../../display/Button";
@@ -58,35 +59,42 @@ const Error: React.FC<ErrorProps> = ({
   // For full page errors, use a larger layout
   if (fullPage) {
     return (
-      <div className={`${styles.fullPageError} ${className}`}>
+      <Stack
+        direction="column"
+        align="center"
+        cross="center"
+        className={`${styles.fullPageError} ${className}`}
+      >
         <FiAlertCircle size={48} className={styles.icon} />
         <h3 className={styles.title}>{displayTitle}</h3>
         {messageContent}
         {(onRetry || actions) && (
-          <div className={styles.actions}>
+          <Stack spacing={2} className={styles.actions}>
             {onRetry && (
               <Button onClick={onRetry} variant="primary" className={styles.retryButton}>
-                <FiRefreshCw size={16} /> Retry
+                <Stack spacing={0.5} cross="center">
+                  <FiRefreshCw size={16} /> Retry
+                </Stack>
               </Button>
             )}
             {actions}
-          </div>
+          </Stack>
         )}
-      </div>
+      </Stack>
     );
   }
 
   // For inline errors, use a more compact layout
   return (
-    <div className={`${styles.error} ${className}`}>
+    <Stack className={`${styles.error} ${className}`}>
       <div className={styles.errorContent}>
-        <div className={styles.errorHeader}>
+        <Stack cross="center" className={styles.errorHeader}>
           <FiAlertCircle size={20} className={styles.icon} />
           <h3 className={styles.title}>{displayTitle}</h3>
-        </div>
+        </Stack>
         {messageContent}
         {(onRetry || actions) && (
-          <div className={styles.actions}>
+          <Stack spacing={1} className={styles.actions}>
             {onRetry && (
               <Button
                 onClick={onRetry}
@@ -94,14 +102,16 @@ const Error: React.FC<ErrorProps> = ({
                 size="small"
                 className={styles.retryButton}
               >
-                <FiRefreshCw size={14} /> Retry
+                <Stack spacing={0.5} cross="center">
+                  <FiRefreshCw size={14} /> Retry
+                </Stack>
               </Button>
             )}
             {actions}
-          </div>
+          </Stack>
         )}
       </div>
-    </div>
+    </Stack>
   );
 };
 

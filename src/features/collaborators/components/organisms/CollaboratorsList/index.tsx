@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
-import { Button } from "@/common/components/ui";
-import { EmptyCollaboratorsList } from "@/features/collaborators/components";
+import { Button, Loading } from "@/common/components/ui";
+import { Typography } from "@/common/components/ui/typography";
+import { RepositoryCollaborator } from "@/features/projects/types";
 
-import { RepositoryCollaborator } from "../../../../repositories/types/repository";
 import AddCollaboratorForm from "../../molecules/AddCollaboratorForm";
 import CollaboratorCard from "../../molecules/CollaboratorCard";
+import EmptyCollaboratorsList from "../EmptyCollaboratorsList";
 
 import styles from "./collaborators-list.module.scss";
 
@@ -39,7 +40,7 @@ const CollaboratorsList: React.FC<CollaboratorsListProps> = ({
   return (
     <div className={styles.collaboratorsSection}>
       <div className={styles.sectionHeader}>
-        <h2>Collaborators</h2>
+        <Typography variant="h2">Collaborators</Typography>
         <Button variant="primary" onClick={() => setShowAddForm(!showAddForm)}>
           {showAddForm ? (
             "Cancel"
@@ -59,7 +60,9 @@ const CollaboratorsList: React.FC<CollaboratorsListProps> = ({
         />
       )}
 
-      {isLoading && <div className={styles.loading}>Loading collaborators...</div>}
+      {isLoading && (
+        <Loading size="medium" text="Loading collaborators..." className={styles.loading} />
+      )}
 
       <div className={styles.collaboratorsList}>
         {collaborators && collaborators.length > 0 ? (

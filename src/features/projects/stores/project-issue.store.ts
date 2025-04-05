@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
+import { getCurrentISOString } from "@/common/utils/date.utils";
 import { Repositories } from "@/features/repositories";
 
 import { validateAndExecute } from "../../../common/utils/validation.utils";
@@ -163,8 +164,8 @@ export class ProjectIssueStore {
             url: "",
             author: null,
             assignees: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: getCurrentISOString(),
+            updatedAt: getCurrentISOString(),
           };
 
           // Update the state

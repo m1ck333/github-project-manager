@@ -1,5 +1,7 @@
 import { makeAutoObservable, action, configure } from "mobx";
 
+import { compareDatesAsc } from "@/common/utils/date.utils";
+
 import { Repository } from "../types/repository";
 
 // Enable strict mode for MobX
@@ -108,12 +110,10 @@ export class RepositorySearchStore {
           comparison = a.name.localeCompare(b.name);
           break;
         case "created":
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          comparison = compareDatesAsc(a.createdAt, b.createdAt);
           break;
         case "updated":
-          if (a.updatedAt && b.updatedAt) {
-            comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-          }
+          comparison = compareDatesAsc(a.updatedAt, b.updatedAt);
           break;
       }
 

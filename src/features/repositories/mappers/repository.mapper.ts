@@ -1,3 +1,4 @@
+import { getCurrentISOString } from "@/common/utils/date.utils";
 import {
   Repository,
   RepositoryOwner,
@@ -40,7 +41,7 @@ export function mapToRepository(apiModel: Partial<RepositoryApiModel>): Reposito
     url: apiModel.url || "",
     html_url: apiModel.url || "", // Use URL as HTML URL if not provided
     owner,
-    createdAt: apiModel.createdAt || new Date().toISOString(),
+    createdAt: apiModel.createdAt || getCurrentISOString(),
     updatedAt: apiModel.updatedAt || undefined,
     isPrivate: apiModel.isPrivate || apiModel.visibility === "PRIVATE",
     visibility: apiModel.visibility || "PUBLIC",

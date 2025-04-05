@@ -1,8 +1,5 @@
 @use "@/common/styles/variables" as *;
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: $spacing-sm;
+.formActions {
   margin-top: $spacing-md;
 }

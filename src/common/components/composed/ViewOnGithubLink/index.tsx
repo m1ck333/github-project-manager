@@ -1,6 +1,6 @@
 import { FiGithub, FiExternalLink } from "react-icons/fi";
 
-import styles from "./ViewOnGithubLink.module.scss";
+import styles from "./view-on-github-link.module.scss";
 
 interface ViewOnGithubProps {
   link: string;

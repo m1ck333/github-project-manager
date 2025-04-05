@@ -1,0 +1,11 @@
+@use "@/common/styles/variables" as *;
+
+.container {
+  min-height: 100vh;
+}
+
+.errorContainer {
+  min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
+}

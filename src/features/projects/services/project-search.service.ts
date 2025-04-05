@@ -1,5 +1,7 @@
 import { makeAutoObservable, action } from "mobx";
 
+import { compareDatesAsc } from "@/common/utils/date.utils";
+
 import { projectStore } from "../stores";
 import { Project, Label, ColumnType } from "../types";
 
@@ -163,10 +165,10 @@ export class ProjectSearchService {
           comparison = a.name.localeCompare(b.name);
           break;
         case "created":
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          comparison = compareDatesAsc(a.createdAt, b.createdAt);
           break;
         case "updated":
-          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+          comparison = compareDatesAsc(a.updatedAt, b.updatedAt);
           break;
       }
 

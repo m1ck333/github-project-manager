@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Typography } from "@/common/components/ui/typography";
+
 import styles from "./Loading.module.scss";
 
 interface LoadingProps {
@@ -32,7 +34,11 @@ const Loading: React.FC<LoadingProps> = ({
       className={`${styles.loading} ${sizeClass} ${containerClass} ${fixedHeightClass} ${fullPageClass} ${className}`}
     >
       <div className={styles.spinner} />
-      {text && <p className={styles.text}>{text}</p>}
+      {text && (
+        <Typography variant="body2" className={styles.text}>
+          {text}
+        </Typography>
+      )}
     </div>
   );
 };

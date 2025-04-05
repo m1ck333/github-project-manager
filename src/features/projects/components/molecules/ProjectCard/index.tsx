@@ -1,7 +1,9 @@
 import React from "react";
-import { FiEdit2, FiTrash2, FiGitBranch, FiList } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiGitBranch, FiList, FiCalendar } from "react-icons/fi";
 
 import { Button } from "@/common/components/ui";
+import { Typography } from "@/common/components/ui/typography";
+import { formatDate } from "@/common/utils/date.utils";
 import { Project } from "@/features/projects/types";
 
 import styles from "./project-card.module.scss";
@@ -28,7 +30,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onD
   return (
     <div className={styles.projectCard} onClick={onClick}>
       <div className={styles.projectHeader}>
-        <h3 className={styles.projectName}>{project.name}</h3>
+        <Typography variant="h3" className={styles.projectName}>
+          {project.name}
+        </Typography>
         <div className={styles.actionButtons}>
           <Button
             variant="secondary"
@@ -49,22 +53,34 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onD
         </div>
       </div>
 
-      {project.description && <p className={styles.projectDescription}>{project.description}</p>}
+      {project.description && (
+        <Typography variant="body2" className={styles.projectDescription}>
+          {project.description}
+        </Typography>
+      )}
 
       <div className={styles.projectInfo}>
         <div className={styles.infoItem}>
           <FiGitBranch />
-          <span>
+          <Typography variant="body2" component="span">
             {project.repositories?.length || 0}{" "}
             {project.repositories?.length === 1 ? "repo" : "repos"}
-          </span>
+          </Typography>
         </div>
         <div className={styles.infoItem}>
           <FiList />
-          <span>
+          <Typography variant="body2" component="span">
             {project.issues?.length || 0} {project.issues?.length === 1 ? "issue" : "issues"}
-          </span>
+          </Typography>
         </div>
+        {project.createdAt && (
+          <div className={styles.infoItem}>
+            <FiCalendar />
+            <Typography variant="caption" component="span">
+              Created on {formatDate(project.createdAt)}
+            </Typography>
+          </div>
+        )}
       </div>
     </div>
   );

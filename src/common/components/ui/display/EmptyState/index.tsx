@@ -1,5 +1,8 @@
 import React, { ReactNode } from "react";
 
+import { Stack } from "@/common/components/ui/display";
+import { Typography } from "@/common/components/ui/typography";
+
 import styles from "./EmptyState.module.scss";
 
 interface EmptyStateProps {
@@ -21,12 +24,24 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`${styles.emptyState} ${className}`}>
+    <Stack
+      direction="column"
+      align="center"
+      cross="center"
+      spacing={2}
+      className={`${styles.emptyState} ${className}`}
+    >
       {icon && <div className={styles.icon}>{icon}</div>}
-      {title && <h3 className={styles.title}>{title}</h3>}
-      <p className={styles.description}>{description}</p>
+      {title && (
+        <Typography variant="h3" className={styles.title}>
+          {title}
+        </Typography>
+      )}
+      <Typography variant="body2" className={styles.description}>
+        {description}
+      </Typography>
       {action && <div className={styles.action}>{action}</div>}
-    </div>
+    </Stack>
   );
 };
 

@@ -1,3 +1,4 @@
+import { getCurrentISOString } from "@/common/utils/date.utils";
 import { appInitService } from "@/features/app/services/app-init.service";
 
 import { Project, ProjectFormData } from "../types";
@@ -69,7 +70,7 @@ export class ProjectStore {
       if (projectData.description) {
         existingProject.description = projectData.description;
       }
-      existingProject.updatedAt = new Date().toISOString();
+      existingProject.updatedAt = getCurrentISOString();
       return existingProject;
     }
     return null;

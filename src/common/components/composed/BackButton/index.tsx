@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../constants/routes.const";
 import Button from "../../ui/display/Button";
 
-import styles from "./BackButton.module.scss";
+import styles from "./back-button.module.scss";
 
 // Common destinations for back navigation
 export type BackDestination = "projects" | "repositories" | "project";

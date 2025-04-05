@@ -1,25 +1,25 @@
-import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useState, memo } from "react";
 
-import {
-  Button,
-  EmptyState,
-  Error,
-  FormActionButtons,
-  FormGroup,
-  Input,
-  Loading,
-  Modal,
-} from "@/common/components/ui";
+import { Button, FormGroup, Input, Loading, Modal } from "@/common/components/ui";
+import EmptyState from "@/common/components/ui/display/EmptyState";
+import Error from "@/common/components/ui/feedback/Error";
+import FormActionButtons from "@/common/components/ui/form/FormActionButtons";
+import { Typography } from "@/common/components/ui/typography";
 import { useAsync } from "@/common/hooks";
 
 import styles from "./project-repositories.module.scss";
 
+/**
+ * ProjectRepositories displays a list of GitHub repositories linked to a project
+ * and provides functionality to add new repository links
+ */
 interface ProjectRepositoriesProps {
   projectId: string;
 }
 
-// Define a simplified Repository interface here to avoid import issues
+/**
+ * Repository represents the minimal data needed for a repo in this context
+ */
 interface Repository {
   id: string;
   name: string;
@@ -29,12 +29,8 @@ interface Repository {
   };
 }
 
-/**
- * ProjectRepositories component
- * @param {ProjectRepositoriesProps} props - Component props
- * @returns {JSX.Element} - Rendered component
- */
-const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): JSX.Element => {
+const ProjectRepositoriesComponent = ({ projectId }: ProjectRepositoriesProps) => {
+  // State for the add repository modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [owner, setOwner] = useState("");
   const [repoName, setRepoName] = useState("");
@@ -62,14 +58,16 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): 
   return (
     <div className={styles.projectRepositories}>
       <div className={styles.header}>
-        <h3>Linked Repositories</h3>
+        <Typography variant="h3">Linked Repositories</Typography>
         <Button variant="primary" onClick={() => setShowAddModal(true)}>
           Link Repository
         </Button>
       </div>
 
       {repositories.length === 0 && !isLoading && !error && (
-        <div className={styles.noRepositories}>No repositories linked to this project.</div>
+        <Typography variant="body1" className={styles.noRepositories}>
+          No repositories linked to this project.
+        </Typography>
       )}
       {isLoading && <Loading size="medium" text="Loading repositories..." />}
       {error && <Error error={error} onRetry={resetError} />}
@@ -84,10 +82,10 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): 
           repositories.map((repo: Repository) => (
             <div key={repo.id} className={styles.repositoryItem}>
               <div className={styles.repoDetails}>
-                <h4>
+                <Typography variant="h4">
                   {repo.owner?.login}/{repo.name}
-                </h4>
-                {repo.description && <p>{repo.description}</p>}
+                </Typography>
+                {repo.description && <Typography variant="body2">{repo.description}</Typography>}
               </div>
             </div>
           ))
@@ -105,7 +103,11 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): 
             handleAddRepository();
           }}
         >
-          {error && <div className={styles.error}>{String(error)}</div>}
+          {error && (
+            <Typography variant="body2" className={styles.error}>
+              {String(error)}
+            </Typography>
+          )}
 
           <FormGroup label="Repository Owner" htmlFor="ownerInput">
             <Input
@@ -135,6 +137,9 @@ const ProjectRepositories = observer(({ projectId }: ProjectRepositoriesProps): 
       </Modal>
     </div>
   );
-});
+};
+
+const ProjectRepositories = memo(ProjectRepositoriesComponent);
+ProjectRepositories.displayName = "ProjectRepositories";
 
 export default ProjectRepositories;

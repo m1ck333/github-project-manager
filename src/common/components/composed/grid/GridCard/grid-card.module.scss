@@ -10,8 +10,6 @@
     transform 0.2s ease,
     box-shadow 0.2s ease;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100%;
   border: 1px solid $border-color;
@@ -37,9 +35,6 @@
 
 .cardHeader {
   padding: $spacing-md;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   border-bottom: 1px solid $border-color;
 }
 
@@ -50,9 +45,6 @@
 }
 
 .avatarContainer {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
   margin-bottom: $spacing-xs;
 }
 
@@ -79,8 +71,6 @@
 }
 
 .actionButtons {
-  display: flex;
-  gap: $spacing-sm;
   position: relative;
   z-index: 2;
 }
@@ -92,9 +82,6 @@
   padding: $spacing-xs;
   border-radius: $border-radius-sm;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition:
     background-color 0.2s,
     color 0.2s;
@@ -125,15 +112,9 @@
 
 .stats {
   padding: 0 $spacing-md $spacing-md $spacing-md;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: $spacing-sm;
 }
 
 .statItem {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
   font-size: $font-size-small;
   color: $text-tertiary;
 
@@ -147,23 +128,14 @@
   padding: $spacing-md;
   border-top: 1px solid $border-color;
   margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
 }
 
 .dateInfo {
-  display: flex;
-  align-items: center;
-  gap: $spacing-xs;
   font-size: $font-size-xs;
   color: $text-secondary;
 }
 
 .footerLinks {
-  display: flex;
-  justify-content: space-between;
-  gap: $spacing-sm;
   position: relative;
   z-index: 2;
   font-size: $font-size-xs;
@@ -171,9 +143,6 @@
 
 .footerLink,
 .viewButton {
-  display: flex;
-  align-items: center;
-  gap: calc($spacing-xs / 2);
   color: $primary-color;
   font-weight: $font-weight-medium;
   text-decoration: none;

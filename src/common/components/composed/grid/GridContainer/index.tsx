@@ -1,12 +1,14 @@
 import React, { ReactNode } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 
+import Typography from "@/common/components/ui/typography/Typography";
+
 import Button from "../../../ui/display/Button";
 import InfoBox from "../../../ui/feedback/InfoBox";
 import Loading from "../../../ui/feedback/Loading";
 import Input from "../../../ui/form/Input";
 
-import styles from "./GridContainer.module.scss";
+import styles from "./grid-container.module.scss";
 
 interface GridContainerProps {
   children: ReactNode;
@@ -45,7 +47,9 @@ const GridContainer: React.FC<GridContainerProps> = ({
     if (error) {
       return (
         <InfoBox variant="error" title={`Error Loading ${title || "Data"}`} dismissible={false}>
-          <p>{error}</p>
+          <Typography variant="body1" color="error">
+            {error}
+          </Typography>
           {onRetry && (
             <Button variant="primary" size="small" onClick={onRetry}>
               Retry
