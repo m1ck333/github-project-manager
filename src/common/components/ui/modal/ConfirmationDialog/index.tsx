@@ -1,8 +1,9 @@
 import React, { ReactNode } from "react";
 
+import Button from "../../display/Button";
 import Modal from "../Modal";
 
-import styles from "./ConfirmationDialog.module.scss";
+import styles from "./confirmation-dialog.module.scss";
 
 export interface ConfirmationDialogProps {
   title: string;

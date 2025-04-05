@@ -3,7 +3,7 @@ import { FiUser, FiUserX } from "react-icons/fi";
 
 import { Button } from "@/common/components/ui";
 import { Stack } from "@/common/components/ui/display";
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 import { RepositoryCollaborator } from "@/features/projects/types";
 
 import styles from "./collaborator-card.module.scss";

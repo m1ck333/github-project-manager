@@ -1,7 +1,8 @@
 import { executeGitHubMutation } from "@/api-github";
 
 import { CreateProjectDocument, UpdateProjectDocument, DeleteProjectDocument } from "../api";
-import { Project, ProjectFormData } from "../types";
+
+import type { Project, ProjectFormData } from "../types";
 
 /**
  * Service responsible for project CRUD operations
@@ -125,5 +126,16 @@ export class ProjectCrudService {
     }
 
     return Boolean(data?.deleteProjectV2);
+  }
+
+  /**
+   * Create a new project (implements abstract method)
+   * For direct creation without GitHub API
+   */
+  create(_projectData: Omit<Project, "id">): Project {
+    // In a real implementation, we might generate a temporary ID
+    // or call an API. For this example, we'll throw an error and
+    // recommend using the createProject method instead.
+    throw new Error("Use createProject method to create projects with GitHub API");
   }
 }

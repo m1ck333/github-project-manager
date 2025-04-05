@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import styles from "./Tooltip.module.scss";
+import styles from "./tooltip.module.scss";
 
 interface TooltipProps {
   content: React.ReactNode;

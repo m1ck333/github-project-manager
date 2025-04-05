@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Link, NavLink } from "react-router-dom";
 
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 import { env } from "@/common/config/env";
 import { useBodyScrollLock, useEscapeKey } from "@/common/hooks";
 import { GitHubUserInfo } from "@/features/app";

@@ -1,3 +1,5 @@
+import { makeObservable, computed, action } from "mobx";
+
 import { getCurrentISOString } from "@/common/utils/date.utils";
 import { appInitService } from "@/features/app/services/app-init.service";
 
@@ -17,6 +19,25 @@ export class ProjectStore {
   crud = projectCrudStore;
   board = projectBoardStore;
   issues = projectIssueStore;
+
+  constructor() {
+    // Use makeObservable with explicit decorations instead of makeAutoObservable
+    makeObservable(this, {
+      // Getters
+      loading: computed,
+      error: computed,
+      currentProject: computed,
+      projects: computed,
+      selectedProject: computed,
+      columns: computed,
+      repositories: computed,
+      // Actions
+      selectProjectWithoutFetch: action,
+      selectProject: action,
+      clearSelectedProject: action,
+      setCurrentProject: action, // Use this instead of string notation for setter
+    });
+  }
 
   // Proxy for common properties
   get loading() {
@@ -173,6 +194,11 @@ export class ProjectStore {
 
   // For compatibility with old code that directly sets currentProject
   set currentProject(project: Project | null) {
+    this.setCurrentProject(project);
+  }
+
+  // Add this method to handle currentProject setting
+  setCurrentProject(project: Project | null) {
     if (project) {
       this.crud.currentProject = project;
       this.board.setProjectId(project.id);

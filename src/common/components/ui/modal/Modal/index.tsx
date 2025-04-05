@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 
 import { useBodyScrollLock, useClickOutside, useEscapeKey } from "@/common/hooks";
 
-import styles from "./Modal.module.scss";
+import styles from "./modal.module.scss";
 
 interface ModalProps {
   isOpen: boolean;

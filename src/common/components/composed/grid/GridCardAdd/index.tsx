@@ -1,7 +1,7 @@
 import React from "react";
 import { FiPlus } from "react-icons/fi";
 
-import Typography from "@/common/components/ui/typography/Typography";
+import Typography from "@/common/components/ui/display/Typography";
 
 import styles from "./grid-card-add.module.scss";
 

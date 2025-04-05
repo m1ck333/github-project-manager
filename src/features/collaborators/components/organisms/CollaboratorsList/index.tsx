@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
 import { Button, Loading } from "@/common/components/ui";
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 import { RepositoryCollaborator } from "@/features/projects/types";
 
 import AddCollaboratorForm from "../../molecules/AddCollaboratorForm";

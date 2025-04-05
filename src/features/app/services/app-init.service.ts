@@ -1,22 +1,22 @@
 import { CombinedError } from "@urql/core";
-import { makeAutoObservable } from "mobx";
+import { makeObservable, observable, action } from "mobx";
 
 import { executeGitHubQuery, GitHubResponse } from "@/api-github";
 import { GetAllInitialDataDocument } from "@/api-github/generated/graphql";
 import { getCurrentISOString } from "@/common/utils/date.utils";
 import { Projects } from "@/features/projects";
 import { mapToProject } from "@/features/projects/mappers";
-import { Project, BoardIssue, Column } from "@/features/projects/types";
+import type { Project, BoardIssue, Column } from "@/features/projects/types";
 import { Repositories } from "@/features/repositories";
 import { mapToRepository } from "@/features/repositories/mappers";
-import { Repository } from "@/features/repositories/types/repository";
-import { RepositoryApiModel } from "@/features/repositories/types/repository-api.types";
+import type { Repository } from "@/features/repositories/types/repository";
+import type { RepositoryApiModel } from "@/features/repositories/types/repository-api.types";
 import { mapToUserProfile } from "@/features/user/mappers";
 import { userService } from "@/features/user/services";
 import { userStore } from "@/features/user/stores";
-import { UserProfile } from "@/features/user/types";
+import type { UserProfile } from "@/features/user/types";
 
-import { GitHubViewerData, GitHubProjectNode } from "../types/app.types";
+import type { GitHubViewerData, GitHubProjectNode } from "../types/app.types";
 
 /**
  * Combined application data type
@@ -47,13 +47,13 @@ export class AppInitializationService {
   private rateLimitedRetryCount = 0;
   private maxRetries = 5;
 
-  private _isInitialized = false;
-  private _isLoading = false;
-  private _error: Error | null = null;
-  private _data: Partial<AllAppData> = {};
+  @observable private _isInitialized = false;
+  @observable private _isLoading = false;
+  @observable private _error: Error | null = null;
+  @observable private _data: Partial<AllAppData> = {};
 
   constructor() {
-    makeAutoObservable(this);
+    makeObservable(this);
   }
 
   /**
@@ -87,6 +87,7 @@ export class AppInitializationService {
   /**
    * Initialize all application data in a coordinated manner
    */
+  @action
   async initialize(forceRefresh = false): Promise<AllAppData> {
     // If already initialized and not forcing refresh, return cached data
     if (this._isInitialized && !forceRefresh) {
@@ -117,8 +118,8 @@ export class AppInitializationService {
     }
 
     // Set loading state
-    this._isLoading = true;
-    this._error = null;
+    this.setLoading(true);
+    this.setError(null);
 
     try {
       this.isInitializing = true;
@@ -184,20 +185,41 @@ export class AppInitializationService {
       this.lastInitialization = Date.now();
 
       // Update internal data
-      this._data = this.getCurrentData();
-      this._isInitialized = true;
+      this.setData(this.getCurrentData());
+      this.setInitialized(true);
 
       // Return all the data
       return this.getCurrentData();
     } catch (error) {
       // Handle errors
       const errorObj = error instanceof Error ? error : new Error(String(error));
-      this._error = errorObj;
+      this.setError(errorObj);
       throw errorObj;
     } finally {
       this.isInitializing = false;
-      this._isLoading = false;
+      this.setLoading(false);
     }
+  }
+
+  // Helper methods to modify state with actions
+  @action
+  private setLoading(isLoading: boolean): void {
+    this._isLoading = isLoading;
+  }
+
+  @action
+  private setError(error: Error | null): void {
+    this._error = error;
+  }
+
+  @action
+  private setData(data: AllAppData): void {
+    this._data = data;
+  }
+
+  @action
+  private setInitialized(isInitialized: boolean): void {
+    this._isInitialized = isInitialized;
   }
 
   /**
@@ -291,28 +313,24 @@ export class AppInitializationService {
   }
 
   /**
-   * Reset the initialization state
-   * Useful when logging out or when needing to reinitialize the app
+   * Reset the service state
    */
+  @action
   reset(): void {
     this._isInitialized = false;
     this._isLoading = false;
     this._error = null;
     this._data = {};
-    this.isInitializing = false;
-    this.lastInitialization = 0;
   }
 
   /**
-   * Set the user profile directly
-   * This is useful when we have the profile from another source
+   * Set user profile - primarily used for testing and from other services
    */
+  @action
   setUserProfile(profile: UserProfile): void {
-    userStore.setProfile(profile);
-
     this._data.user = profile;
 
-    // If this is the first time setting the user, mark as initialized
+    // Mark as initialized if not already
     if (!this._isInitialized) {
       this._isInitialized = true;
     }

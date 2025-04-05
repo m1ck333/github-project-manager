@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { FiInfo, FiAlertTriangle, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
-import styles from "./InfoBox.module.scss";
+import styles from "./info-box.module.scss";
 
 export type InfoBoxVariant = "info" | "warning" | "success" | "error";
 

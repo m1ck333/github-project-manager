@@ -1,89 +1,88 @@
-import { makeAutoObservable, action } from "mobx";
+import { action, override } from "mobx";
 
+import { AbstractSearchService, SearchCriteria } from "@/common/services";
 import { compareDatesAsc } from "@/common/utils/date.utils";
 
 import { projectStore } from "../stores";
-import { Project, Label, ColumnType } from "../types";
+
+import type { Project, Label, ColumnType } from "../types";
 
 /**
  * Service responsible for project search functionality
+ * Extends AbstractSearchService to leverage common search functionality
  */
-export class ProjectSearchService {
-  // Search parameters
-  private searchQuery = "";
+export class ProjectSearchService extends AbstractSearchService<Project> {
+  // Project-specific filters
   private labelFilter: string[] = [];
   private statusFilter: ColumnType[] = [];
-  private sortBy: "name" | "created" | "updated" = "name";
-  private sortDirection: "asc" | "desc" = "asc";
-
-  constructor() {
-    makeAutoObservable(this, {
-      // Mark methods that modify state as actions
-      setSearchQuery: action,
-      setLabelFilter: action,
-      setStatusFilter: action,
-      setSortOptions: action,
-      resetFilters: action,
-    });
-  }
-
-  /**
-   * Set search query
-   */
-  setSearchQuery = (query: string) => {
-    this.searchQuery = query;
-  };
 
   /**
    * Set label filter
    */
-  setLabelFilter = (labelIds: string[]) => {
+  @action
+  setLabelFilter(labelIds: string[]): void {
     this.labelFilter = labelIds;
-  };
+  }
 
   /**
    * Set status filter
    */
-  setStatusFilter = (columnTypes: ColumnType[]) => {
+  @action
+  setStatusFilter(columnTypes: ColumnType[]): void {
     this.statusFilter = columnTypes;
-  };
-
-  /**
-   * Set sort options
-   */
-  setSortOptions = (
-    sortBy: "name" | "created" | "updated" = "name",
-    sortDirection: "asc" | "desc" = "asc"
-  ) => {
-    this.sortBy = sortBy;
-    this.sortDirection = sortDirection;
-  };
+  }
 
   /**
    * Reset all filters
+   * Overrides the base class reset to include project-specific filters
    */
-  resetFilters = () => {
-    this.searchQuery = "";
+  @override
+  reset(): void {
+    super.reset();
     this.labelFilter = [];
     this.statusFilter = [];
-    this.sortBy = "name";
-    this.sortDirection = "asc";
-  };
+  }
 
   /**
-   * Search projects by name or description
-   * @param query Search query
-   * @returns Filtered list of projects
+   * Search projects based on criteria
+   * Implements the abstract method from AbstractSearchService
    */
-  searchProjects(query: string): Project[] {
-    this.setSearchQuery(query);
-    return this.applyFilters(projectStore.projects);
+  search(criteria: SearchCriteria): Project[] {
+    // Update search state from criteria
+    this.setSearchQuery(criteria.query);
+
+    if (criteria.sortBy) {
+      this.setSortBy(criteria.sortBy, (criteria.sortDirection as "asc" | "desc") || "asc");
+    }
+
+    if (criteria.page) {
+      this.setPagination(criteria.page, criteria.pageSize || this.pageSize);
+    }
+
+    // Set project-specific filters if provided
+    if (criteria.filters) {
+      if (criteria.filters.labels && Array.isArray(criteria.filters.labels)) {
+        this.setLabelFilter(criteria.filters.labels as string[]);
+      }
+
+      if (criteria.filters.status && Array.isArray(criteria.filters.status)) {
+        this.setStatusFilter(criteria.filters.status as ColumnType[]);
+      }
+    }
+
+    // Get projects from store
+    const allProjects = projectStore.projects;
+
+    // Apply filters and update search results
+    const filteredProjects = this.applyFilters(allProjects);
+    this.setSearchResults(filteredProjects);
+
+    // Return search results
+    return this.getSearchResults();
   }
 
   /**
    * Filter projects by label
-   * @param labelIds Array of label IDs
-   * @returns Filtered list of projects
    */
   filterByLabels(labelIds: string[]): Project[] {
     this.setLabelFilter(labelIds);
@@ -92,8 +91,6 @@ export class ProjectSearchService {
 
   /**
    * Filter projects by status
-   * @param columnTypes Array of column types
-   * @returns Filtered list of projects
    */
   filterByStatus(columnTypes: ColumnType[]): Project[] {
     this.setStatusFilter(columnTypes);
@@ -101,23 +98,7 @@ export class ProjectSearchService {
   }
 
   /**
-   * Sort projects by a specific field
-   * @param sortBy Field to sort by
-   * @param sortDirection Sort direction
-   * @returns Sorted list of projects
-   */
-  sortProjects(
-    sortBy: "name" | "created" | "updated" = "name",
-    sortDirection: "asc" | "desc" = "asc"
-  ): Project[] {
-    this.setSortOptions(sortBy, sortDirection);
-    return this.applyFilters(projectStore.projects);
-  }
-
-  /**
    * Apply all current filters and sorting to the projects list
-   * @param projects List of projects to filter
-   * @returns Filtered and sorted projects
    */
   private applyFilters(projects: Project[]): Project[] {
     let filteredProjects = [...projects];
@@ -160,7 +141,7 @@ export class ProjectSearchService {
     filteredProjects.sort((a, b) => {
       let comparison = 0;
 
-      switch (this.sortBy) {
+      switch (this.sortField) {
         case "name":
           comparison = a.name.localeCompare(b.name);
           break;
@@ -170,6 +151,8 @@ export class ProjectSearchService {
         case "updated":
           comparison = compareDatesAsc(a.updatedAt, b.updatedAt);
           break;
+        default:
+          comparison = a.name.localeCompare(b.name);
       }
 
       return this.sortDirection === "asc" ? comparison : -comparison;
@@ -180,7 +163,6 @@ export class ProjectSearchService {
 
   /**
    * Find labels across all projects
-   * @returns Array of unique labels
    */
   getAllLabels(): Label[] {
     const labelsMap = new Map<string, Label>();
@@ -199,5 +181,5 @@ export class ProjectSearchService {
   }
 }
 
-// Singleton instance
+// Create a singleton instance
 export const projectSearchService = new ProjectSearchService();

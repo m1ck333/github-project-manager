@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/common/components/ui";
 import { Stack } from "@/common/components/ui/display";
 
-import styles from "./FormActionButtons.module.scss";
+import styles from "./form-action-buttons.module.scss";
 
 export interface FormActionButtonsProps {
   onCancel?: () => void;

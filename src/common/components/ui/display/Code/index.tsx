@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-import styles from "./Code.module.scss";
+import styles from "./code.module.scss";
 
 interface CodeProps {
   children: ReactNode;

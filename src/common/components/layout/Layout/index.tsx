@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import Header from "../Header";
 
-import styles from "./Layout.module.scss";
+import styles from "./layout.module.scss";
 
 interface LayoutProps {
   children: ReactNode;

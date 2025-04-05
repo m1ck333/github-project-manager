@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 
-import styles from "./FormGroup.module.scss";
+import styles from "./form-group.module.scss";
 
 interface FormGroupProps {
   label: string;

@@ -6,7 +6,7 @@ import { getErrorMessage } from "@/common/utils/errors.utils";
 
 import Button from "../../display/Button";
 
-import styles from "./Error.module.scss";
+import styles from "./error.module.scss";
 
 export interface ErrorProps {
   error?: unknown | null;

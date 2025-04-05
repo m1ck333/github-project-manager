@@ -1,14 +1,16 @@
 import { z } from "zod";
 
+import { BaseSchemas, createFormSchema } from "@/common/validation/base.schema";
+
 /**
  * Validation schema for issues
  */
-export const issueSchema = z.object({
-  title: z.string().min(1, "Issue title is required"),
-  description: z.string().optional(),
-  labels: z.array(z.string()).optional(),
-  assignees: z.array(z.string()).optional(),
+export const issueSchema = createFormSchema({
+  title: BaseSchemas.name("Issue title is required"),
+  description: BaseSchemas.description(),
+  labels: BaseSchemas.uniqueArray(z.string()),
+  assignees: BaseSchemas.uniqueArray(z.string()),
 });
 
-// Type inference from schema
-export type IssueSchema = z.infer<typeof issueSchema>;
+// Export types
+export type IssueFormData = z.infer<typeof issueSchema>;

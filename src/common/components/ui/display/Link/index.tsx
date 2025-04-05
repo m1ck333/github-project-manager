@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
-import styles from "./Link.module.scss";
+import styles from "./link.module.scss";
 
 interface LinkProps {
   children: ReactNode;

@@ -4,15 +4,8 @@ import { FiTag, FiColumns, FiRefreshCw, FiTrash2, FiMove, FiEdit2 } from "react-
 
 import GridCard from "@/common/components/composed/grid/GridCard";
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
-import {
-  Button,
-  Error,
-  InfoBox,
-  Loading,
-  Modal,
-  Typography,
-  useToast,
-} from "@/common/components/ui";
+import { Button, Error, InfoBox, Loading, Modal, useToast } from "@/common/components/ui";
+import Typography from "@/common/components/ui/display/Typography";
 import ConfirmationDialog from "@/common/components/ui/modal/ConfirmationDialog";
 import { useAsync } from "@/common/hooks";
 import { getErrorMessage } from "@/common/utils/errors.utils";

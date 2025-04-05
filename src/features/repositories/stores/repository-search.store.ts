@@ -1,5 +1,6 @@
-import { makeAutoObservable, action, configure } from "mobx";
+import { makeObservable, observable, action, configure, override, makeAutoObservable } from "mobx";
 
+import { AbstractSearchStore, SearchCriteria } from "@/common/stores";
 import { compareDatesAsc } from "@/common/utils/date.utils";
 
 import { Repository } from "../types/repository";
@@ -9,63 +10,95 @@ configure({ enforceActions: "observed" });
 
 /**
  * Store responsible for repository search functionality
+ * Extends the AbstractSearchStore to leverage common search functionality
  */
-export class RepositorySearchStore {
-  searchQuery = "";
-  visibilityFilter: "all" | "public" | "private" = "all";
-  sortBy: "name" | "created" | "updated" = "name";
-  sortDirection: "asc" | "desc" = "asc";
+export class RepositorySearchStore extends AbstractSearchStore<Repository> {
+  // Additional repository-specific filters
+  @observable visibilityFilter: "all" | "public" | "private" = "all";
 
   constructor() {
-    makeAutoObservable(this, {
-      // Explicitly mark methods as actions
-      setSearchQuery: action,
-      setVisibilityFilter: action,
-      setSortOptions: action,
-      resetFilters: action,
-    });
+    super();
+    makeObservable(this);
   }
-
-  /**
-   * Set search query
-   */
-  setSearchQuery = (query: string) => {
-    this.searchQuery = query;
-  };
 
   /**
    * Set visibility filter
    */
-  setVisibilityFilter = (filter: "all" | "public" | "private") => {
+  @action
+  setVisibilityFilter(filter: "all" | "public" | "private"): void {
     this.visibilityFilter = filter;
-  };
-
-  /**
-   * Set sort options
-   */
-  setSortOptions = (
-    sortBy: "name" | "created" | "updated",
-    sortDirection: "asc" | "desc" = "asc"
-  ) => {
-    this.sortBy = sortBy;
-    this.sortDirection = sortDirection;
-  };
+  }
 
   /**
    * Reset all filters to default values
+   * Overrides the base class reset to include repository-specific filters
    */
-  resetFilters = () => {
-    this.searchQuery = "";
+  @override
+  reset(): void {
+    super.reset();
     this.visibilityFilter = "all";
-    this.sortBy = "name";
-    this.sortDirection = "asc";
-  };
+  }
 
   /**
-   * Search repositories by name, description, or owner
+   * Search repositories based on criteria
+   * Implements the abstract method from AbstractSearchStore
    */
-  searchRepositories(repositories: Repository[]): Repository[] {
-    let filteredRepos = [...repositories];
+  search(criteria: SearchCriteria): Repository[] {
+    // Update search state from criteria
+    this.setSearchQuery(criteria.query);
+
+    if (criteria.sortBy) {
+      const sortField = this.mapSortField(criteria.sortBy);
+      const sortDirection = criteria.sortDirection || "asc";
+      this.setSortBy(sortField, sortDirection as "asc" | "desc");
+    }
+
+    if (criteria.page) {
+      this.setPagination(criteria.page, criteria.pageSize || this.pageSize);
+    }
+
+    // If visibility filter is provided in criteria
+    if (criteria.filters && typeof criteria.filters.visibility === "string") {
+      this.setVisibilityFilter(criteria.filters.visibility as "all" | "public" | "private");
+    }
+
+    // Filter and return results
+    return this.searchRepositories();
+  }
+
+  /**
+   * Helper to map generic sort fields to repository-specific fields
+   */
+  private mapSortField(sortBy: string): string {
+    switch (sortBy) {
+      case "name":
+      case "created":
+      case "updated":
+        return sortBy;
+      default:
+        return "name";
+    }
+  }
+
+  /**
+   * Search repositories with the current filters
+   */
+  searchRepositories(): Repository[] {
+    // Get full result set based on current filters
+    const filteredResults = this.filterRepositories();
+
+    // Store and return filtered results
+    this.setSearchResults(filteredResults);
+    return filteredResults;
+  }
+
+  /**
+   * Filter repositories based on current filters
+   */
+  private filterRepositories(): Repository[] {
+    // We would typically get this from a service or parent store
+    // For this example, we'll use the searchResults as our data source
+    let filteredRepos = [...this.searchResults];
 
     // Apply text search filter
     if (this.searchQuery.trim()) {
@@ -105,7 +138,7 @@ export class RepositorySearchStore {
     filteredRepos.sort((a, b) => {
       let comparison = 0;
 
-      switch (this.sortBy) {
+      switch (this.sortField) {
         case "name":
           comparison = a.name.localeCompare(b.name);
           break;

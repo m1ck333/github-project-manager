@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 
 import Modal from "../Modal";
 
-import styles from "./ModalForm.module.scss";
+import styles from "./modal-form.module.scss";
 
 interface ModalFormProps {
   isOpen: boolean;

@@ -2,7 +2,8 @@ import React from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-import { ROUTES } from "../../../constants/routes.const";
+import { ROUTES } from "@/common/routes";
+
 import Button from "../../ui/display/Button";
 
 import styles from "./back-button.module.scss";

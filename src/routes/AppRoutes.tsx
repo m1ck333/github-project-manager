@@ -11,9 +11,13 @@ import ProjectsPage from "@/features/projects/pages/ProjectsPage";
 import RepositoriesPage from "@/features/repositories/pages/RepositoriesPage";
 import RepositoryPage from "@/features/repositories/pages/RepositoryPage";
 
-import { ROUTES } from "../../../constants/routes.const";
+import { ROUTE_PATHS } from "./config/routes";
 
-const ErrorBoundaryRoutes: React.FC = () => {
+/**
+ * Main application routes component with error boundary functionality
+ * Handles route definitions and global error handling
+ */
+const AppRoutes: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -50,12 +54,16 @@ const ErrorBoundaryRoutes: React.FC = () => {
       // Call original console.error
       originalConsoleError(...args);
 
-      // Check if this is a React error
+      // Check if this is a React error - but AVOID infinite loop errors
       const errorMessage = args.join(" ");
       if (
-        errorMessage.includes("React") ||
-        errorMessage.includes("Error") ||
-        errorMessage.includes("Exception")
+        (errorMessage.includes("React") ||
+          errorMessage.includes("Error") ||
+          errorMessage.includes("Exception")) &&
+        // Skip Maximum update depth exceeded errors to avoid infinite loops
+        !errorMessage.includes("Maximum update depth exceeded") &&
+        !errorMessage.includes("infinite loop") &&
+        !errorMessage.includes("setState inside useEffect")
       ) {
         setError(errorMessage);
       }
@@ -99,15 +107,37 @@ const ErrorBoundaryRoutes: React.FC = () => {
   }
 
   return (
-    <Routes key={location.pathname}>
-      <Route path={ROUTES.HOME} element={<HomePage />} />
-      <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
-      <Route path={ROUTES.PROJECT_DETAIL()} element={<ProjectPage />} />
-      <Route path={ROUTES.PROJECT_COLLABORATORS()} element={<CollaboratorsPage />} />
-      <Route path={ROUTES.REPOSITORIES} element={<RepositoriesPage />} />
-      <Route path={ROUTES.REPOSITORY_DETAIL()} element={<RepositoryPage />} />
+    <Routes>
+      {/* Main routes */}
+      <Route path={ROUTE_PATHS.HOME} element={<HomePage />} />
+
+      {/* Project routes */}
+      <Route path={ROUTE_PATHS.PROJECTS} element={<ProjectsPage />} />
+      <Route path={ROUTE_PATHS.PROJECT_DETAIL} element={<ProjectPage />} />
+      <Route path={ROUTE_PATHS.PROJECT_COLLABORATORS} element={<CollaboratorsPage />} />
+
+      {/* Repository routes */}
+      <Route path={ROUTE_PATHS.REPOSITORIES} element={<RepositoriesPage />} />
+      <Route path={ROUTE_PATHS.REPOSITORY_DETAIL} element={<RepositoryPage />} />
+
+      {/* Fallback route */}
+      <Route
+        path="*"
+        element={
+          <Error
+            error="The page you requested does not exist"
+            title="Page Not Found"
+            fullPage={true}
+            actions={
+              <Button variant="primary" onClick={() => navigate(ROUTE_PATHS.HOME)}>
+                Go to Home
+              </Button>
+            }
+          />
+        }
+      />
     </Routes>
   );
 };
 
-export default ErrorBoundaryRoutes;
+export default AppRoutes;

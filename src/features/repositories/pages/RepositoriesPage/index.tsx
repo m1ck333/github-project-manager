@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, ChangeEvent, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
@@ -22,7 +22,7 @@ import styles from "./repositories-page.module.scss";
 
 const RepositoriesPage: React.FC = observer(() => {
   const repositoryStore = Repositories.store;
-  const { repositories, loading, error } = repositoryStore;
+  const { repositories, isLoading, error } = repositoryStore;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [repoName, setRepoName] = useState("");
@@ -32,15 +32,33 @@ const RepositoriesPage: React.FC = observer(() => {
   const [nameError, setNameError] = useState("");
   const [disableRepository, setDisableRepository] = useState<Repository | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
+  const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
   const toast = useToast();
   const navigate = useNavigate();
 
   // Load repositories when component mounts
   useEffect(() => {
-    if (repositories.length === 0 && !loading && !error) {
+    if (repositories.length === 0 && !isLoading && !error) {
       Repositories.services.crud.fetchRepositories();
     }
-  }, [repositories.length, loading, error]);
+  }, [repositories.length, isLoading, error]);
+
+  // Filter repositories based on search query - use memoized search function
+  useEffect(() => {
+    // Simple client-side filtering to avoid MobX trigger loop
+    const filtered = repositories.filter((repo) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+
+      const nameMatch = repo.name.toLowerCase().includes(query);
+      const descMatch = repo.description ? repo.description.toLowerCase().includes(query) : false;
+      const ownerMatch = repo.owner.login.toLowerCase().includes(query);
+
+      return nameMatch || descMatch || ownerMatch;
+    });
+
+    setFilteredRepos(filtered);
+  }, [repositories, searchQuery]);
 
   const handleCreateRepository = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,9 +101,6 @@ const RepositoriesPage: React.FC = observer(() => {
     setSearchQuery(e.target.value);
   };
 
-  // Filter repositories based on search query
-  const filteredRepositories = Repositories.services.search.searchRepositories(searchQuery);
-
   // Handle repository disabling
   const handleDisableRepository = (repository: Repository) => {
     setDisableRepository(repository);
@@ -119,7 +134,7 @@ const RepositoriesPage: React.FC = observer(() => {
           Repositories
         </Typography>
       }
-      isLoading={loading}
+      isLoading={isLoading}
       error={error ? getErrorMessage(error) : null}
       loadingMessage="Loading repositories..."
     >
@@ -128,7 +143,7 @@ const RepositoriesPage: React.FC = observer(() => {
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           onRefresh={handleRefresh}
-          isLoading={loading}
+          isLoading={isLoading}
           placeholder="Search repositories..."
           className={styles.search}
         />
@@ -136,7 +151,7 @@ const RepositoriesPage: React.FC = observer(() => {
         <div className={styles.gridContainer}>
           <GridCardAdd label="Create Repository" onClick={() => setIsModalOpen(true)} />
 
-          {filteredRepositories.map((repository: Repository) => (
+          {filteredRepos.map((repository: Repository) => (
             <RepositoryCard
               key={repository.id}
               repository={repository}
@@ -146,7 +161,7 @@ const RepositoriesPage: React.FC = observer(() => {
           ))}
         </div>
 
-        {filteredRepositories.length === 0 && searchQuery && !loading && (
+        {filteredRepos.length === 0 && searchQuery && !isLoading && (
           <div className={styles.noResults}>
             <Typography variant="body1" color="secondary" align="center">
               No repositories found matching "{searchQuery}"

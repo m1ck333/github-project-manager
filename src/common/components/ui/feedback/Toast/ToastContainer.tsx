@@ -1,7 +1,7 @@
 import React from "react";
 
 import Toast, { ToastProps } from "./Toast";
-import styles from "./Toast.module.scss";
+import styles from "./toast.module.scss";
 
 interface ToastContainerProps {
   toasts: Omit<ToastProps, "onClose">[];

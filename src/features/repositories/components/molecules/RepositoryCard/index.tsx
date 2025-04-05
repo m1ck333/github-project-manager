@@ -24,12 +24,12 @@ const RepositoryCard: React.FC<RepositoryCardProps> = ({
 
   // Fetch collaborators on mount if not already loaded
   useEffect(() => {
-    const { collaborators, name, owner } = repository;
+    const { collaborators, id } = repository;
 
     if (collaborators === undefined && !isLoadingCollaborators) {
       setIsLoadingCollaborators(true);
       Repositories.store
-        .fetchRepositoryCollaborators(owner.login, name)
+        .getRepositoryCollaborators(id)
         .then(() => setIsLoadingCollaborators(false))
         .catch((error: Error) => {
           console.error("Error fetching collaborators:", error);

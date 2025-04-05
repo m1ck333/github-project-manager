@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import styles from "./Toast.module.scss";
+import styles from "./toast.module.scss";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 

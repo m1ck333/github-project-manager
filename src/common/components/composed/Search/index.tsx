@@ -3,7 +3,7 @@ import { FiRefreshCw, FiSearch } from "react-icons/fi";
 
 import { Button, Input } from "@/common/components/ui";
 
-import styles from "./Search.module.scss";
+import styles from "./search.module.scss";
 
 export interface SearchProps {
   searchQuery: string;
@@ -14,6 +14,9 @@ export interface SearchProps {
   className?: string;
 }
 
+/**
+ * Search component provides a search input with optional refresh functionality
+ */
 const Search: React.FC<SearchProps> = ({
   searchQuery,
   onSearchChange,

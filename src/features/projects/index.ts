@@ -30,7 +30,8 @@ export * from "./hooks";
 export * from "./services";
 export * from "./stores";
 export * from "./mappers";
-export * from "./validation";
+// Exclude validation since it conflicts with types
+// export * from "./validation";
 
 // Convenience export for external modules
 export const Projects = {

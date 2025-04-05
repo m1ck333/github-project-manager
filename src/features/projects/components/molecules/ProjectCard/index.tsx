@@ -2,7 +2,7 @@ import React from "react";
 import { FiEdit2, FiTrash2, FiGitBranch, FiList, FiCalendar } from "react-icons/fi";
 
 import { Button } from "@/common/components/ui";
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 import { formatDate } from "@/common/utils/date.utils";
 import { Project } from "@/features/projects/types";
 

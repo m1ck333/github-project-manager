@@ -1,9 +1,9 @@
 import React, { ReactNode } from "react";
 
 import { Stack } from "@/common/components/ui/display";
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 
-import styles from "./EmptyState.module.scss";
+import styles from "./empty-state.module.scss";
 
 interface EmptyStateProps {
   icon?: ReactNode;

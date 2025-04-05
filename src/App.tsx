@@ -2,24 +2,25 @@ import React from "react";
 import { BrowserRouter } from "react-router-dom";
 
 import { AppInitializer } from "./common/components/layout/AppInitializer";
-import ErrorBoundaryRoutes from "./common/components/layout/ErrorBoundaryRoutes";
 import Layout from "./common/components/layout/Layout";
 import { ToastProvider } from "./common/components/ui/feedback/Toast";
-import { StoreContext, rootStore } from "./store";
+import { AppRoutes } from "./routes";
 
+/**
+ * Main Application Component
+ * Sets up the application context providers and main layout
+ */
 const App: React.FC = () => {
   return (
-    <StoreContext.Provider value={rootStore}>
-      <BrowserRouter>
-        <ToastProvider>
-          <AppInitializer>
-            <Layout>
-              <ErrorBoundaryRoutes />
-            </Layout>
-          </AppInitializer>
-        </ToastProvider>
-      </BrowserRouter>
-    </StoreContext.Provider>
+    <BrowserRouter>
+      <ToastProvider>
+        <AppInitializer>
+          <Layout>
+            <AppRoutes />
+          </Layout>
+        </AppInitializer>
+      </ToastProvider>
+    </BrowserRouter>
   );
 };
 

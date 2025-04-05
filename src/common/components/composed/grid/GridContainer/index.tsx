@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { FiRefreshCw } from "react-icons/fi";
 
-import Typography from "@/common/components/ui/typography/Typography";
+import Typography from "@/common/components/ui/display/Typography";
 
 import Button from "../../../ui/display/Button";
 import InfoBox from "../../../ui/feedback/InfoBox";

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import PageContainer from "@/common/components/layout/PageContainer";
@@ -30,6 +30,7 @@ const ProjectsPage: React.FC = observer(() => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
@@ -46,10 +47,25 @@ const ProjectsPage: React.FC = observer(() => {
     }
   }, []);
 
-  // Filter projects based on search query
-  const filteredProjects = debouncedSearchQuery
-    ? Projects.services.search.searchProjects(debouncedSearchQuery)
-    : Projects.store.projects;
+  // Filter projects when search query changes
+  useEffect(() => {
+    if (!debouncedSearchQuery) {
+      setFilteredProjects(Projects.store.projects);
+      return;
+    }
+
+    // Perform client-side filtering to avoid MobX reaction cycles
+    const filtered = Projects.store.projects.filter((project) => {
+      const query = debouncedSearchQuery.toLowerCase().trim();
+      const nameMatch = project.name.toLowerCase().includes(query);
+      const descMatch = project.description
+        ? project.description.toLowerCase().includes(query)
+        : false;
+      return nameMatch || descMatch;
+    });
+
+    setFilteredProjects(filtered);
+  }, [debouncedSearchQuery, Projects.store.projects]);
 
   // Handle refreshing projects
   const handleRefreshProjects = async () => {

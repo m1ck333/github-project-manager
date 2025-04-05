@@ -2,9 +2,9 @@ import { useState, memo } from "react";
 
 import { Button, FormGroup, Input, Loading, Modal } from "@/common/components/ui";
 import EmptyState from "@/common/components/ui/display/EmptyState";
+import Typography from "@/common/components/ui/display/Typography";
 import Error from "@/common/components/ui/feedback/Error";
 import FormActionButtons from "@/common/components/ui/form/FormActionButtons";
-import { Typography } from "@/common/components/ui/typography";
 import { useAsync } from "@/common/hooks";
 
 import styles from "./project-repositories.module.scss";

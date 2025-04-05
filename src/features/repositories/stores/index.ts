@@ -1,36 +1,132 @@
-// Import and export all stores
-import { Repository } from "../types/repository";
+import { makeAutoObservable, computed } from "mobx";
 
-import {
-  repositoryCollaboratorStore,
-  RepositoryCollaboratorStore,
-} from "./repository-collaborator.store";
-import { repositoryCrudStore, RepositoryCrudStore } from "./repository-crud.store";
-import { repositorySearchStore, RepositorySearchStore } from "./repository-search.store";
+import { SearchCriteria } from "@/common/stores";
+
+import { Repository, RepositoryCollaborator } from "../types/repository";
+
+import { repositoryCollaboratorStore } from "./repository-collaborator.store";
+import { repositoryCrudStore } from "./repository-crud.store";
+import { repositorySearchStore } from "./repository-search.store";
 
 /**
- * Combined repository store with access to all store functionality
+ * Main repository store that combines CRUD, search and collaborator functionality
  */
-export class CombinedRepositoryStore {
-  crud = repositoryCrudStore;
-  collaborator = repositoryCollaboratorStore;
-  search = repositorySearchStore;
-
-  // Proxy properties for backward compatibility
-  get loading() {
-    return this.crud.loading || this.collaborator.loading;
+export class RepositoryStore {
+  constructor() {
+    makeAutoObservable(this, {
+      isLoading: computed,
+      repositories: computed,
+    });
   }
 
+  /**
+   * Get loading state from sub-stores
+   */
+  get isLoading() {
+    return this.crud.isLoading || this.collaborator.loading;
+  }
+
+  /**
+   * Get error state from sub-stores
+   */
   get error() {
-    return this.crud.error || this.collaborator.error;
+    return this.crud.error || this.collaborator.error || null;
   }
 
+  /**
+   * Get all repositories
+   */
   get repositories() {
-    return this.crud.repositories;
+    return this.crud.items;
   }
 
+  /**
+   * Get the currently selected repository
+   */
   get selectedRepository() {
     return this.crud.selectedRepository;
+  }
+
+  /**
+   * Get all repositories with collaborators
+   */
+  get repositoriesWithCollaborators() {
+    return this.repositories.filter((repo: Repository) => {
+      // Don't immediately await the promise - just check if it has collaborators
+      const collaborators = repo.collaborators;
+      return collaborators && collaborators.length > 0;
+    });
+  }
+
+  /**
+   * CRUD operations for repositories
+   */
+  get crud() {
+    return repositoryCrudStore;
+  }
+
+  /**
+   * Search functionality for repositories
+   */
+  get search() {
+    return repositorySearchStore;
+  }
+
+  /**
+   * Collaborator operations for repositories
+   */
+  get collaborator() {
+    return repositoryCollaboratorStore;
+  }
+
+  /**
+   * Search repositories with the current filters
+   */
+  searchRepositories(query?: string): Repository[] {
+    // If query is provided, update search query
+    if (query !== undefined) {
+      this.search.setSearchQuery(query);
+    }
+
+    // Create search criteria
+    const criteria: SearchCriteria = {
+      query: this.search.searchQuery,
+      sortBy: this.search.sortField,
+      sortDirection: this.search.sortDirection,
+    };
+
+    // Execute search
+    return this.search.search(criteria);
+  }
+
+  /**
+   * Set repositories directly
+   */
+  setRepositories(repositories: Repository[]) {
+    this.crud.setItems(repositories);
+  }
+
+  /**
+   * Clear error state
+   */
+  clearError() {
+    this.crud.setError(null);
+  }
+
+  /**
+   * Get repository collaborators
+   */
+  async getRepositoryCollaborators(repositoryId: string): Promise<RepositoryCollaborator[]> {
+    const repository = this.repositories.find((repo: Repository) => repo.id === repositoryId);
+    if (!repository) return [];
+
+    const updatedRepo = await this.collaborator.fetchRepositoryCollaborators(
+      this.repositories,
+      repository.owner.login,
+      repository.name
+    );
+
+    return updatedRepo?.collaborators || [];
   }
 
   // Proxy methods for backward compatibility
@@ -65,10 +161,6 @@ export class CombinedRepositoryStore {
     return this.collaborator.removeRepositoryCollaborator(owner, name, collaboratorId);
   }
 
-  async fetchRepositoryCollaborators(owner: string, name: string) {
-    return this.collaborator.fetchRepositoryCollaborators(this.repositories, owner, name);
-  }
-
   selectRepositoryWithoutFetch(owner: string, name: string) {
     return this.crud.selectRepositoryWithoutFetch(owner, name);
   }
@@ -78,26 +170,9 @@ export class CombinedRepositoryStore {
   }
 
   clearSelectedRepository() {
-    this.crud.clearSelectedRepository();
-  }
-
-  searchRepositories(query: string) {
-    this.search.setSearchQuery(query);
-    return this.search.searchRepositories(this.repositories);
-  }
-
-  setRepositories(repositories: Repository[]) {
-    this.crud.setRepositories(repositories);
-  }
-
-  clearError() {
-    this.crud.clearError();
-    this.collaborator.clearError();
+    return this.crud.clearSelectedRepository();
   }
 }
 
-// Export singleton instance
-export const repositoryStore = new CombinedRepositoryStore();
-
-// Export store classes for testing
-export { RepositoryCrudStore, RepositoryCollaboratorStore, RepositorySearchStore };
+// Singleton instance
+export const repositoryStore = new RepositoryStore();

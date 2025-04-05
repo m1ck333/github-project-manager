@@ -6,8 +6,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, Typography } from "@/common/components/ui";
-import { ROUTES } from "@/common/constants/routes.const";
 import { useAsync } from "@/common/hooks";
+import { ROUTES } from "@/common/routes";
 import { ProjectBoard, ProjectRepositories } from "@/features/projects/components";
 import { projectStore } from "@/features/projects/stores";
 

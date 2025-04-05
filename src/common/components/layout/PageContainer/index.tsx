@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 
 import { env } from "../../../config/env";
 import BackButton, { BackDestination } from "../../composed/BackButton";
+import Typography from "../../ui/display/Typography";
 import Error from "../../ui/feedback/Error";
-import { Typography } from "../../ui/typography";
 import Container from "../Container";
 
-import styles from "./PageContainer.module.scss";
+import styles from "./page-container.module.scss";
 
 interface PageContainerProps {
   children: ReactNode;

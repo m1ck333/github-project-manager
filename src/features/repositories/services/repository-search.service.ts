@@ -1,5 +1,7 @@
 import { makeAutoObservable } from "mobx";
 
+import { SearchCriteria } from "@/common/stores";
+
 import { repositoryStore } from "../stores";
 import { Repository } from "../types/repository";
 
@@ -29,8 +31,14 @@ export class RepositorySearchService {
     // Set the visibility filter in the store
     repositoryStore.search.setVisibilityFilter(visibility);
 
+    // Create search criteria
+    const criteria: SearchCriteria = {
+      query: repositoryStore.search.searchQuery,
+      filters: { visibility },
+    };
+
     // Return filtered repositories
-    return repositoryStore.search.searchRepositories(repositoryStore.repositories);
+    return repositoryStore.search.search(criteria);
   }
 
   /**
@@ -43,11 +51,15 @@ export class RepositorySearchService {
     sortBy: "name" | "created" | "updated",
     sortDirection: "asc" | "desc" = "desc"
   ): Repository[] {
-    // Set sort options in the store
-    repositoryStore.search.setSortOptions(sortBy, sortDirection);
+    // Create search criteria with sorting options
+    const criteria: SearchCriteria = {
+      query: repositoryStore.search.searchQuery,
+      sortBy,
+      sortDirection,
+    };
 
     // Return sorted repositories
-    return repositoryStore.search.searchRepositories(repositoryStore.repositories);
+    return repositoryStore.search.search(criteria);
   }
 }
 

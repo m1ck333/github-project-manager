@@ -1,28 +1,30 @@
-import * as z from "zod";
+import { z } from "zod";
+
+import { BaseSchemas, createFormSchema } from "@/common/validation/base.schema";
 
 /**
  * Repository schema
  */
-export const repositorySchema = z.object({
-  name: z.string().min(1, "Repository name is required"),
-  description: z.string().optional(),
-  visibility: z.enum(["PRIVATE", "PUBLIC", "INTERNAL"]).default("PRIVATE"),
+export const repositorySchema = createFormSchema({
+  name: BaseSchemas.name("Repository name is required"),
+  description: BaseSchemas.description(),
+  visibility: BaseSchemas.visibility(),
 });
 
 /**
  * Repository collaborator schema
  */
-export const repositoryCollaboratorSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+export const repositoryCollaboratorSchema = createFormSchema({
+  username: BaseSchemas.username("Username is required"),
   permission: z.enum(["READ", "TRIAGE", "WRITE", "MAINTAIN", "ADMIN"]).default("READ"),
 });
 
 /**
  * Project repository linking schema
  */
-export const projectRepositorySchema = z.object({
-  repositoryId: z.string().min(1, "Repository is required"),
-  projectId: z.string().min(1, "Project is required"),
+export const projectRepositorySchema = createFormSchema({
+  repositoryId: BaseSchemas.id(),
+  projectId: BaseSchemas.id(),
 });
 
 export type RepositoryFormValues = z.infer<typeof repositorySchema>;

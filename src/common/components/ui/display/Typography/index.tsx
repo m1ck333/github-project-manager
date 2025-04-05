@@ -1,6 +1,6 @@
 import React, { ReactNode, ElementType, HTMLAttributes } from "react";
 
-import styles from "./Typography.module.scss";
+import styles from "./typography.module.scss";
 
 export type TypographyVariant =
   | "h1"

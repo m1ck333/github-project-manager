@@ -1,12 +1,24 @@
 import { z } from "zod";
 
+import { BaseSchemas, createFormSchema } from "@/common/validation/base.schema";
+
 /**
  * Validation schema for project creation and updates
  */
-export const projectSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  description: z.string().optional(),
+export const projectSchema = createFormSchema({
+  name: BaseSchemas.name("Project name is required"),
+  description: BaseSchemas.description(),
 });
 
-// Type inference from schema
-export type ProjectSchema = z.infer<typeof projectSchema>;
+/**
+ * Validation schema for project search
+ */
+export const projectSearchSchema = createFormSchema({
+  ...BaseSchemas.search().shape,
+  labels: z.array(z.string()).optional(),
+  status: z.array(z.string()).optional(),
+});
+
+// Export types
+export type ProjectFormData = z.infer<typeof projectSchema>;
+export type ProjectSearchParams = z.infer<typeof projectSearchSchema>;

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import ViewOnGithub from "@/common/components/composed/ViewOnGithubLink";
 import { Stack } from "@/common/components/ui/display";
-import { Typography } from "@/common/components/ui/typography";
+import Typography from "@/common/components/ui/display/Typography";
 import { formatDate } from "@/common/utils/date.utils";
 
 import styles from "./grid-card.module.scss";

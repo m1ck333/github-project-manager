@@ -1,84 +1,33 @@
-import { makeAutoObservable, runInAction, action } from "mobx";
+import { action } from "mobx";
 
 import { executeGitHubQuery, executeGitHubMutation } from "@/api-github";
 import { RepositoryVisibility } from "@/api-github/generated/graphql";
+import { AbstractCrudStore } from "@/common/stores";
 import { CreateRepositoryDocument, GetAllInitialDataDocument } from "@/features/repositories/api";
 
 import { mapToRepository } from "../mappers/repository.mapper";
-import { Repository } from "../types/repository";
 import {
   RepositoryApiModel,
   ViewerResponse,
   CreateRepositoryResponse,
 } from "../types/repository-api.types";
 
+import type { Repository } from "../types/repository";
+
 /**
  * Store responsible for repository CRUD operations
+ * Extends the AbstractCrudStore to leverage common CRUD functionality
  */
-export class RepositoryCrudStore {
-  repositories: Repository[] = [];
+export class RepositoryCrudStore extends AbstractCrudStore<Repository> {
   selectedRepository: Repository | null = null;
-  loading = false;
-  error: string | null = null;
-
-  constructor() {
-    makeAutoObservable(this, {
-      startLoading: action,
-      finishLoading: action,
-      updateRepositories: action,
-      handleError: action,
-      clearError: action,
-      selectRepository: action,
-      clearSelectedRepository: action,
-      setRepositories: action,
-    });
-  }
-
-  /**
-   * Start loading state
-   */
-  startLoading() {
-    this.loading = true;
-  }
-
-  /**
-   * Finish loading state
-   */
-  finishLoading() {
-    this.loading = false;
-  }
-
-  /**
-   * Update repositories
-   */
-  updateRepositories(repositories: Repository[]) {
-    runInAction(() => {
-      this.repositories = repositories;
-      this.error = null;
-    });
-  }
-
-  /**
-   * Handle error
-   */
-  handleError(error: unknown) {
-    this.error = error instanceof Error ? error.message : String(error);
-  }
-
-  /**
-   * Clear any error
-   */
-  clearError() {
-    this.error = null;
-  }
 
   /**
    * Fetch user repositories
    */
-  async fetchUserRepositories() {
+  async fetchUserRepositories(): Promise<Repository[]> {
     try {
-      this.startLoading();
-      this.clearError();
+      this.setLoading(true);
+      this.setError(null);
 
       // Fetch repositories from GitHub API
       const { data, error } = await executeGitHubQuery(GetAllInitialDataDocument, {});
@@ -99,13 +48,14 @@ export class RepositoryCrudStore {
         .filter(Boolean)
         .map((node) => mapToRepository(node as Partial<RepositoryApiModel>));
 
-      this.updateRepositories(repositories);
+      // Update the items using the base class method
+      this.setItems(repositories);
       return repositories;
     } catch (error) {
-      this.handleError(error);
+      this.setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     } finally {
-      this.finishLoading();
+      this.setLoading(false);
     }
   }
 
@@ -114,11 +64,11 @@ export class RepositoryCrudStore {
    */
   async fetchRepository(owner: string, name: string): Promise<Repository | undefined> {
     try {
-      this.startLoading();
-      this.clearError();
+      this.setLoading(true);
+      this.setError(null);
 
       // Look in local repository cache first
-      const cachedRepo = this.repositories.find((r) => r.owner.login === owner && r.name === name);
+      const cachedRepo = this.items.find((r) => r.owner.login === owner && r.name === name);
       if (cachedRepo) {
         this.selectRepository(cachedRepo);
         return cachedRepo;
@@ -129,15 +79,24 @@ export class RepositoryCrudStore {
       console.log(`Repository ${owner}/${name} not found in local cache`);
       return undefined;
     } catch (error) {
-      this.handleError(error);
+      this.setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     } finally {
-      this.finishLoading();
+      this.setLoading(false);
     }
   }
 
   /**
    * Create a new repository
+   * Implements the abstract method from AbstractCrudStore
+   */
+  @action
+  create(_repositoryData: Omit<Repository, "id">): Repository {
+    throw new Error("Direct creation not supported. Use createRepository method instead.");
+  }
+
+  /**
+   * Create a new repository with the GitHub API
    */
   async createRepository(
     name: string,
@@ -145,8 +104,8 @@ export class RepositoryCrudStore {
     visibility: "PRIVATE" | "PUBLIC" | "INTERNAL" = "PRIVATE"
   ): Promise<Repository> {
     try {
-      this.startLoading();
-      this.clearError();
+      this.setLoading(true);
+      this.setError(null);
 
       // Convert string visibility to RepositoryVisibility enum
       const visibilityEnum = this.mapVisibility(visibility);
@@ -176,15 +135,15 @@ export class RepositoryCrudStore {
         response.createRepository.repository as Partial<RepositoryApiModel>
       );
 
-      // Add to repositories list
-      this.updateRepositories([...this.repositories, repository]);
+      // Add to repositories list using the base class update method
+      this.setItems([...this.items, repository]);
 
       return repository;
     } catch (error) {
-      this.handleError(error);
+      this.setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     } finally {
-      this.finishLoading();
+      this.setLoading(false);
     }
   }
 
@@ -205,69 +164,61 @@ export class RepositoryCrudStore {
   }
 
   /**
-   * Disable (delete) a repository
+   * Disable a repository (soft delete)
    */
   async disableRepository(repositoryId: string): Promise<boolean> {
     try {
-      this.startLoading();
-      this.clearError();
+      this.setLoading(true);
+      this.setError(null);
 
-      const repository = this.repositories.find((r) => r.id === repositoryId);
+      // In a real implementation, call the API to disable the repository
+      // For this example, we'll just remove it from our local collection
 
-      if (!repository) {
+      // Use the delete method from the base class
+      const success = this.delete(repositoryId);
+
+      if (!success) {
         throw new Error(`Repository with ID ${repositoryId} not found`);
       }
 
-      // In a real implementation, we would make a GraphQL API call
-      console.log(`Disabling repository: ${repositoryId}`);
-
-      // Remove from repositories list (optimistic update)
-      this.updateRepositories(this.repositories.filter((r) => r.id !== repositoryId));
-
       return true;
     } catch (error) {
-      this.handleError(error);
+      this.setError(error instanceof Error ? error : new Error(String(error)));
       throw error;
     } finally {
-      this.finishLoading();
+      this.setLoading(false);
     }
   }
 
   /**
-   * Select a repository without triggering a fetch
+   * Select a repository by owner and name without fetching
    */
   selectRepositoryWithoutFetch(owner: string, name: string): Repository | undefined {
-    const repository = this.repositories.find((r) => r.owner.login === owner && r.name === name);
+    const repository = this.items.find((r) => r.owner.login === owner && r.name === name);
 
     if (repository) {
-      this.selectedRepository = repository;
-      return repository;
+      this.selectRepository(repository);
     }
 
-    return undefined;
+    return repository;
   }
 
   /**
    * Select a repository
    */
+  @action
   selectRepository(repository: Repository): void {
     this.selectedRepository = repository;
   }
 
   /**
-   * Clear the selected repository
+   * Clear selected repository
    */
-  clearSelectedRepository() {
+  @action
+  clearSelectedRepository(): void {
     this.selectedRepository = null;
-  }
-
-  /**
-   * Set repositories - Called by the app-init service
-   */
-  setRepositories(repositories: Repository[]) {
-    this.updateRepositories(repositories);
   }
 }
 
-// Singleton instance of the repository CRUD store
+// Create singleton instance
 export const repositoryCrudStore = new RepositoryCrudStore();
