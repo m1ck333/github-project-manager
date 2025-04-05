@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 
 import { executeGitHubMutation } from "@/api-github";
-import { CreateProjectDocument } from "@/api-github/operations/operation-names";
+import { CreateProjectDocument } from "@/api-github/generated/graphql";
 
 import { Project, ProjectFormData } from "../types";
 import { projectSchema } from "../validation";
