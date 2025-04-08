@@ -3,7 +3,7 @@ import { FiEdit, FiTrash2, FiBook } from "react-icons/fi";
 
 import GridCard from "@/common/components/composed/grid/GridCard";
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
-import { Button, EmptyState } from "@/common/components/ui";
+import { EmptyState } from "@/common/components/ui";
 import { Project } from "@/features/projects/types";
 
 import styles from "./project-grid.module.scss";
@@ -24,15 +24,7 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
   onDeleteProject,
 }) => {
   const renderEmptyState = () => (
-    <EmptyState
-      title="No projects found"
-      description="Create a new project to get started"
-      action={
-        <Button variant="primary" onClick={onCreateProject}>
-          Create Project
-        </Button>
-      }
-    />
+    <EmptyState title="No projects found" description="Create a new project to get started" />
   );
 
   return (

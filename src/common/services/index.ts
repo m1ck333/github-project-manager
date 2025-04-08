@@ -4,10 +4,13 @@
  * by feature-specific services.
  */
 
-// Export base CRUD service
-export { AbstractCrudService } from "./base-crud.service";
-export type { BaseCrudService } from "./base-crud.service";
+// Export base services
+export { AbstractBaseService } from "./abstract-base.service";
+export type { IAbstractBaseService } from "./abstract-base.service";
+
+export { AbstractCacheableService } from "./abstract-cacheable.service";
+export type { IAbstractCacheableService } from "./abstract-cacheable.service";
 
 // Export base search service
-export { AbstractSearchService } from "./base-search.service";
-export type { BaseSearchService, SearchCriteria } from "./base-search.service";
+export { AbstractSearchService } from "./abstract-search.service";
+export type { IAbstractSearchService, ISearchCriteria } from "./abstract-search.service";

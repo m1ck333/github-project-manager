@@ -1,41 +1,54 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeObservable, observable, action, computed, override } from "mobx";
+
+import { AbstractEntityStore, BaseEntityStore } from "./abstract-entity.store";
 
 /**
- * Base CRUD service interface for entity operations
+ * Base CRUD store interface for entity operations
  */
-export interface BaseCrudService<T extends { id: string }> {
+export interface BaseCrudStore<T extends { id: string }> extends BaseEntityStore {
+  items: T[];
+
   getAll(): T[];
   getById(id: string): T | undefined;
   create(item: Omit<T, "id">): T;
   update(id: string, item: Partial<T>): T | undefined;
   delete(id: string): boolean;
+  setItems(items: T[]): void;
 }
 
 /**
- * Abstract base class for CRUD operations
- * Provides common functionality for entity services
+ * Abstract base class for CRUD operations in stores
+ * Provides common functionality for entity stores
  */
-export abstract class AbstractCrudService<T extends { id: string }> implements BaseCrudService<T> {
-  @observable protected items: T[] = [];
-  @observable protected error: Error | null = null;
-  @observable protected isLoading = false;
+export abstract class AbstractCrudStore<T extends { id: string }>
+  extends AbstractEntityStore
+  implements BaseCrudStore<T>
+{
+  @observable items: T[] = [];
 
   constructor() {
+    super();
     makeObservable(this);
   }
 
   /**
    * Get all items
    */
-  @action
-  getAll(): T[] {
+  @computed
+  get allItems(): T[] {
     return this.items;
+  }
+
+  /**
+   * Get all items (method form for interface compatibility)
+   */
+  getAll(): T[] {
+    return this.allItems;
   }
 
   /**
    * Get item by ID
    */
-  @action
   getById(id: string): T | undefined {
     return this.items.find((item) => item.id === id);
   }
@@ -55,7 +68,9 @@ export abstract class AbstractCrudService<T extends { id: string }> implements B
     if (index === -1) return undefined;
 
     const updatedItem = { ...this.items[index], ...updates } as T;
-    this.items[index] = updatedItem;
+    const newItems = [...this.items];
+    newItems[index] = updatedItem;
+    this.items = newItems;
     return updatedItem;
   }
 
@@ -78,32 +93,20 @@ export abstract class AbstractCrudService<T extends { id: string }> implements B
   }
 
   /**
-   * Set loading state
+   * Clear all items
    */
   @action
-  setLoading(isLoading: boolean): void {
-    this.isLoading = isLoading;
+  clearItems(): void {
+    this.items = [];
   }
 
   /**
-   * Set error state
+   * Reset store to initial state
+   * Overrides the base reset method to also clear items
    */
-  @action
-  setError(error: Error | null): void {
-    this.error = error;
-  }
-
-  /**
-   * Get current loading state
-   */
-  getLoading(): boolean {
-    return this.isLoading;
-  }
-
-  /**
-   * Get current error
-   */
-  getError(): Error | null {
-    return this.error;
+  @override
+  reset(): void {
+    super.reset();
+    this.items = [];
   }
 }

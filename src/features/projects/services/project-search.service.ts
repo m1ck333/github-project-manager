@@ -1,41 +1,30 @@
 import { action, override } from "mobx";
 
-import { AbstractSearchService, SearchCriteria } from "@/common/services";
-import { compareDatesAsc } from "@/common/utils/date.utils";
+import { AbstractSearchService, ISearchCriteria } from "@/common/services";
+import { ColumnType } from "@/features/columns/types/column.types";
 
 import { projectStore } from "../stores";
-
-import type { Project, Label, ColumnType } from "../types";
+import { Project } from "../types";
+import { filterByLabels, filterByStatus, searchProjectText, sortProjects } from "../utils";
 
 /**
- * Service responsible for project search functionality
- * Extends AbstractSearchService to leverage common search functionality
+ * Service for project search functionality
  */
 export class ProjectSearchService extends AbstractSearchService<Project> {
   // Project-specific filters
   private labelFilter: string[] = [];
   private statusFilter: ColumnType[] = [];
 
-  /**
-   * Set label filter
-   */
   @action
   setLabelFilter(labelIds: string[]): void {
     this.labelFilter = labelIds;
   }
 
-  /**
-   * Set status filter
-   */
   @action
   setStatusFilter(columnTypes: ColumnType[]): void {
     this.statusFilter = columnTypes;
   }
 
-  /**
-   * Reset all filters
-   * Overrides the base class reset to include project-specific filters
-   */
   @override
   reset(): void {
     super.reset();
@@ -45,139 +34,113 @@ export class ProjectSearchService extends AbstractSearchService<Project> {
 
   /**
    * Search projects based on criteria
-   * Implements the abstract method from AbstractSearchService
    */
-  search(criteria: SearchCriteria): Project[] {
-    // Update search state from criteria
-    this.setSearchQuery(criteria.query);
+  search(criteria: ISearchCriteria): Project[] {
+    try {
+      this.setSearching(true);
 
-    if (criteria.sortBy) {
-      this.setSortBy(criteria.sortBy, (criteria.sortDirection as "asc" | "desc") || "asc");
-    }
+      // Update search state from criteria
+      this.setSearchQuery(criteria.query);
 
-    if (criteria.page) {
-      this.setPagination(criteria.page, criteria.pageSize || this.pageSize);
-    }
-
-    // Set project-specific filters if provided
-    if (criteria.filters) {
-      if (criteria.filters.labels && Array.isArray(criteria.filters.labels)) {
-        this.setLabelFilter(criteria.filters.labels as string[]);
+      if (criteria.sortBy) {
+        this.setSortBy(criteria.sortBy, (criteria.sortDirection as "asc" | "desc") || "asc");
       }
 
-      if (criteria.filters.status && Array.isArray(criteria.filters.status)) {
-        this.setStatusFilter(criteria.filters.status as ColumnType[]);
+      if (criteria.page) {
+        this.setPagination(criteria.page, criteria.pageSize || this.pageSize);
       }
+
+      // Set project-specific filters if provided
+      if (criteria.filters) {
+        if (criteria.filters.labels && Array.isArray(criteria.filters.labels)) {
+          this.setLabelFilter(criteria.filters.labels as string[]);
+        }
+
+        if (criteria.filters.status && Array.isArray(criteria.filters.status)) {
+          this.setStatusFilter(criteria.filters.status as ColumnType[]);
+        }
+      }
+
+      // Get all projects and apply filters
+      const results = this.applyFilters(projectStore.projects);
+      this.setSearchResults(results);
+      return results;
+    } catch (error) {
+      this.setSearchError(error instanceof Error ? error : new Error("Search failed"));
+      return [];
+    } finally {
+      this.setSearching(false);
     }
-
-    // Get projects from store
-    const allProjects = projectStore.projects;
-
-    // Apply filters and update search results
-    const filteredProjects = this.applyFilters(allProjects);
-    this.setSearchResults(filteredProjects);
-
-    // Return search results
-    return this.getSearchResults();
   }
 
   /**
    * Filter projects by label
    */
   filterByLabels(labelIds: string[]): Project[] {
-    this.setLabelFilter(labelIds);
-    return this.applyFilters(projectStore.projects);
+    try {
+      this.setSearching(true);
+      this.setLabelFilter(labelIds);
+
+      const results = this.applyFilters(projectStore.projects);
+      this.setSearchResults(results);
+      return results;
+    } catch (error) {
+      this.setSearchError(error instanceof Error ? error : new Error("Failed to filter by labels"));
+      return [];
+    } finally {
+      this.setSearching(false);
+    }
   }
 
   /**
    * Filter projects by status
    */
   filterByStatus(columnTypes: ColumnType[]): Project[] {
-    this.setStatusFilter(columnTypes);
-    return this.applyFilters(projectStore.projects);
+    try {
+      this.setSearching(true);
+      this.setStatusFilter(columnTypes);
+
+      const results = this.applyFilters(projectStore.projects);
+      this.setSearchResults(results);
+      return results;
+    } catch (error) {
+      this.setSearchError(error instanceof Error ? error : new Error("Failed to filter by status"));
+      return [];
+    } finally {
+      this.setSearching(false);
+    }
   }
 
   /**
-   * Apply all current filters and sorting to the projects list
+   * Apply all filters and sorting to projects
    */
   private applyFilters(projects: Project[]): Project[] {
-    let filteredProjects = [...projects];
-
-    // Apply text search filter
-    if (this.searchQuery.trim()) {
-      const normalizedQuery = this.searchQuery.toLowerCase().trim();
-      filteredProjects = filteredProjects.filter((project) => {
-        const nameMatch = project.name.toLowerCase().includes(normalizedQuery);
-        const descMatch = project.description?.toLowerCase().includes(normalizedQuery) || false;
-        return nameMatch || descMatch;
-      });
-    }
+    // Apply text search
+    let results = projects.filter((project) => searchProjectText(project, this.searchQuery));
 
     // Apply label filter
     if (this.labelFilter.length > 0) {
-      filteredProjects = filteredProjects.filter((project) => {
-        if (!project.labels || project.labels.length === 0) {
-          return false;
-        }
-
-        // Check if project has at least one of the filtered labels
-        return project.labels.some((label) => this.labelFilter.includes(label.id));
-      });
+      results = filterByLabels(results, this.labelFilter);
     }
 
     // Apply status filter
     if (this.statusFilter.length > 0) {
-      filteredProjects = filteredProjects.filter((project) => {
-        if (!project.columns || project.columns.length === 0) {
-          return false;
-        }
-
-        // Check if project has at least one of the filtered column types
-        return project.columns.some((column) => this.statusFilter.includes(column.type));
-      });
+      results = filterByStatus(results, this.statusFilter);
     }
 
     // Apply sorting
-    filteredProjects.sort((a, b) => {
-      let comparison = 0;
+    if (this.sortField) {
+      results = sortProjects(results, this.sortField, this.sortDirection);
+    }
 
-      switch (this.sortField) {
-        case "name":
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case "created":
-          comparison = compareDatesAsc(a.createdAt, b.createdAt);
-          break;
-        case "updated":
-          comparison = compareDatesAsc(a.updatedAt, b.updatedAt);
-          break;
-        default:
-          comparison = a.name.localeCompare(b.name);
-      }
+    // Apply pagination if needed
+    if (this.currentPage > 1 || this.pageSize < results.length) {
+      const startIndex = (this.currentPage - 1) * this.pageSize;
+      const endIndex = Math.min(startIndex + this.pageSize, results.length);
+      results = results.slice(startIndex, endIndex);
+    }
 
-      return this.sortDirection === "asc" ? comparison : -comparison;
-    });
-
-    return filteredProjects;
-  }
-
-  /**
-   * Find labels across all projects
-   */
-  getAllLabels(): Label[] {
-    const labelsMap = new Map<string, Label>();
-
-    projectStore.projects.forEach((project) => {
-      if (project.labels && project.labels.length > 0) {
-        project.labels.forEach((label) => {
-          if (!labelsMap.has(label.id)) {
-            labelsMap.set(label.id, label);
-          }
-        });
-      }
-    });
-
-    return Array.from(labelsMap.values());
+    return results;
   }
 }
 

@@ -7,7 +7,6 @@ import PageContainer from "@/common/components/layout/PageContainer";
 import { Button, Typography } from "@/common/components/ui";
 import { env } from "@/common/config/env";
 import GitHubTokenWarning from "@/features/app/components/GitHubTokenWarning";
-import { useAppInitialization } from "@/features/app/hooks/use-app-initialization";
 import { projectStore } from "@/features/projects/stores";
 import { repositoryStore } from "@/features/repositories/stores";
 import { userService } from "@/features/user/api";
@@ -16,7 +15,6 @@ import styles from "./home-page.module.scss";
 
 const HomePage: React.FC = observer(() => {
   const navigate = useNavigate();
-  useAppInitialization();
 
   const hasToken = userService.hasToken();
   const projectCount = projectStore.projects.length;

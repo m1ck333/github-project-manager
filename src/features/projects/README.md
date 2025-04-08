@@ -1,6 +1,73 @@
 # Projects Feature
 
-This feature directory contains components, services, and utilities related to project management in the application.
+This feature manages GitHub Projects V2, providing functionality to view, create, update, and delete projects, as well as manage project items like issues and columns.
+
+## Architecture
+
+The Projects feature follows a clean architecture with separation of concerns:
+
+### Data Flow
+
+```
+GraphQL API → Data Service → Mappers → Store → Components
+```
+
+1. **API Layer**: GraphQL queries and mutations in `api/`
+2. **Data Service**: Handles data fetching with caching and error handling in `services/project-data.service.ts`
+3. **CRUD Service**: Manages create, read, update, delete operations in `services/project-crud.service.ts`
+4. **Mappers**: Transform API responses to domain models in `mappers/`
+5. **Store**: State management via MobX in `stores/`
+6. **Components**: React components to display and interact with projects
+
+### Key Components
+
+- **ProjectDataService**: Responsible for fetching project data from the API
+- **ProjectCrudService**: Manages the project data and CRUD operations
+- **ProjectRelationsService**: Handles relationships between projects and other entities
+- **ProjectSearchService**: Provides search functionality for projects
+- **Project Mappers**: Transform API data to domain models
+
+## Data Model
+
+The main entities in this feature are:
+
+- **Project**: Represents a GitHub Project V2
+- **Column**: Represents a status column in a project board
+- **BoardIssue**: Represents an issue within a project board
+- **Label**: Represents a label that can be applied to issues
+
+## Usage
+
+```typescript
+// Fetch all projects
+Projects.services.data.fetchProjects();
+
+// Get all projects
+const projects = Projects.services.crud.getProjects();
+
+// Get a specific project
+const project = Projects.services.crud.getProjectById(projectId);
+
+// Create a new project
+const newProject = await Projects.services.crud.createProject(projectData, ownerId);
+
+// Update a project
+const updatedProject = await Projects.services.crud.updateProject(projectId, projectData);
+
+// Delete a project
+await Projects.services.crud.deleteProject(projectId);
+```
+
+## Queries and Mutations
+
+The main GraphQL operations are:
+
+- `GetProjects`: Fetches all projects owned by the user
+- `CreateProject`: Creates a new project
+- `UpdateProject`: Updates an existing project
+- `DeleteProject`: Deletes a project
+
+See `api-github/operations/projects/queries/getProjects.graphql` for the main query structure.
 
 ## Directory Structure
 

@@ -1,11 +1,14 @@
 import { executeGitHubQuery } from "@/api-github";
-import { GetUserProfileDocument, GetViewerDocument } from "@/api-github/generated/graphql";
+import {
+  GetUserProfileDocument,
+  GetViewerDocument,
+  User as GitHubUser,
+} from "@/api-github/generated/graphql";
 import { getErrorMessage } from "@/common/utils/errors.utils";
 
-import { mapToUserProfile } from "../mappers";
+import { mapToUser } from "../mappers";
 import { userStore } from "../stores";
-import { UserApiModel } from "../types/user-api.types";
-import { UserProfile } from "../types/user.types";
+import { User } from "../types/user.types";
 
 /**
  * Service responsible for handling user-related API operations
@@ -22,14 +25,14 @@ class UserService {
   /**
    * Get the current user profile from the store
    */
-  getUserProfile(): UserProfile | null {
+  getUserProfile(): User | null {
     return userStore.profile;
   }
 
   /**
    * Fetch the user's basic profile from the GitHub API
    */
-  async fetchBasicProfile(): Promise<UserProfile | null> {
+  async fetchBasicProfile(): Promise<User | null> {
     try {
       userStore.setLoading(true);
       userStore.setError(null);
@@ -43,9 +46,9 @@ class UserService {
         return null;
       }
 
-      // Convert data.viewer to UserApiModel
+      // Convert data.viewer to User
       if (response.data.viewer) {
-        const userProfile = mapToUserProfile(response.data.viewer as unknown as UserApiModel);
+        const userProfile = mapToUser(response.data.viewer as GitHubUser);
         userStore.setProfile(userProfile);
         return userProfile;
       }

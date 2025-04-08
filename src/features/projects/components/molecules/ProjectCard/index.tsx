@@ -1,5 +1,5 @@
 import React from "react";
-import { FiEdit2, FiTrash2, FiGitBranch, FiList, FiCalendar } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiGitBranch, FiList, FiCalendar, FiUser } from "react-icons/fi";
 
 import { Button } from "@/common/components/ui";
 import Typography from "@/common/components/ui/display/Typography";
@@ -60,6 +60,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onD
       )}
 
       <div className={styles.projectInfo}>
+        {project.owner && (
+          <div className={styles.infoItem}>
+            <FiUser />
+            <Typography variant="body2" component="span">
+              {project.owner.login}
+            </Typography>
+          </div>
+        )}
         <div className={styles.infoItem}>
           <FiGitBranch />
           <Typography variant="body2" component="span">

@@ -1,10 +1,8 @@
-/**
- * User profile interface
- */
-export interface UserProfile {
+export interface User {
+  id: string;
   login: string;
-  name: string | null;
   avatarUrl: string;
+  name: string | null;
   bio: string | null;
   location: string | null;
   company: string | null;

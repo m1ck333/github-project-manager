@@ -1,12 +1,13 @@
 import { makeAutoObservable } from "mobx";
 
-import { UserProfile } from "../types";
+import { userService } from "../services";
+import { User } from "../types/user.types";
 
 /**
  * Store for managing user profile state
  */
 export class UserStore {
-  private _profile: UserProfile | null = null;
+  private _profile: User | null = null;
   private _isLoading = false;
   private _error: Error | null = null;
 
@@ -17,7 +18,7 @@ export class UserStore {
   /**
    * Get the user profile
    */
-  get profile(): UserProfile | null {
+  get profile(): User | null {
     return this._profile;
   }
 
@@ -38,7 +39,7 @@ export class UserStore {
   /**
    * Set the user profile
    */
-  setProfile(profile: UserProfile | null): void {
+  setProfile(profile: User | null): void {
     this._profile = profile;
   }
 
@@ -62,6 +63,32 @@ export class UserStore {
   clearUserData(): void {
     this._profile = null;
     this._error = null;
+  }
+
+  /**
+   * Initialize the user store by fetching the user profile
+   */
+  async initialize(): Promise<boolean> {
+    if (this._profile) {
+      return true;
+    }
+
+    if (this._isLoading) {
+      return false;
+    }
+
+    try {
+      this._isLoading = true;
+      this._error = null;
+
+      const profile = await userService.fetchBasicProfile();
+      return !!profile;
+    } catch (error) {
+      this._error = error instanceof Error ? error : new Error(String(error));
+      return false;
+    } finally {
+      this._isLoading = false;
+    }
   }
 }
 

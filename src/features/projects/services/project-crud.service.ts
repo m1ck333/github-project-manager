@@ -1,141 +1,186 @@
-import { executeGitHubMutation } from "@/api-github";
+import { action } from "mobx";
 
-import { CreateProjectDocument, UpdateProjectDocument, DeleteProjectDocument } from "../api";
+import { executeGitHubMutation, executeGitHubQuery } from "@/api-github";
+import {
+  CreateProjectDocument,
+  UpdateProjectDocument,
+  DeleteProjectDocument,
+  GetProjectsDocument,
+  ProjectV2,
+} from "@/api-github/generated/graphql";
+import { executeServiceOperation, ServiceResult } from "@/common/utils/service.utils";
+
+import { mapToProject } from "../mappers";
+
+import { BaseProjectService } from "./base-project.service";
 
 import type { Project, ProjectFormData } from "../types";
 
 /**
- * Service responsible for project CRUD operations
+ * Service for project CRUD operations
+ * Extends BaseProjectService to leverage common project functionality
+ * Combines operations from ProjectOperationsService and ProjectFetchService
  */
-export class ProjectCrudService {
-  private projects: Project[] = [];
-
+export class ProjectCrudService extends BaseProjectService {
   /**
-   * Get all projects
+   * Fetch all projects with caching
    */
-  getProjects(): Project[] {
-    return this.projects;
-  }
+  @action
+  async fetchProjects(forceRefresh = false): Promise<ServiceResult<Project[]>> {
+    return this.executeWithCache(async () => {
+      return executeServiceOperation(
+        this,
+        async () => {
+          const { data, error } = await executeGitHubQuery(GetProjectsDocument);
 
-  /**
-   * Find a project by ID
-   */
-  getProjectById(id: string): Project | undefined {
-    return this.projects.find((project) => project.id === id);
-  }
+          if (error || !data) {
+            throw new Error(error?.message || "Failed to fetch projects data");
+          }
 
-  /**
-   * Set projects directly
-   */
-  setProjects(projects: Project[]): void {
-    this.projects = projects;
+          const projectsData = data.viewer.projectsV2.nodes;
+          if (!projectsData) {
+            throw new Error("No projects data found in the response");
+          }
+
+          const projects = projectsData
+            .filter((project): project is NonNullable<typeof project> => project !== null)
+            .map((project) => mapToProject(project as unknown as ProjectV2));
+
+          this._items = projects;
+          return projects;
+        },
+        {
+          errorPrefix: "Failed to fetch projects",
+          successMessage: "Projects successfully fetched",
+        }
+      );
+    }, forceRefresh);
   }
 
   /**
    * Create a new project
    */
-  async createProject(projectData: ProjectFormData, ownerId: string): Promise<Project> {
-    const input = {
-      ownerId: ownerId,
-      title: projectData.name,
-      ...(projectData.description ? { description: projectData.description } : {}),
-    };
+  @action
+  async createProject(
+    projectData: ProjectFormData,
+    ownerId: string
+  ): Promise<ServiceResult<Project>> {
+    return executeServiceOperation(
+      this,
+      async () => {
+        const input = {
+          ownerId,
+          title: projectData.name,
+          // description is not supported in CreateProjectV2Input
+        };
 
-    const { data, error } = await executeGitHubMutation(CreateProjectDocument, { input });
+        const { data, error } = await executeGitHubMutation(CreateProjectDocument, { input });
 
-    if (error || !data?.createProjectV2?.projectV2) {
-      throw error || new Error("Failed to create project");
-    }
+        if (error || !data?.createProjectV2?.projectV2) {
+          throw error || new Error("Failed to create project");
+        }
 
-    // Return project from the response
-    const projectResponse = data.createProjectV2.projectV2;
+        const projectResponse = data.createProjectV2.projectV2;
 
-    // Create a well-formed project object
-    const newProject: Project = {
-      id: projectResponse.id,
-      name: projectResponse.title,
-      description: projectData.description || "",
-      createdAt: projectResponse.createdAt,
-      updatedAt: projectResponse.updatedAt,
-      url: projectResponse.url,
-      html_url: projectResponse.url,
-      createdBy: {
-        login: "", // This will be filled in by the store
-        avatarUrl: "",
+        // Absolute minimum - only ID and fields from schema
+        const newProject = {
+          id: projectResponse.id,
+          name: projectResponse.title,
+        } as Project;
+
+        // Only add description if provided in our app model (not sent to GitHub API)
+        if (projectData.description) {
+          newProject.description = projectData.description;
+        }
+
+        this._items.push(newProject as Project);
+        return newProject;
       },
-      owner: {
-        login: "", // This will be filled in by the store
-        avatarUrl: "",
-      },
-      columns: [],
-      issues: [],
-      collaborators: [],
-      repositories: [],
-    };
-
-    return newProject;
+      {
+        errorPrefix: "Failed to create project",
+        successMessage: `Project '${projectData.name}' successfully created`,
+      }
+    );
   }
 
   /**
    * Update an existing project
    */
-  async updateProject(projectId: string, projectData: ProjectFormData): Promise<Project> {
-    const input = {
-      projectId: projectId,
-      title: projectData.name,
-      ...(projectData.description ? { shortDescription: projectData.description } : {}),
-    };
+  @action
+  async updateProject(
+    projectId: string,
+    projectData: ProjectFormData
+  ): Promise<ServiceResult<Project>> {
+    return executeServiceOperation(
+      this,
+      async () => {
+        const input = {
+          projectId,
+          title: projectData.name,
+          ...(projectData.description ? { shortDescription: projectData.description } : {}),
+        };
 
-    const { data, error } = await executeGitHubMutation(UpdateProjectDocument, { input });
+        const { data, error } = await executeGitHubMutation(UpdateProjectDocument, { input });
 
-    if (error || !data?.updateProjectV2?.projectV2) {
-      throw error || new Error("Failed to update project");
-    }
+        if (error || !data?.updateProjectV2?.projectV2) {
+          throw error || new Error("Failed to update project");
+        }
 
-    const projectResponse = data.updateProjectV2.projectV2;
+        const existingProject = this.getById(projectId);
 
-    // Find the existing project to maintain its relationships
-    const existingProject = this.getProjectById(projectId);
-    if (!existingProject) {
-      throw new Error(`Project with ID ${projectId} not found`);
-    }
+        if (!existingProject) {
+          throw new Error(`Project with ID ${projectId} not found`);
+        }
 
-    // Create an updated project object
-    const updatedProject: Project = {
-      ...existingProject,
-      id: projectResponse.id,
-      name: projectResponse.title,
-      updatedAt: projectResponse.updatedAt,
-      url: projectResponse.url,
-      html_url: projectResponse.url,
-    };
+        existingProject.name = projectData.name;
 
-    return updatedProject;
+        if (projectData.description !== undefined) {
+          existingProject.description = projectData.description;
+        }
+
+        return existingProject;
+      },
+      {
+        errorPrefix: "Failed to update project",
+        successMessage: `Project '${projectData.name}' successfully updated`,
+      }
+    );
   }
 
   /**
    * Delete a project
    */
-  async deleteProject(projectId: string): Promise<boolean> {
-    const input = { projectId };
+  @action
+  async deleteProject(projectId: string): Promise<ServiceResult<boolean>> {
+    return executeServiceOperation(
+      this,
+      async () => {
+        const { data, error } = await executeGitHubMutation(DeleteProjectDocument, {
+          input: { projectId },
+        });
 
-    const { data, error } = await executeGitHubMutation(DeleteProjectDocument, { input });
+        if (error) {
+          throw error;
+        }
 
-    if (error) {
-      throw error;
-    }
+        if (data?.deleteProjectV2) {
+          this._items = this._items.filter((p) => p.id !== projectId);
+          return true;
+        }
 
-    return Boolean(data?.deleteProjectV2);
+        return false;
+      },
+      {
+        errorPrefix: "Failed to delete project",
+        successMessage: "Project successfully deleted",
+      }
+    );
   }
 
   /**
-   * Create a new project (implements abstract method)
-   * For direct creation without GitHub API
+   * Get all projects
    */
-  create(_projectData: Omit<Project, "id">): Project {
-    // In a real implementation, we might generate a temporary ID
-    // or call an API. For this example, we'll throw an error and
-    // recommend using the createProject method instead.
-    throw new Error("Use createProject method to create projects with GitHub API");
+  getAll(): Project[] {
+    return this._items;
   }
 }

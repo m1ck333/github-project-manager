@@ -1,4 +1,6 @@
-import { makeObservable, observable, action } from "mobx";
+import { makeObservable, observable, action, computed, override } from "mobx";
+
+import { AbstractEntityStore, BaseEntityStore } from "./abstract-entity.store";
 
 /**
  * Interface for search criteria
@@ -13,37 +15,45 @@ export interface SearchCriteria {
 }
 
 /**
- * Base search service interface
+ * Base search store interface
  */
-export interface BaseSearchService<T extends { id: string }> {
+export interface BaseSearchStore<T extends { id: string }> extends BaseEntityStore {
+  searchQuery: string;
+  sortField: string;
+  sortDirection: "asc" | "desc";
+  currentPage: number;
+  pageSize: number;
+  searchResults: T[];
+  isSearching: boolean;
+  searchError: Error | null;
+
   search(criteria: SearchCriteria): T[];
   setSortBy(field: string, direction: "asc" | "desc"): void;
   setSearchQuery(query: string): void;
   setFilters(filters: Record<string, unknown>): void;
   setPagination(page: number, pageSize: number): void;
-  getSearchResults(): T[];
-  getTotalResults(): number;
-  getCurrentPage(): number;
 }
 
 /**
- * Abstract base class for search functionality
- * Provides common search operations for entities
+ * Abstract base class for search functionality in stores
+ * Provides common search operations for entity stores
  */
-export abstract class AbstractSearchService<T extends { id: string }>
-  implements BaseSearchService<T>
+export abstract class AbstractSearchStore<T extends { id: string }>
+  extends AbstractEntityStore
+  implements BaseSearchStore<T>
 {
-  @observable protected searchQuery: string = "";
-  @observable protected sortField: string = "id";
-  @observable protected sortDirection: "asc" | "desc" = "asc";
-  @observable protected filters: Record<string, unknown> = {};
-  @observable protected currentPage: number = 1;
-  @observable protected pageSize: number = 10;
-  @observable protected searchResults: T[] = [];
-  @observable protected isSearching: boolean = false;
-  @observable protected searchError: Error | null = null;
+  @observable searchQuery: string = "";
+  @observable sortField: string = "id";
+  @observable sortDirection: "asc" | "desc" = "asc";
+  @observable filters: Record<string, unknown> = {};
+  @observable currentPage: number = 1;
+  @observable pageSize: number = 10;
+  @observable searchResults: T[] = [];
+  @observable isSearching: boolean = false;
+  @observable searchError: Error | null = null;
 
   constructor() {
+    super();
     makeObservable(this);
   }
 
@@ -111,84 +121,38 @@ export abstract class AbstractSearchService<T extends { id: string }>
   }
 
   /**
-   * Get current search results
-   */
-  getSearchResults(): T[] {
-    return this.searchResults;
-  }
-
-  /**
    * Get total number of results
    */
+  @computed
   get totalResults(): number {
     return this.searchResults.length;
   }
 
-  getTotalResults(): number {
-    return this.totalResults;
+  /**
+   * Get total pages
+   */
+  @computed
+  get totalPages(): number {
+    return Math.ceil(this.totalResults / this.pageSize) || 1;
   }
 
   /**
-   * Get current page
+   * Get current page results
    */
-  getCurrentPage(): number {
-    return this.currentPage;
-  }
-
-  /**
-   * Get page size
-   */
-  getPageSize(): number {
-    return this.pageSize;
-  }
-
-  /**
-   * Get search query
-   */
-  getSearchQuery(): string {
-    return this.searchQuery;
-  }
-
-  /**
-   * Get sort field
-   */
-  getSortField(): string {
-    return this.sortField;
-  }
-
-  /**
-   * Get sort direction
-   */
-  getSortDirection(): "asc" | "desc" {
-    return this.sortDirection;
-  }
-
-  /**
-   * Get filters
-   */
-  getFilters(): Record<string, unknown> {
-    return { ...this.filters };
-  }
-
-  /**
-   * Get searching state
-   */
-  isLoading(): boolean {
-    return this.isSearching;
-  }
-
-  /**
-   * Get search error
-   */
-  getError(): Error | null {
-    return this.searchError;
+  @computed
+  get paginatedResults(): T[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.searchResults.slice(start, end);
   }
 
   /**
    * Reset search parameters to defaults
+   * Overrides the base reset method to also reset search-specific state
    */
-  @action
+  @override
   reset(): void {
+    super.reset();
     this.searchQuery = "";
     this.sortField = "id";
     this.sortDirection = "asc";

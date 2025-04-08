@@ -1,0 +1,137 @@
+query GetProjects {
+  # Get all projects owned by the user
+  viewer {
+    login
+    avatarUrl
+    projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        id
+        title
+        number
+        shortDescription
+        closed
+        url
+        createdAt
+        updatedAt
+
+        # Project Fields including Status Field (columns)
+        fields(first: 50) {
+          nodes {
+            # All fields
+            ... on ProjectV2FieldCommon {
+              id
+              name
+              dataType
+            }
+            # Specifically for columns (Status field)
+            ... on ProjectV2SingleSelectField {
+              id
+              name
+              dataType
+              options {
+                id
+                name
+                color
+              }
+            }
+          }
+        }
+
+        # Project Items (issues, PRs, etc.)
+        items(first: 100) {
+          nodes {
+            id
+            fieldValues(first: 50) {
+              nodes {
+                # Text values (descriptions, etc.)
+                ... on ProjectV2ItemFieldTextValue {
+                  text
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                      id
+                    }
+                  }
+                }
+                # Date values
+                ... on ProjectV2ItemFieldDateValue {
+                  date
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      name
+                      id
+                    }
+                  }
+                }
+                # Column values - this represents which column an item is in
+                ... on ProjectV2ItemFieldSingleSelectValue {
+                  name
+                  optionId
+                  field {
+                    ... on ProjectV2FieldCommon {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+            content {
+              ... on Issue {
+                id
+                title
+                number
+                body
+                state
+                url
+                createdAt
+                updatedAt
+                author {
+                  login
+                  avatarUrl
+                  url
+                }
+                repository {
+                  id
+                  name
+                  owner {
+                    login
+                  }
+                }
+                labels(first: 10) {
+                  nodes {
+                    id
+                    name
+                    color
+                    description
+                  }
+                }
+                assignees(first: 5) {
+                  nodes {
+                    id
+                    login
+                    avatarUrl
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # Project Repositories
+        repositories(first: 20) {
+          nodes {
+            id
+            name
+            nameWithOwner
+            url
+            owner {
+              login
+              avatarUrl
+            }
+          }
+        }
+      }
+    }
+  }
+}

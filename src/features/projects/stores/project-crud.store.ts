@@ -1,203 +1,127 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { action, makeObservable } from "mobx";
 
-import { executeGitHubMutation } from "@/api-github";
-import { CreateProjectDocument } from "@/api-github/generated/graphql";
+import { AbstractEntityStore } from "@/common/stores";
+import { userStore } from "@/features/user/stores";
 
-import { Project, ProjectFormData } from "../types";
-import { projectSchema } from "../validation";
+import { projectCrudService } from "../services";
+import { projectSchema } from "../validation/project.schema";
+
+import { ProjectStateManager } from "./project-state";
+
+import type { Project, ProjectFormData } from "../types";
 
 /**
- * Store responsible for project CRUD operations
+ * Handles CRUD operations for projects
  */
-export class ProjectCrudStore {
-  projects: Project[] = [];
-  loading = false;
-  error: Error | null = null;
-  currentProject: Project | null = null;
-  // Mock user data for a more realistic implementation
-  userData = {
-    id: "user-1",
-    login: "default-user",
-    avatarUrl: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
-  };
-
-  constructor() {
-    makeAutoObservable(this);
+export class ProjectCrudStore extends AbstractEntityStore {
+  constructor(private stateManager: ProjectStateManager) {
+    super();
+    makeObservable(this);
   }
 
   /**
-   * Set projects directly (used by the app initialization service)
+   * Fetch all projects
    */
-  setProjects(projects: Project[]) {
-    this.projects = projects;
-  }
+  @action
+  async fetchProjects(forceRefresh = false): Promise<boolean> {
+    this.setLoading(true);
+    this.setError(null);
 
-  /**
-   * Get all projects
-   */
-  getProjects(): Project[] {
-    return this.projects;
-  }
+    const result = await projectCrudService.fetchProjects(forceRefresh);
 
-  /**
-   * Refresh projects from API
-   */
-  async fetchProjects() {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // In a real implementation, this would call an API service
-      // For now, we just return the projects we already have in local state
-      const projects = this.projects;
-
-      // Update state
-      runInAction(() => {
-        this.projects = projects;
-        this.loading = false;
-      });
-
-      return projects;
-    } catch (error) {
-      runInAction(() => {
-        this.error = error as Error;
-        this.loading = false;
-      });
-      return [];
+    if (result.success && result.data) {
+      this.stateManager.setProjects(result.data);
+    } else if (result.error) {
+      this.setError(result.error);
     }
+
+    this.setLoading(false);
+    return result.success;
   }
 
   /**
    * Create a new project
    */
-  async createProject(formData: ProjectFormData): Promise<Project | null> {
-    // Validate form data
-    const validationResult = projectSchema.safeParse(formData);
-    if (!validationResult.success) {
-      // If validation failed, set the error and return null
-      const error = new Error(validationResult.error.message);
-      this.error = error;
+  @action
+  async createProject(projectData: ProjectFormData): Promise<Project | null> {
+    if (!projectData.name) {
+      this.setError(new Error("Project name is required"));
       return null;
     }
 
-    this.loading = true;
-    this.error = null;
+    const validatedData = projectSchema.parse(projectData);
+    this.setLoading(true);
+    this.setError(null);
 
-    try {
-      // Get current user ID to set as the owner
-      const ownerId = this.userData.id;
+    // Get user ID from store
+    const userId = userStore.profile?.id || "user-1";
 
-      // Get the user data
-      const userData = this.userData;
+    const result = await projectCrudService.createProject(validatedData, userId);
 
-      // Call the GraphQL mutation
-      const { data, error } = await executeGitHubMutation(CreateProjectDocument, {
-        input: {
-          ownerId: ownerId,
-          title: formData.name,
-          repositoryId: formData.repositoryIds?.[0],
-          // Optional fields
-          description: formData.description || "",
-        },
-      });
-
-      if (error || !data?.createProjectV2) {
-        throw error || new Error("Failed to create project");
-      }
-
-      // Get the created project from the result
-      const createdProject = data.createProjectV2.projectV2;
-
-      if (!createdProject) {
-        throw new Error("Failed to create project");
-      }
-
-      // Create a new project object with the required fields
-      const newProject: Project = {
-        id: createdProject.id,
-        name: createdProject.title,
-        description: formData.description || undefined,
-        number: createdProject.number,
-        url: createdProject.url,
-        createdAt: createdProject.createdAt,
-        updatedAt: createdProject.updatedAt,
-        owner: {
-          login: userData.login,
-          avatarUrl: userData.avatarUrl,
-        },
-      };
-
-      // Add the new project to the list
-      runInAction(() => {
-        this.projects = [...this.projects, newProject];
-        this.currentProject = newProject;
-        this.loading = false;
-      });
-
-      return newProject;
-    } catch (error) {
-      runInAction(() => {
-        this.error = error as Error;
-        this.loading = false;
-      });
-      return null;
+    if (result.success && result.data) {
+      this.stateManager.addProject(result.data);
+      this.setLoading(false);
+      return result.data;
+    } else if (result.error) {
+      this.setError(result.error);
     }
+
+    this.setLoading(false);
+    return null;
   }
 
   /**
-   * Get a project by its ID
+   * Update a project
    */
-  getProjectById(id: string): Project | undefined {
-    return this.projects.find((project) => project.id === id);
-  }
+  @action
+  async updateProject(
+    projectId: string,
+    projectData: Partial<ProjectFormData>
+  ): Promise<Project | null> {
+    const validatedData = projectData as ProjectFormData;
+    this.setLoading(true);
+    this.setError(null);
 
-  /**
-   * Set the current project
-   */
-  setCurrentProject(project: Project | null) {
-    this.currentProject = project;
-  }
+    const result = await projectCrudService.updateProject(projectId, validatedData);
 
-  /**
-   * Load a project by its ID
-   */
-  async loadProject(id: string): Promise<Project | null> {
-    this.loading = true;
-    this.error = null;
-
-    try {
-      // Try to find the project in the current list
-      let project = this.getProjectById(id);
-
-      if (!project) {
-        // If not found, fetch all projects and try again
-        await this.fetchProjects();
-        project = this.getProjectById(id);
-
-        if (!project) {
-          throw new Error(`Project with ID ${id} not found`);
-        }
-      }
-
-      runInAction(() => {
-        this.currentProject = project || null;
-        this.loading = false;
-      });
-
-      return project || null;
-    } catch (error) {
-      runInAction(() => {
-        this.error = error as Error;
-        this.loading = false;
-      });
-      return null;
+    if (result.success && result.data) {
+      this.stateManager.updateProject(projectId, result.data);
+      return result.data;
+    } else if (result.error) {
+      this.setError(result.error);
     }
+
+    this.setLoading(false);
+    return null;
   }
 
   /**
-   * Clear the current error
+   * Delete a project
    */
-  clearError() {
-    this.error = null;
+  @action
+  async deleteProject(projectId: string): Promise<boolean> {
+    this.setLoading(true);
+    this.setError(null);
+
+    const result = await projectCrudService.deleteProject(projectId);
+
+    if (result.success) {
+      this.stateManager.removeProject(projectId);
+      if (this.stateManager.selectedProject?.id === projectId) {
+        this.stateManager.clearSelectedProject();
+      }
+    } else if (result.error) {
+      this.setError(result.error);
+    }
+
+    this.setLoading(false);
+    return result.success;
+  }
+
+  /**
+   * Reset store
+   */
+  reset(): void {
+    super.reset();
   }
 }
