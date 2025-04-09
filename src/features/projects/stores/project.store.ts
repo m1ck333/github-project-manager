@@ -99,15 +99,7 @@ export class ProjectStore {
    * @returns Promise resolving to true if successful
    */
   async linkRepositoryToProject(projectId: string, owner: string, name: string): Promise<boolean> {
-    try {
-      // Currently just simulating a success response
-      // This would typically call the related store or an API service
-      console.log(`Linking repository ${owner}/${name} to project ${projectId}`);
-      return true;
-    } catch (error) {
-      console.error("Error linking repository to project:", error);
-      return false;
-    }
+    return this.related.linkRepositoryToProject(projectId, owner, name);
   }
 }
 

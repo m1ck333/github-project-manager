@@ -138,6 +138,37 @@ export class ProjectRelatedStore extends AbstractEntityStore {
   }
 
   /**
+   * Link a repository to a project
+   * @param projectId The ID of the project to link to
+   * @param owner The repository owner's login
+   * @param name The repository name
+   * @returns Promise resolving to true if successful
+   */
+  @action
+  async linkRepositoryToProject(projectId: string, owner: string, name: string): Promise<boolean> {
+    this.setLoading(true);
+    this.setError(null);
+
+    try {
+      // Currently just simulating a success response
+      // This would typically call a service method
+      console.log(`Linking repository ${owner}/${name} to project ${projectId}`);
+
+      // In the future, this would be a real service call:
+      // const result = await projectRelatedService.linkRepositoryToProject(projectId, owner, name);
+
+      this.checkProjectRefresh(projectId);
+      this.setLoading(false);
+      return true;
+    } catch (error) {
+      console.error("Error linking repository to project:", error);
+      this.setError(error instanceof Error ? error : new Error(String(error)));
+      this.setLoading(false);
+      return false;
+    }
+  }
+
+  /**
    * Reset store
    */
   reset(): void {
