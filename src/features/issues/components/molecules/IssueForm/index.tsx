@@ -5,9 +5,9 @@ import { Button, Typography } from "@/common/components/ui";
 import { useToast } from "@/common/components/ui/feedback/Toast";
 import { Input } from "@/common/components/ui/form";
 import { getErrorMessage } from "@/common/utils/errors.utils";
+import { Label } from "@/features/labels/types";
 
 import { issueService } from "../../../services";
-import { Label } from "../../../types";
 
 import styles from "./issue-form.module.scss";
 

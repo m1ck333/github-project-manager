@@ -191,7 +191,7 @@ const RepositoryPage: React.FC = observer(() => {
         isOpen={showLinkProjectModal}
         onClose={() => setShowLinkProjectModal(false)}
         projects={projectStore.projects}
-        isLoading={projectStore.loading}
+        isLoading={projectStore.isLoading}
         onLinkToProject={handleLinkToProject}
       />
     </PageContainer>

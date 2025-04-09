@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 
-import Button from "../../display/Button";
 import Modal from "../Modal";
 
 import styles from "./confirmation-dialog.module.scss";

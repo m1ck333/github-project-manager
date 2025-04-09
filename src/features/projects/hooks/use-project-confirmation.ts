@@ -1,32 +1,54 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+
+interface ConfirmationState {
+  isOpen: boolean;
+  projectName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
 
 /**
  * A custom hook for managing project confirmation dialogs
  */
 export function useProjectConfirmation() {
-  const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmState, setConfirmState] = useState<ConfirmationState>({
+    isOpen: false,
+    projectName: "",
+    onConfirm: () => {},
+    onCancel: () => {},
+  });
+
+  const closeConfirmation = useCallback(() => {
+    setConfirmState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
 
   /**
-   * Confirm deletion of a project
+   * Confirm deletion of a project using a modern Promise-based approach
    * @param projectName The name of the project to delete
    * @returns A promise that resolves to true if the user confirms, false otherwise
    */
-  const confirmDeleteProject = async (projectName: string): Promise<boolean> => {
-    setIsConfirming(true);
-
-    try {
-      const confirmed = window.confirm(
-        `Are you sure you want to delete project "${projectName}"? This action cannot be undone.`
-      );
-
-      return confirmed;
-    } finally {
-      setIsConfirming(false);
-    }
-  };
+  const confirmDeleteProject = useCallback(
+    (projectName: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        setConfirmState({
+          isOpen: true,
+          projectName,
+          onConfirm: () => {
+            closeConfirmation();
+            resolve(true);
+          },
+          onCancel: () => {
+            closeConfirmation();
+            resolve(false);
+          },
+        });
+      });
+    },
+    [closeConfirmation]
+  );
 
   return {
-    isConfirming,
+    confirmState,
     confirmDeleteProject,
   };
 }

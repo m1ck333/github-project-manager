@@ -1,0 +1,48 @@
+@use "@/common/styles/variables" as *;
+
+.issueCount {
+  font-size: $font-size-xs;
+  padding: $spacing-xxs $spacing-xs;
+  border-radius: $border-radius-sm;
+  max-width: fit-content;
+}
+
+.default {
+  background-color: $background-tertiary;
+  color: $text-secondary;
+
+  .icon {
+    color: $text-secondary;
+  }
+}
+
+.warning {
+  background-color: rgba($warning-color, 0.1);
+  color: $warning-color;
+
+  .icon {
+    color: $warning-color;
+  }
+}
+
+.error {
+  background-color: rgba($danger-color, 0.1);
+  color: $danger-color;
+
+  .icon {
+    color: $danger-color;
+  }
+}
+
+.success {
+  background-color: rgba($success-color, 0.1);
+  color: $success-color;
+
+  .icon {
+    color: $success-color;
+  }
+}
+
+.count {
+  font-weight: $font-weight-medium;
+}

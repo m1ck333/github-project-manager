@@ -2,12 +2,13 @@ import React, { useState } from "react";
 
 import { Button, Typography } from "@/common/components/ui";
 
-import { Column, BoardIssue } from "../../../../projects/types";
+import { Column } from "../../../../projects/types";
+import { ColumnIssue } from "../../../types";
 
 interface MoveIssueModalProps {
-  issue: BoardIssue;
+  issue: ColumnIssue;
   columns: Column[];
-  onMove: (issue: BoardIssue, columnId: string) => void;
+  onMove: (issue: ColumnIssue, columnId: string) => void;
   onCancel: () => void;
   isLoading: boolean;
 }

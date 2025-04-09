@@ -5,7 +5,7 @@ import { ProjectRelatedStore } from "./project-related.store";
 import { ProjectSearchStore } from "./project-search.store";
 import { ProjectStateManager } from "./project-state";
 
-import type { Project } from "../types";
+import type { Project, ProjectFormData } from "../types";
 
 /**
  * Main Project Store that uses composition
@@ -55,6 +55,21 @@ export class ProjectStore {
     return this.crud.fetchProjects(forceRefresh);
   }
 
+  async createProject(projectData: ProjectFormData): Promise<Project | null> {
+    return this.crud.createProject(projectData);
+  }
+
+  async updateProject(
+    projectId: string,
+    projectData: Partial<ProjectFormData>
+  ): Promise<Project | null> {
+    return this.crud.updateProject(projectId, projectData);
+  }
+
+  async deleteProject(projectId: string): Promise<boolean> {
+    return this.crud.deleteProject(projectId);
+  }
+
   getProjectById(projectId: string): Project | undefined {
     return this.stateManager.getProjectById(projectId);
   }
@@ -74,6 +89,25 @@ export class ProjectStore {
     this.search.reset();
     this.related.reset();
     this.stateManager.reset();
+  }
+
+  /**
+   * Link a repository to a project
+   * @param projectId The ID of the project to link to
+   * @param owner The repository owner's login
+   * @param name The repository name
+   * @returns Promise resolving to true if successful
+   */
+  async linkRepositoryToProject(projectId: string, owner: string, name: string): Promise<boolean> {
+    try {
+      // Currently just simulating a success response
+      // This would typically call the related store or an API service
+      console.log(`Linking repository ${owner}/${name} to project ${projectId}`);
+      return true;
+    } catch (error) {
+      console.error("Error linking repository to project:", error);
+      return false;
+    }
   }
 }
 

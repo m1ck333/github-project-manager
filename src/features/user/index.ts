@@ -9,7 +9,7 @@ import { userService } from "./services";
 import { userStore } from "./stores";
 
 // Create user feature object for easy imports
-export const User = {
+export const UserFeature = {
   service: userService,
   store: userStore,
 };

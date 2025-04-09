@@ -31,19 +31,19 @@ export abstract class AbstractRepositoryService<T> extends AbstractCacheableServ
     throw new Error("fetchItems must be implemented by derived class");
   }
 
-  protected async fetchItemById(id: string): Promise<void> {
+  protected async fetchItemById(_id: string): Promise<void> {
     throw new Error("fetchItemById must be implemented by derived class");
   }
 
-  protected async createItem(item: Partial<T>): Promise<void> {
+  protected async createItem(_item: Partial<T>): Promise<void> {
     throw new Error("createItem must be implemented by derived class");
   }
 
-  protected async updateItem(id: string, item: Partial<T>): Promise<void> {
+  protected async updateItem(_id: string, _item: Partial<T>): Promise<void> {
     throw new Error("updateItem must be implemented by derived class");
   }
 
-  protected async deleteItem(id: string): Promise<void> {
+  protected async deleteItem(_id: string): Promise<void> {
     throw new Error("deleteItem must be implemented by derived class");
   }
 }

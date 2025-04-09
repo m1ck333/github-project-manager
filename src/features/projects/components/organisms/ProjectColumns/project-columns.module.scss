@@ -1,7 +1,7 @@
 @use "sass:color";
-@use "@/common/styles/variables.scss" as *;
+@use "@/common/styles/variables" as *;
 
-.projectBoard {
+.projectColumn {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -46,7 +46,7 @@
     overflow: hidden;
   }
 
-  .boardContainer {
+  .columnContainer {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -55,7 +55,7 @@
     overflow: auto;
   }
 
-  .boardColumns {
+  .columnColumns {
     display: flex;
     gap: 1rem;
     min-height: 400px;
@@ -335,7 +335,7 @@
   }
 }
 
-.projectBoard {
+.projectColumn {
   margin-top: $spacing-md;
   padding: $spacing-md;
   background-color: $background-secondary;
@@ -415,8 +415,8 @@
     }
   }
 
-  // Board View Styles
-  .boardContainer {
+  // column View Styles
+  .columnContainer {
     height: 100%;
     overflow: auto;
     padding-bottom: $spacing-xl;
@@ -470,7 +470,7 @@
     }
   }
 
-  .boardColumn {
+  .columnColumn {
     display: flex;
     flex-direction: column;
     min-width: 280px;
@@ -640,7 +640,7 @@
     }
   }
 
-  .boardHeader {
+  .columnHeader {
     display: flex;
     flex-direction: column;
     gap: $spacing-md;
@@ -654,7 +654,7 @@
       align-items: flex-start;
     }
 
-    .boardTitle {
+    .columnTitle {
       display: flex;
       flex-direction: column;
       gap: $spacing-xs;
@@ -666,7 +666,7 @@
         font-weight: $font-weight-semibold;
       }
 
-      .boardStats {
+      .columnStats {
         display: flex;
         gap: $spacing-md;
         color: $gray-600;
@@ -680,7 +680,7 @@
       }
     }
 
-    .boardActions {
+    .columnActions {
       display: flex;
       flex-direction: column;
       gap: $spacing-sm;
@@ -735,7 +735,7 @@
     }
   }
 
-  .noBoardsMessage {
+  .nocolumnsMessage {
     text-align: center;
     padding: $spacing-xl $spacing-md;
     background-color: $gray-100;
@@ -1037,7 +1037,7 @@
   }
 }
 
-.boardColumnsDebug {
+.columnColumnsDebug {
   width: 100%;
   background-color: #f5f7fa;
   border: 1px solid #dfe3e8;
@@ -1114,66 +1114,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-bottom: $spacing-md;
 }
 
 .headerTitle {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: $spacing-md;
 }
 
 .headerActions {
   display: flex;
-  gap: 0.5rem;
-}
-
-.unassignedIssues {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-}
-
-.columnHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  gap: 1rem;
-}
-
-.columnTitle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.issuesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.columnsContainer {
-  width: 100%;
+  gap: $spacing-sm;
 }
 
 .columns {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.column {
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  min-height: 15rem;
-}
-
-.issuesContainer {
-  margin-top: 1rem;
+  gap: $spacing-lg;
 }
 
 .emptyState {
@@ -1182,52 +1140,15 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 3rem;
-  background-color: #f9fafb;
-  border-radius: 0.5rem;
-  gap: 1rem;
-}
-
-.addIssueButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.issueCard {
-  height: 100%;
-}
-
-.label {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-}
-
-.labels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
+  padding: $spacing-xl;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  gap: $spacing-md;
 }
 
 .deleteFooter {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.issueContent {
-  margin-bottom: 1rem;
-}
-
-.issueActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
 }

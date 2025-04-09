@@ -41,21 +41,38 @@
   &.small .spinner {
     width: 20px;
     height: 20px;
+    border-width: 2px;
   }
 
   &.medium .spinner {
     width: 32px;
     height: 32px;
+    border-width: 3px;
   }
 
   &.large .spinner {
-    width: 120px;
-    height: 120px;
-    border-width: 6px;
+    width: 64px;
+    height: 64px;
+    border-width: 4px;
   }
 }
 
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.inlineContainer {
+  display: inline-flex;
+  margin: 0 $spacing-sm;
+}
+
 .spinner {
+  width: 32px;
+  height: 32px;
   border: 3px solid rgba($text-secondary, 0.3);
   border-radius: 50%;
   border-top: 3px solid $primary-color;
@@ -65,6 +82,7 @@
 .text {
   margin-top: $spacing-sm;
   color: $text-secondary;
+  text-align: center;
 
   .large & {
     font-size: $font-size-xl;

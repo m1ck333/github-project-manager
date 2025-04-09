@@ -18,6 +18,7 @@ export function mapToIssues(issuesData: GithubIssue[]): Issue[] {
     updatedAt: issue.updatedAt,
     assignees:
       issue.assignees?.nodes?.map((assignee) => ({
+        id: assignee?.id || assignee?.login || "",
         login: assignee?.login || "",
         name: assignee?.name || null,
         avatarUrl: assignee?.avatarUrl || "",

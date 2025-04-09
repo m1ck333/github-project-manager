@@ -1,124 +1,40 @@
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 
 import PageContainer from "@/common/components/layout/PageContainer";
-import { Search, Typography } from "@/common/components/ui";
-import { useAsync, useDebounce } from "@/common/hooks";
-import { getErrorMessage } from "@/common/utils/errors.utils";
-import { Projects } from "@/features/projects";
-import { ProjectGrid } from "@/features/projects/components";
-import { ProjectFormModal } from "@/features/projects/components/molecules/ProjectForm";
-import { useProjectConfirmation } from "@/features/projects/hooks";
-import { Project, ProjectFormData } from "@/features/projects/types";
+import { Typography, Search } from "@/common/components/ui";
+import {
+  CreateProjectModal,
+  DeleteProjectModal,
+  EditProjectModal,
+} from "@/features/projects/components/modals";
+import ProjectGrid from "@/features/projects/components/organisms/ProjectGrid";
+import { useProjectsPage } from "@/features/projects/hooks/use-projects-page";
 
-// Define styles inline instead of importing SCSS
-const styles = {
-  pageContent: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "1.5rem",
-  },
-  noResults: {
-    marginTop: "1.5rem",
-    textAlign: "center" as const,
-  },
-};
+import styles from "./projects-page.module.scss";
 
 const ProjectsPage: React.FC = observer(() => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const {
+    // State
+    isLoading,
+    error,
+    searchQuery,
+    showCreateModal,
+    selectedProject,
+    filteredProjects,
+    confirmState,
 
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-
-  // Use the async hook for loading state management
-  const { execute, isLoading, error } = useAsync();
-
-  // Custom hook for project confirmation dialogs
-  const { confirmDeleteProject } = useProjectConfirmation();
-
-  useEffect(() => {
-    // Reset the selected project when the page loads
-    if (Projects.store) {
-      Projects.store.clearSelectedProject();
-    }
-  }, []);
-
-  // Filter projects when search query changes
-  useEffect(() => {
-    if (!debouncedSearchQuery) {
-      setFilteredProjects(Projects.store.projects);
-      return;
-    }
-
-    // Perform client-side filtering to avoid MobX reaction cycles
-    const filtered = Projects.store.projects.filter((project) => {
-      const query = debouncedSearchQuery.toLowerCase().trim();
-      const nameMatch = project.name.toLowerCase().includes(query);
-      const descMatch = project.description
-        ? project.description.toLowerCase().includes(query)
-        : false;
-      return nameMatch || descMatch;
-    });
-
-    setFilteredProjects(filtered);
-  }, [debouncedSearchQuery, Projects.store.projects]);
-
-  // Handle refreshing projects
-  const handleRefreshProjects = async () => {
-    execute(async () => {
-      await Projects.store.fetchProjects();
-    });
-  };
-
-  // Handle navigating to a project
-  const handleNavigateToProject = (projectId: string) => {
-    navigate(`/projects/${projectId}`);
-  };
-
-  // Handle creating a new project
-  const handleCreateProject = async (projectData: ProjectFormData) => {
-    return execute(async () => {
-      const project = await Projects.store.createProject(projectData);
-      setShowCreateModal(false);
-      return project;
-    });
-  };
-
-  // Handle editing a project
-  const handleEditProject = (project: Project) => {
-    setSelectedProject(project);
-  };
-
-  // Handle saving edited project
-  const handleUpdateProject = async (projectData: ProjectFormData) => {
-    if (!selectedProject) return null;
-
-    return execute(async () => {
-      const updatedProject = await Projects.store.updateProject(selectedProject.id, projectData);
-      setSelectedProject(null);
-      return updatedProject;
-    });
-  };
-
-  // Handle deleting a project with confirmation
-  const handleDeleteProject = async (project: Project) => {
-    const confirmed = await confirmDeleteProject(project.name);
-
-    if (confirmed) {
-      execute(async () => {
-        await Projects.store.deleteProject(project.id);
-      });
-    }
-  };
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
+    // Actions
+    handleSearchChange,
+    handleRefreshProjects,
+    handleNavigateToProject,
+    handleCreateProject,
+    handleEditProject,
+    handleUpdateProject,
+    handleDeleteProject,
+    setShowCreateModal,
+    setSelectedProject,
+  } = useProjectsPage();
 
   return (
     <PageContainer
@@ -128,11 +44,11 @@ const ProjectsPage: React.FC = observer(() => {
         </Typography>
       }
       fluid={false}
-      isLoading={isLoading && Projects.store.projects.length === 0}
+      isLoading={isLoading && filteredProjects.length === 0}
       loadingMessage="Loading projects..."
-      error={error ? getErrorMessage(error) : null}
+      error={error ? error : null}
     >
-      <div style={styles.pageContent}>
+      <div className={styles.pageContent}>
         <Search
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
@@ -141,10 +57,10 @@ const ProjectsPage: React.FC = observer(() => {
           placeholder="Search projects..."
         />
 
-        {filteredProjects.length === 0 && debouncedSearchQuery && !isLoading && (
-          <div style={styles.noResults}>
+        {filteredProjects.length === 0 && searchQuery && !isLoading && (
+          <div className={styles.noResults}>
             <Typography variant="body1" color="secondary" align="center">
-              No projects found matching "{debouncedSearchQuery}".
+              No projects found matching "{searchQuery}".
             </Typography>
           </div>
         )}
@@ -158,23 +74,25 @@ const ProjectsPage: React.FC = observer(() => {
         />
       </div>
 
-      {/* Project Creation Modal */}
-      <ProjectFormModal
+      {/* Modals */}
+      <DeleteProjectModal
+        isOpen={confirmState.isOpen}
+        projectName={confirmState.projectName}
+        onCancel={confirmState.onCancel}
+        onConfirm={confirmState.onConfirm}
+      />
+
+      <CreateProjectModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateProject}
-        title="Create New Project"
-        submitLabel="Create Project"
       />
 
-      {/* Project Edit Modal */}
-      <ProjectFormModal
+      <EditProjectModal
         isOpen={!!selectedProject}
+        project={selectedProject}
         onClose={() => setSelectedProject(null)}
         onSubmit={handleUpdateProject}
-        initialValues={selectedProject}
-        title="Edit Project"
-        submitLabel="Update Project"
       />
     </PageContainer>
   );

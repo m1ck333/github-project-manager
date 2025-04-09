@@ -14,7 +14,7 @@ export const ROUTE_PATHS = {
 
   // Project routes
   PROJECT_DETAIL: "/projects/:projectId",
-  PROJECT_BOARD: "/projects/:projectId/board",
+  PROJECT_COLUMNS: "/projects/:projectId/columns",
   PROJECT_COLLABORATORS: "/projects/:projectId/collaborators",
 
   // Repository routes
@@ -34,7 +34,8 @@ export const ROUTES = {
   PROJECT_DETAIL: (id: string = ":projectId") =>
     ROUTE_PATHS.PROJECT_DETAIL.replace(":projectId", id),
 
-  PROJECT_BOARD: (id: string = ":projectId") => ROUTE_PATHS.PROJECT_BOARD.replace(":projectId", id),
+  PROJECT_COLUMNS: (id: string = ":projectId") =>
+    ROUTE_PATHS.PROJECT_COLUMNS.replace(":projectId", id),
 
   PROJECT_COLLABORATORS: (id: string = ":projectId") =>
     ROUTE_PATHS.PROJECT_COLLABORATORS.replace(":projectId", id),

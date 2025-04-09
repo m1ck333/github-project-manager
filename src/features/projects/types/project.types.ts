@@ -2,7 +2,7 @@ import { Collaborator } from "@/features/collaborators/types/collaborator.types"
 import { Column } from "@/features/columns/types/column.types";
 import { Issue } from "@/features/issues/types/issue.types";
 import { Label } from "@/features/labels/types/label.types";
-import { Repository } from "@/features/repositories/types/repository";
+import { Repository, RepositoryCollaborator } from "@/features/repositories/types/repository";
 import type { User } from "@/features/user/types";
 
 import { ProjectFormData, ProjectSearchParams } from "../validation/project.schema";
@@ -35,4 +35,5 @@ export interface Project {
   labels?: Label[];
 }
 
-export type { ProjectFormData, ProjectSearchParams };
+// Re-export Column type for convenience
+export type { Column, ProjectFormData, ProjectSearchParams, RepositoryCollaborator };

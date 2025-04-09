@@ -7,6 +7,7 @@ export * from "./components";
 export * from "./mappers";
 export * from "./hooks";
 export * from "./validation";
+export type { Project, ProjectState } from "./types";
 
 // Export the Projects namespace with consistent structure
 export const Projects = {

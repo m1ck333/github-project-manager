@@ -54,10 +54,10 @@ const GridCard: React.FC<GridCardProps> = ({
 
   return (
     <div className={`${styles.gridCard} ${className || ""}`} onClick={onClick}>
-      <Stack align="spread" className={styles.cardHeader}>
+      <Stack align="spread" spacing={2} className={styles.cardHeader}>
         <div className={styles.titleArea}>
           {avatar && (
-            <Stack cross="center" className={styles.avatarContainer}>
+            <Stack cross="center" spacing={1} className={styles.avatarContainer}>
               <img src={avatar.src} alt={avatar.alt} className={styles.avatar} />
               {subtitle && (
                 <Typography variant="subtitle2" className={styles.subtitle}>
@@ -72,7 +72,7 @@ const GridCard: React.FC<GridCardProps> = ({
         </div>
 
         {actions && actions.length > 0 && (
-          <Stack className={styles.actionButtons}>
+          <Stack spacing={1} className={styles.actionButtons}>
             {actions.map((action, index) => (
               <button
                 key={`action-${index}`}
@@ -97,9 +97,9 @@ const GridCard: React.FC<GridCardProps> = ({
       )}
 
       {stats && stats.length > 0 && (
-        <Stack wrap className={styles.stats}>
+        <Stack wrap spacing={2} className={styles.stats}>
           {stats.map((stat, index) => (
-            <Stack cross="center" key={`stat-${index}`} className={styles.statItem}>
+            <Stack cross="center" spacing={1} key={`stat-${index}`} className={styles.statItem}>
               {stat.icon}
               <Typography variant="body2" component="span">
                 {stat.text}
@@ -114,9 +114,9 @@ const GridCard: React.FC<GridCardProps> = ({
         <div className={styles.footer}>{footer}</div>
       ) : (
         (formattedDate || htmlUrl || viewPath) && (
-          <Stack align="spread" className={styles.footer}>
+          <Stack align="spread" spacing={2} className={styles.footer}>
             {formattedDate && (
-              <Stack cross="center" className={styles.dateInfo}>
+              <Stack cross="center" spacing={1} className={styles.dateInfo}>
                 <FiCalendar size={14} />
                 <Typography variant="caption" component="span">
                   Created on {formattedDate}
@@ -124,7 +124,7 @@ const GridCard: React.FC<GridCardProps> = ({
               </Stack>
             )}
 
-            <Stack className={styles.footerLinks}>
+            <Stack spacing={2} className={styles.footerLinks}>
               {htmlUrl && <ViewOnGithub link={htmlUrl} />}
               {viewPath && (
                 <Link

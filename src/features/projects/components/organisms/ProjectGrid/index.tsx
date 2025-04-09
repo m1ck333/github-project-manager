@@ -1,16 +1,16 @@
 import React from "react";
-import { FiEdit, FiTrash2, FiBook } from "react-icons/fi";
 
-import GridCard from "@/common/components/composed/grid/GridCard";
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";
 import { EmptyState } from "@/common/components/ui";
+import { Stack } from "@/common/components/ui/display";
+import ProjectCard from "@/features/projects/components/molecules/ProjectCard";
 import { Project } from "@/features/projects/types";
 
 import styles from "./project-grid.module.scss";
 
 interface ProjectGridProps {
   projects: Project[];
-  onNavigateToProject: (id: string) => void;
+  onNavigateToProject: (projectId: string) => void;
   onCreateProject: () => void;
   onEditProject: (project: Project) => void;
   onDeleteProject: (project: Project) => void;
@@ -28,7 +28,7 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
   );
 
   return (
-    <div className={styles.gridContainer}>
+    <Stack className={styles.gridContainer} wrap>
       {/* Add Project Card */}
       <GridCardAdd label="Create Project" onClick={onCreateProject} />
 
@@ -36,42 +36,15 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({
       {projects.length === 0
         ? renderEmptyState()
         : projects.map((project) => (
-            <GridCard
+            <ProjectCard
               key={project.id}
-              title={project.name}
-              description={project.description || "No description provided"}
+              project={project}
               onClick={() => onNavigateToProject(project.id)}
-              stats={[
-                {
-                  icon: <FiBook size={14} />,
-                  text: `${project.repositories?.length || 0} Repositories`,
-                },
-              ]}
-              actions={[
-                {
-                  icon: <FiEdit size={16} />,
-                  label: "Edit",
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    onEditProject(project);
-                  },
-                },
-                {
-                  icon: <FiTrash2 size={16} />,
-                  label: "Delete",
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    onDeleteProject(project);
-                  },
-                },
-              ]}
-              createdAt={project.createdAt}
-              htmlUrl={project.html_url}
-              viewPath={`/projects/${project.id}`}
-              className={styles.projectCard}
+              onEdit={onEditProject}
+              onDelete={onDeleteProject}
             />
           ))}
-    </div>
+    </Stack>
   );
 };
 

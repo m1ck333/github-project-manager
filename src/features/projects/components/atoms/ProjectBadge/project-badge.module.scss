@@ -1,0 +1,81 @@
+@use "@/common/styles/variables" as *;
+
+.badge {
+  border-radius: $border-radius-sm;
+  padding: $spacing-xxs $spacing-xs;
+  max-width: fit-content;
+  white-space: nowrap;
+}
+
+.small {
+  padding: 0 $spacing-xs;
+
+  .label {
+    font-size: $font-size-xs;
+  }
+
+  .icon {
+    font-size: $font-size-xs;
+  }
+}
+
+.medium {
+  padding: $spacing-xxs $spacing-xs;
+
+  .label {
+    font-size: $font-size-small;
+  }
+
+  .icon {
+    font-size: $font-size-small;
+  }
+}
+
+.default {
+  background-color: $background-tertiary;
+  color: $text-secondary;
+
+  .icon {
+    color: $text-secondary;
+  }
+}
+
+.primary {
+  background-color: rgba($primary-color, 0.1);
+  color: $primary-color;
+
+  .icon {
+    color: $primary-color;
+  }
+}
+
+.success {
+  background-color: rgba($success-color, 0.1);
+  color: $success-color;
+
+  .icon {
+    color: $success-color;
+  }
+}
+
+.warning {
+  background-color: rgba($warning-color, 0.1);
+  color: $warning-color;
+
+  .icon {
+    color: $warning-color;
+  }
+}
+
+.error {
+  background-color: rgba($danger-color, 0.1);
+  color: $danger-color;
+
+  .icon {
+    color: $danger-color;
+  }
+}
+
+.label {
+  font-weight: $font-weight-medium;
+}

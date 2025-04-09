@@ -1,12 +1,8 @@
 import React from "react";
-import { FiEdit2, FiTrash2, FiGitBranch, FiList, FiCalendar, FiUser } from "react-icons/fi";
+import { FiGitBranch, FiList, FiEdit2, FiTrash2 } from "react-icons/fi";
 
-import { Button } from "@/common/components/ui";
-import Typography from "@/common/components/ui/display/Typography";
-import { formatDate } from "@/common/utils/date.utils";
+import GridCard from "@/common/components/composed/grid/GridCard";
 import { Project } from "@/features/projects/types";
-
-import styles from "./project-card.module.scss";
 
 interface ProjectCardProps {
   project: Project;
@@ -16,81 +12,47 @@ interface ProjectCardProps {
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onEdit, onDelete }) => {
-  // Prevent event bubbling when clicking edit or delete
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(project);
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(project);
-  };
-
   return (
-    <div className={styles.projectCard} onClick={onClick}>
-      <div className={styles.projectHeader}>
-        <Typography variant="h3" className={styles.projectName}>
-          {project.name}
-        </Typography>
-        <div className={styles.actionButtons}>
-          <Button
-            variant="secondary"
-            onClick={handleEdit}
-            title="Edit project"
-            className={styles.editButton}
-          >
-            <FiEdit2 size={16} />
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleDelete}
-            title="Delete project"
-            className={styles.deleteButton}
-          >
-            <FiTrash2 size={16} />
-          </Button>
-        </div>
-      </div>
-
-      {project.description && (
-        <Typography variant="body2" className={styles.projectDescription}>
-          {project.description}
-        </Typography>
-      )}
-
-      <div className={styles.projectInfo}>
-        {project.owner && (
-          <div className={styles.infoItem}>
-            <FiUser />
-            <Typography variant="body2" component="span">
-              {project.owner.login}
-            </Typography>
-          </div>
-        )}
-        <div className={styles.infoItem}>
-          <FiGitBranch />
-          <Typography variant="body2" component="span">
-            {project.repositories?.length || 0}{" "}
-            {project.repositories?.length === 1 ? "repo" : "repos"}
-          </Typography>
-        </div>
-        <div className={styles.infoItem}>
-          <FiList />
-          <Typography variant="body2" component="span">
-            {project.issues?.length || 0} {project.issues?.length === 1 ? "issue" : "issues"}
-          </Typography>
-        </div>
-        {project.createdAt && (
-          <div className={styles.infoItem}>
-            <FiCalendar />
-            <Typography variant="caption" component="span">
-              Created on {formatDate(project.createdAt)}
-            </Typography>
-          </div>
-        )}
-      </div>
-    </div>
+    <GridCard
+      title={project.name}
+      description={project.description || "No description provided"}
+      onClick={onClick}
+      stats={[
+        {
+          icon: <FiGitBranch size={14} />,
+          text: `${project.repositories?.length || 0} ${
+            project.repositories?.length === 1 ? "Repository" : "Repositories"
+          }`,
+        },
+        {
+          icon: <FiList size={14} />,
+          text: `${project.issues?.length || 0} ${
+            project.issues?.length === 1 ? "Issue" : "Issues"
+          }`,
+        },
+      ]}
+      actions={[
+        {
+          icon: <FiEdit2 size={16} />,
+          label: "Edit",
+          onClick: (e) => {
+            e.stopPropagation();
+            onEdit(project);
+          },
+        },
+        {
+          icon: <FiTrash2 size={16} />,
+          label: "Delete",
+          onClick: (e) => {
+            e.stopPropagation();
+            onDelete(project);
+          },
+        },
+      ]}
+      createdAt={project.createdAt}
+      htmlUrl={project.html_url}
+      viewPath={`/projects/${project.id}`}
+    />
   );
 };
 

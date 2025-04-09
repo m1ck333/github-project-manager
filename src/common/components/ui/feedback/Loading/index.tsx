@@ -2,7 +2,7 @@ import React from "react";
 
 import Typography from "@/common/components/ui/display/Typography";
 
-import styles from "./loading.module.scss";
+import styles from "./Loading.module.scss";
 
 interface LoadingProps {
   text?: string;

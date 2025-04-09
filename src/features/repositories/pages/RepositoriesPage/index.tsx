@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import React, { useState, ChangeEvent, useEffect, useCallback } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import GridCardAdd from "@/common/components/composed/grid/GridCardAdd";

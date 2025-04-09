@@ -1,0 +1,11 @@
+@use "@/common/styles/variables" as *;
+
+.header {
+  margin-bottom: $spacing-md;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.headerTitle {
+  flex: 1;
+}

@@ -1,0 +1,9 @@
+@use "@/common/styles/variables" as *;
+
+.emptyState {
+  padding: $spacing-xl;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+  text-align: center;
+  width: 100%;
+}

@@ -1,0 +1,7 @@
+@use "@/common/styles/variables" as *;
+
+.deleteFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-md;
+}

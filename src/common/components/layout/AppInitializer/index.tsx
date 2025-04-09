@@ -1,3 +1,4 @@
+import { observer } from "mobx-react-lite";
 import React from "react";
 
 import { Stack } from "@/common/components/ui/display";
@@ -15,13 +16,13 @@ interface AppInitializerProps {
  * Component that initializes app data before rendering children
  * Handles loading states and error feedback
  */
-export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
+export const AppInitializer: React.FC<AppInitializerProps> = observer(({ children }) => {
   const { loading, error, initializeApp } = useAppInitialization();
 
   if (loading) {
     return (
       <Stack direction="column" align="center" cross="center" className={styles.container}>
-        <Loading text="Initializing GitHub Project Manager..." />
+        <Loading text="Initializing GitHub Project Manager..." size="large" />
       </Stack>
     );
   }
@@ -40,6 +41,6 @@ export const AppInitializer: React.FC<AppInitializerProps> = ({ children }) => {
   }
 
   return <>{children}</>;
-};
+});
 
 export default AppInitializer;

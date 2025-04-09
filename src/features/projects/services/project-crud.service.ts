@@ -183,4 +183,11 @@ export class ProjectCrudService extends BaseProjectService {
   getAll(): Project[] {
     return this._items;
   }
+
+  /**
+   * Get a project by ID
+   */
+  getProjectById(id: string): Project | undefined {
+    return this.getById(id);
+  }
 }

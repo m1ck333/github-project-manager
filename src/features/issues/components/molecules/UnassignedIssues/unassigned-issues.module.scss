@@ -1,0 +1,22 @@
+@use "@/common/styles/variables" as *;
+
+.unassignedIssues {
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background-color: $background-secondary;
+  border-radius: $border-radius-md;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  gap: $spacing-md;
+}
+
+.issuesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-md;
+}

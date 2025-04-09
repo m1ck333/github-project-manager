@@ -1,4 +1,4 @@
-import { makeObservable, observable, action, configure, override, makeAutoObservable } from "mobx";
+import { makeObservable, observable, action, configure, override } from "mobx";
 
 import { AbstractSearchStore, SearchCriteria } from "@/common/stores";
 import { compareDatesAsc } from "@/common/utils/date.utils";

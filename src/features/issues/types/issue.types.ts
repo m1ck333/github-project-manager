@@ -1,5 +1,5 @@
 import { Label } from "@/features/labels";
-import { UserProfile } from "@/features/user";
+import { User } from "@/features/user/types";
 export interface Issue {
   id: string;
   number: number;
@@ -8,6 +8,6 @@ export interface Issue {
   url: string;
   createdAt: string;
   updatedAt: string;
-  assignees: UserProfile[];
+  assignees: User[];
   labels: Label[];
 }

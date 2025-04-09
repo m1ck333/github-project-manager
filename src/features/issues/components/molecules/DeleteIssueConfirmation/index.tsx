@@ -2,13 +2,13 @@ import React from "react";
 
 import { Button, ConfirmationDialog } from "@/common/components/ui";
 
-import { BoardIssue } from "../../../../projects/types";
+import { ColumnIssue } from "../../../types";
 
 interface DeleteIssueConfirmationProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  issue: BoardIssue | null;
+  issue: ColumnIssue | null;
   isLoading: boolean;
 }
 

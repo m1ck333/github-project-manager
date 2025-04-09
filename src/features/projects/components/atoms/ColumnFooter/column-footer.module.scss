@@ -1,0 +1,31 @@
+@use "@/common/styles/variables" as *;
+
+.columnFooter {
+  margin-top: $spacing-sm;
+}
+
+.footer {
+  padding: $spacing-xs $spacing-sm;
+  background-color: $background-secondary;
+  border-radius: $border-radius-sm;
+}
+
+.count {
+  color: $text-tertiary;
+  font-size: $font-size-xs;
+}
+
+.addButton {
+  background: none;
+  border: none;
+  color: $primary-color;
+  font-size: $font-size-small;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  padding: $spacing-xs;
+  border-radius: $border-radius-sm;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.05);
+  }
+}

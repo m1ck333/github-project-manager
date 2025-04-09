@@ -7,11 +7,6 @@ import {
   ProjectV2SingleSelectFieldOptionColor,
 } from "@/api-github/generated/graphql";
 
-import { Column } from "../types/column.types";
-
-/**
- * Service for managing columns in project boards
- */
 export class ColumnService {
   @observable private _isLoading = false;
   @observable private _error: Error | null = null;

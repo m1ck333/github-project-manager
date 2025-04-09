@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { Link, NavLink } from "react-router-dom";
 
+import { Stack } from "@/common/components/ui/display";
 import Typography from "@/common/components/ui/display/Typography";
 import { env } from "@/common/config/env";
 import { useBodyScrollLock, useEscapeKey } from "@/common/hooks";
 import { GitHubUserInfo } from "@/features/app";
 
-import styles from "./header.module.scss";
+import styles from "./Header.module.scss";
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,30 +32,19 @@ const Header: React.FC = () => {
         </Link>
       </div>
 
-      <nav className={`${styles.desktopNav}`}>
-        <ul>
-          <li>
-            <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : "")}>
-              Home
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/projects" className={({ isActive }) => (isActive ? styles.active : "")}>
-              Projects
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/repositories"
-              className={({ isActive }) => (isActive ? styles.active : "")}
-            >
-              Repositories
-            </NavLink>
-          </li>
-        </ul>
-      </nav>
-
       <div className={styles.headerRight}>
+        <Stack direction="row" spacing={2} className={styles.desktopNav} cross="center">
+          <NavLink to="/" className={({ isActive }) => (isActive ? styles.active : "")}>
+            Home
+          </NavLink>
+          <NavLink to="/projects" className={({ isActive }) => (isActive ? styles.active : "")}>
+            Projects
+          </NavLink>
+          <NavLink to="/repositories" className={({ isActive }) => (isActive ? styles.active : "")}>
+            Repositories
+          </NavLink>
+        </Stack>
+
         <div className={styles.userProfile}>
           <GitHubUserInfo />
         </div>

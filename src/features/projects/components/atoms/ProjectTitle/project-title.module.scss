@@ -1,0 +1,16 @@
+@use "@/common/styles/variables" as *;
+
+.projectTitle {
+  margin-bottom: $spacing-sm;
+}
+
+.title {
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: $text-secondary;
+  font-weight: $font-weight-normal;
+}

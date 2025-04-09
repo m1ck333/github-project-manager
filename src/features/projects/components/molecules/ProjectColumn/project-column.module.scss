@@ -1,0 +1,22 @@
+@use "@/common/styles/variables" as *;
+
+.columnContainer {
+  overflow: hidden;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.columnsRow {
+  height: 100%;
+  padding: 0 16px;
+}
+
+.columnWrapper {
+  min-width: 300px;
+  max-width: 300px;
+  height: 100%;
+}

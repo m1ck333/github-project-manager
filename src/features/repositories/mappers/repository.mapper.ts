@@ -1,4 +1,4 @@
-import { BaseMapper } from "@/common/mappers/base.mapper";
+import { BaseMapper } from "@/common/mappers";
 import {
   Repository,
   RepositoryOwner,

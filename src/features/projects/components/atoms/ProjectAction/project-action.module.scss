@@ -1,0 +1,58 @@
+@use "@/common/styles/variables" as *;
+
+.action {
+  background: none;
+  border: none;
+  border-radius: $border-radius-sm;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.small {
+  padding: $spacing-xxs;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.medium {
+  padding: $spacing-xs;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.default {
+  color: $text-tertiary;
+
+  &:hover:not(:disabled) {
+    background-color: $background-secondary;
+    color: $text-primary;
+  }
+}
+
+.primary {
+  color: $primary-color;
+
+  &:hover:not(:disabled) {
+    background-color: rgba($primary-color, 0.1);
+  }
+}
+
+.danger {
+  color: $danger-color;
+
+  &:hover:not(:disabled) {
+    background-color: rgba($danger-color, 0.1);
+  }
+}

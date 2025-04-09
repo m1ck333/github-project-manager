@@ -1,4 +1,2 @@
-/**
- * Re-export all hooks from the projects feature
- */
+export * from "./use-project-columns";
 export * from "./use-project-confirmation";

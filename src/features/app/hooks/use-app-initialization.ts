@@ -1,32 +1,50 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { projectStore } from "@/features/projects";
 import { userStore } from "@/features/user/stores";
 
 export const useAppInitialization = () => {
-  const initializedRef = useRef(false);
+  const [initialized, setInitialized] = useState(false);
+  const [initializing, setInitializing] = useState(false);
 
-  const initializeApp = useCallback(async (forceRefresh = false) => {
-    if (!userStore.profile && !userStore.isLoading) {
-      await userStore.initialize();
-    }
+  const initializeApp = useCallback(
+    async (forceRefresh = false) => {
+      if (initializing) return false;
 
-    const success = await projectStore.fetchProjects(forceRefresh);
-    if (success) {
-      initializedRef.current = true;
-    }
-    return success;
-  }, []);
+      try {
+        setInitializing(true);
+
+        if (!userStore.profile && !userStore.isLoading) {
+          await userStore.initialize();
+        }
+
+        const success = await projectStore.fetchProjects(forceRefresh);
+        if (success) {
+          setInitialized(true);
+        }
+        return success;
+      } finally {
+        setInitializing(false);
+      }
+    },
+    [initializing]
+  );
 
   useEffect(() => {
-    if (!initializedRef.current) {
+    if (!initialized && !initializing) {
       initializeApp(false);
     }
-  }, [initializeApp]);
+  }, [initialized, initializing, initializeApp]);
+
+  // Only show loading during initial app initialization, not during every project operation
+  // Use local state to determine if we're in the initial loading phase
+  const loading = initializing || (!initialized && (projectStore.isLoading || userStore.isLoading));
+
+  const error = projectStore.error || userStore.error;
 
   return {
-    loading: projectStore.isLoading || userStore.isLoading,
-    error: projectStore.error || userStore.error,
+    loading,
+    error,
     initializeApp,
   };
 };
