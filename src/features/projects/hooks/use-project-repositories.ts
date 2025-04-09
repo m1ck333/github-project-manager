@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 
+import { useToast } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
+import { withToast } from "@/common/utils";
 import { projectStore } from "@/features/projects/stores";
 
 export interface Repository {
@@ -29,8 +31,19 @@ export function useProjectRepositories({ projectId }: UseProjectRepositoriesProp
   const [repoName, setRepoName] = useState("");
 
   // Async operations
-  const linkRepoAsync = useAsync();
-  const unlinkRepoAsync = useAsync();
+  const {
+    execute: linkExecute,
+    isLoading: linkLoading,
+    error: linkError,
+    resetError: resetLinkError,
+  } = useAsync();
+  const {
+    execute: unlinkExecute,
+    isLoading: unlinkLoading,
+    error: unlinkError,
+    resetError: resetUnlinkError,
+  } = useAsync();
+  const { showToast } = useToast();
 
   // Ensure we have the selected project
   useEffect(() => {
@@ -47,18 +60,21 @@ export function useProjectRepositories({ projectId }: UseProjectRepositoriesProp
 
   // Link a repository to the project with current state values
   const handleLinkRepository = async () => {
-    const success = await linkRepoAsync.execute(async () => {
-      // In the future, this would call a service to link the repository
-      console.log(`Link repository ${owner}/${repoName} to project ${projectId}`);
+    return withToast(
+      linkExecute,
+      showToast,
+      async () => {
+        // In the future, this would call a service to link the repository
+        console.log(`Link repository ${owner}/${repoName} to project ${projectId}`);
 
-      // Clear the form
-      setShowAddModal(false);
-      setOwner("");
-      setRepoName("");
-      return true;
-    });
-
-    return success;
+        // Clear the form
+        setShowAddModal(false);
+        setOwner("");
+        setRepoName("");
+        return true;
+      },
+      `Repository ${owner}/${repoName} linked successfully`
+    );
   };
 
   // Handle form submission from modal component
@@ -73,13 +89,21 @@ export function useProjectRepositories({ projectId }: UseProjectRepositoriesProp
 
   // Unlink a repository from the project
   const handleUnlinkRepository = async (repoId: string) => {
-    const success = await unlinkRepoAsync.execute(async () => {
-      // In the future, this would call a service to unlink the repository
-      console.log(`Unlink repository ${repoId} from project ${projectId}`);
-      return true;
-    });
+    const repoToUnlink = repositories.find((repo) => repo.id === repoId);
+    const repoName = repoToUnlink
+      ? `${repoToUnlink.owner?.login || ""}/${repoToUnlink.name}`
+      : repoId;
 
-    return success;
+    return withToast(
+      unlinkExecute,
+      showToast,
+      async () => {
+        // In the future, this would call a service to unlink the repository
+        console.log(`Unlink repository ${repoId} from project ${projectId}`);
+        return true;
+      },
+      `Repository ${repoName} unlinked successfully`
+    );
   };
 
   return {
@@ -100,11 +124,11 @@ export function useProjectRepositories({ projectId }: UseProjectRepositoriesProp
     handleSubmitLinkForm,
 
     // Loading & error states
-    isLoading: linkRepoAsync.isLoading || unlinkRepoAsync.isLoading || projectStore.isLoading,
-    error: linkRepoAsync.error || unlinkRepoAsync.error || projectStore.error,
+    isLoading: linkLoading || unlinkLoading || projectStore.isLoading,
+    error: linkError || unlinkError || projectStore.error,
     resetError: () => {
-      linkRepoAsync.resetError();
-      unlinkRepoAsync.resetError();
+      resetLinkError();
+      resetUnlinkError();
       // Note: No direct way to reset projectStore error
     },
   };

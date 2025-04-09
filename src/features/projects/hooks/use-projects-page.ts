@@ -5,6 +5,7 @@ import { useToast } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
 import { useDebounce } from "@/common/hooks/use-debounce";
 import { ROUTES } from "@/common/routes";
+import { withToast } from "@/common/utils";
 import { Projects } from "@/features/projects";
 import type { Project, ProjectFormData } from "@/features/projects";
 import { useProjectConfirmation } from "@/features/projects/hooks";
@@ -78,17 +79,16 @@ export function useProjectsPage(): UseProjectsPageReturn {
 
   // Handler for creating a new project
   const handleCreateProject = async (projectData: ProjectFormData) => {
-    const result = await execute(async () => {
-      const newProject = await Projects.store.createProject(projectData);
-      setShowCreateModal(false);
-      return newProject;
-    });
-
-    if (result) {
-      showToast(`Project "${projectData.name}" created successfully`, "success");
-    }
-
-    return result;
+    return withToast(
+      execute,
+      showToast,
+      async () => {
+        const newProject = await Projects.store.createProject(projectData);
+        setShowCreateModal(false);
+        return newProject;
+      },
+      `Project "${projectData.name}" created successfully`
+    );
   };
 
   // Handle editing a project
@@ -100,17 +100,16 @@ export function useProjectsPage(): UseProjectsPageReturn {
   const handleUpdateProject = async (projectData: ProjectFormData) => {
     if (!selectedProject) return null;
 
-    const result = await execute(async () => {
-      const updatedProject = await Projects.store.updateProject(selectedProject.id, projectData);
-      setSelectedProject(null);
-      return updatedProject;
-    });
-
-    if (result) {
-      showToast(`Project "${projectData.name}" updated successfully`, "success");
-    }
-
-    return result;
+    return withToast(
+      execute,
+      showToast,
+      async () => {
+        const updatedProject = await Projects.store.updateProject(selectedProject.id, projectData);
+        setSelectedProject(null);
+        return updatedProject;
+      },
+      `Project "${projectData.name}" updated successfully`
+    );
   };
 
   // Handle deleting a project with confirmation
@@ -118,14 +117,14 @@ export function useProjectsPage(): UseProjectsPageReturn {
     const confirmed = await confirmDeleteProject(project.name);
 
     if (confirmed) {
-      const success = await execute(async () => {
-        await Projects.store.deleteProject(project.id);
-        return true;
-      });
-
-      if (success) {
-        showToast(`Project "${project.name}" deleted successfully`, "success");
-      }
+      await withToast(
+        execute,
+        showToast,
+        async () => {
+          await Projects.store.deleteProject(project.id);
+        },
+        `Project "${project.name}" deleted successfully`
+      );
     }
   };
 
@@ -137,7 +136,7 @@ export function useProjectsPage(): UseProjectsPageReturn {
   return {
     // State
     isLoading,
-    error,
+    error: error ? String(error) : null,
     searchQuery,
     showCreateModal,
     selectedProject,

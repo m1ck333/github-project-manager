@@ -1,5 +1,6 @@
 import { useToast } from "@/common/components/ui";
 import { useAsync } from "@/common/hooks";
+import { withToast } from "@/common/utils";
 import { useColumns } from "@/features/columns/hooks/use-columns";
 import { useIssues } from "@/features/issues/hooks/use-issues";
 import { projectStore } from "@/features/projects/stores";
@@ -11,7 +12,7 @@ export interface UseProjectColumnsProps {
 
 export const useProjectColumns = ({ project }: UseProjectColumnsProps) => {
   const { showToast } = useToast();
-  const refreshAsync = useAsync();
+  const { execute, isLoading: isRefreshing, error: refreshError } = useAsync();
 
   // Use specialized hooks for issues and columns
   const issuesHook = useIssues({
@@ -25,12 +26,15 @@ export const useProjectColumns = ({ project }: UseProjectColumnsProps) => {
 
   // Refresh project data
   const refreshProjectData = async () => {
-    const success = await refreshAsync.execute(async () => {
-      await projectStore.selectProject(project.id);
-      showToast("Project data refreshed", "success");
-      return true;
-    });
-    return success;
+    return withToast(
+      execute,
+      showToast,
+      async () => {
+        projectStore.selectProject(project.id);
+        return true;
+      },
+      "Project data refreshed"
+    );
   };
 
   return {
@@ -45,7 +49,7 @@ export const useProjectColumns = ({ project }: UseProjectColumnsProps) => {
 
     // Project-specific functionality
     refreshProjectData,
-    isRefreshing: refreshAsync.isLoading,
-    refreshError: refreshAsync.error,
+    isRefreshing,
+    refreshError,
   };
 };
